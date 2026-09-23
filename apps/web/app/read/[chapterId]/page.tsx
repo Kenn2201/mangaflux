@@ -25,6 +25,52 @@ type ReaderResponse = {
   };
 };
 
+function ReaderImage({
+  index,
+  imageUrl,
+  dataSaverUrl
+}: {
+  index: number;
+  imageUrl: string;
+  dataSaverUrl?: string;
+}) {
+  const [src, setSrc] = useState(imageUrl);
+  const [failed, setFailed] = useState(false);
+
+  return (
+    <figure className={`reader-page ${failed ? "reader-page-failed" : ""}`}>
+      {!failed ? (
+        <img
+          src={src}
+          alt={`Page ${index}`}
+          loading={index <= 2 ? "eager" : "lazy"}
+          referrerPolicy="no-referrer"
+          onError={() => {
+            if (dataSaverUrl && src !== dataSaverUrl) {
+              setSrc(dataSaverUrl);
+              return;
+            }
+            setFailed(true);
+          }}
+        />
+      ) : (
+        <div className="reader-image-error">
+          <strong>Page {index} could not load</strong>
+          <button
+            type="button"
+            onClick={() => {
+              setFailed(false);
+              setSrc(dataSaverUrl ?? imageUrl);
+            }}
+          >
+            Retry page
+          </button>
+        </div>
+      )}
+    </figure>
+  );
+}
+
 export default function ReaderPage() {
   const params = useParams<{ chapterId: string }>();
   const chapterId = params.chapterId;
@@ -93,7 +139,9 @@ export default function ReaderPage() {
         <section className="panel">
           <p className="eyebrow">Reader</p>
           <h2>Couldn't load this chapter</h2>
-          <p className="message">{message || "The chapter source is temporarily unavailable."}</p>
+          <p className="message">
+            {message || "The chapter source is temporarily unavailable."}
+          </p>
         </section>
       </main>
     );
@@ -132,12 +180,11 @@ export default function ReaderPage() {
 
       <div className="reader-pages">
         {data.pages.map((page) => (
-          <img
+          <ReaderImage
             key={page.index}
-            src={page.imageUrl}
-            alt={`Page ${page.index}`}
-            loading={page.index <= 2 ? "eager" : "lazy"}
-            referrerPolicy="no-referrer"
+            index={page.index}
+            imageUrl={page.imageUrl}
+            dataSaverUrl={page.dataSaverUrl}
           />
         ))}
       </div>
