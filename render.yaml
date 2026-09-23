@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: mangaflux-api
+    runtime: node
+    plan: free
+    rootDir: .
+    buildCommand: npm install && npm run build --workspace=@mangaflux/api
+    startCommand: npm run start --workspace=@mangaflux/api
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: PORT
+        value: 4000
