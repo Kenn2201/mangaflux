@@ -7,64 +7,63 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- Authentication and account-backed library ownership
-- Device-state migration/sync into authenticated accounts
+- Email verification / account recovery strategy
+- Session management polish
 - Large-series chapter pagination
 - Final V1 production and mobile QA
+
+## 0.5.0 - 2026-09-24 — Authentication
+
+### Added
+- Email/password account signup and login.
+- Password hashing with Node scrypt and per-password random salts.
+- Opaque random session tokens stored only as SHA-256 hashes in Neon.
+- HttpOnly secure account session cookie on the MangaFlux web origin.
+- Server-to-server Vercel → Render auth proxy secret.
+- Authenticated account bookmarks, history, reading progress, and Continue Reading.
+- One-time import of device-scoped bookmarks/progress into each account.
+- Account page, session status chip, and sign-out flow.
+- Separate auth signup/login/session rate limits.
+
+### Security
+- Passwords are never stored directly.
+- Raw session tokens are not stored in Neon and are not returned to browser JavaScript.
+- Direct Render auth/account endpoints require the internal proxy secret in addition to account session tokens.
+- State-changing web auth routes require same-origin requests plus a custom anti-CSRF header.
+- Login errors do not reveal whether an email or password was incorrect.
+- Account routes keep database/auth errors generic.
+
+### Known pre-1.0 limitation
+- Email verification and password recovery are not implemented yet. This must be addressed before treating MangaFlux accounts as production-complete.
 
 ## 0.4.0 - 2026-09-24 — Neon Persistence
 
 ### Added
-- Neon HTTP database client through Drizzle ORM.
-- Checked-in Drizzle runtime migration journal and initial persistence migration.
-- Automatic migration run before the Render API starts.
-- Device-scoped HttpOnly reader identity issued by the Next.js server.
-- Neon-backed bookmarks.
-- Neon-backed reading progress and recent-reading history.
-- Continue Reading card with page resume.
-- Bookmark controls on manga details.
-- Debounced page-progress saves in the vertical reader.
+- Neon/Drizzle database client and checked-in runtime migrations.
+- Device-scoped HttpOnly reader identity.
+- Neon-backed bookmarks, reading progress/history, Continue Reading, and page resume.
 - Migration journal verification in CI.
-
-### Security
-- Reader identifiers remain HttpOnly and are proxied server-to-server by Vercel.
-- No account claims are made before authentication exists.
-- Persistence endpoints validate reader UUIDs, MangaDex UUIDs, titles, page bounds, and cover hosts.
-- Persistence reads/writes have independent API rate limits.
-- Database failures return generic persistence errors without leaking connection information.
 
 ## 0.3.0 - 2026-09-24 — Reader UX
 
 ### Added
-- URL-backed search queries so returning from a manga or chapter restores the search and result list.
-- Live Page X / Y tracking with IntersectionObserver.
-- Sticky chapter progress bar.
-- Previous and next chapter navigation with duplicate scanlation entries skipped where possible.
-- Reader-wide data-saver toggle stored as a browser preference.
-
-### Improved
-- Search clear/reload behavior and preserved query links.
-- Reader loading and failure states.
-- Small-screen reader header, chapter navigation, manga details, and search controls.
+- URL-backed search restoration.
+- Page X / Y tracking and live progress.
+- Previous/next chapter navigation.
+- Persistent data-saver preference.
 
 ## 0.2.1 - 2026-09-24 — Security Patch
 
 ### Security
-- Removed the unused browser runtime from the V1 dependency tree.
-- Expanded CI to audit the complete dependency tree.
-- Verified zero npm vulnerabilities at release time.
+- Removed unused browser runtime.
+- Audited the full dependency tree.
 
 ## 0.2.0 - 2026-09-24 — Security Preview
 
 ### Security
-- Added per-IP route rate limiting and strict request validation.
-- Hardened HTTPS source fetching and redirect handling.
-- Removed raw upstream errors from public responses.
-- Added security headers, secret scanning, CI, and Dependabot.
+- Added rate limits, input validation, source hardening, secure headers, CI secret scanning, and Dependabot.
 
 ## 0.1.0 - 2026-09-24 — Reader Prototype
 
 ### Added
-- Next.js frontend and Fastify API.
-- MangaDex search, details, chapter listing, At-Home page resolution, and image proxy.
-- Vercel, Render, and Neon-ready project structure.
+- Next.js frontend, Fastify API, MangaDex adapter, deployments, and initial vertical reader.

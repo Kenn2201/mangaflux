@@ -92,7 +92,7 @@ export default function LibraryClient() {
         <h2>Your MangaFlux library</h2>
         <p>
           Bookmark a manga or start reading a chapter and it will appear here.
-          Account sync comes in the next authentication milestone.
+          Sign in to make that library account-backed across browsers.
         </p>
       </section>
     );
@@ -205,8 +205,8 @@ export default function LibraryClient() {
       ) : null}
 
       <p className="device-note">
-        This pre-auth library is tied to this browser by a private reader
-        cookie. Account sync is planned for v0.5.
+        When signed out, this library belongs to this browser. Sign in to use
+        account-backed bookmarks and progress instead.
       </p>
     </section>
   );

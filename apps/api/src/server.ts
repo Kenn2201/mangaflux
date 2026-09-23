@@ -1,13 +1,14 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import { createDatabase } from "@mangaflux/db";
+import { registerAuthRoutes } from "./auth.js";
 import { registerStateRoutes } from "./state.js";
 import {
   fetchMangaDexPageImage,
   mangaDexSource
 } from "@mangaflux/sources";
 
-const APP_VERSION = "0.4.0";
+const APP_VERSION = "0.5.0";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LANGUAGE_RE = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i;
@@ -45,7 +46,7 @@ await app.register(cors, {
 
     callback(null, allowed);
   },
-  methods: ["GET", "PUT", "DELETE", "OPTIONS"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type"],
   maxAge: 86400
 });
@@ -125,6 +126,9 @@ const metadataRateLimit = makeRateLimit("metadata", 90);
 const imageRateLimit = makeRateLimit("images", 240);
 const stateReadRateLimit = makeRateLimit("state-read", 120);
 const stateWriteRateLimit = makeRateLimit("state-write", 60);
+const authSignupRateLimit = makeRateLimit("auth-signup", 5, 10 * 60_000);
+const authLoginRateLimit = makeRateLimit("auth-login", 10, 10 * 60_000);
+const authSessionRateLimit = makeRateLimit("auth-session", 120);
 
 function requireUuid(value: string, reply: any, field = "id") {
   if (UUID_RE.test(value)) return true;
@@ -151,6 +155,7 @@ function parseDataSaver(value: string | undefined, reply: any) {
 const database = process.env.DATABASE_URL?.trim()
   ? createDatabase(process.env.DATABASE_URL.trim())
   : null;
+const authProxySecret = process.env.AUTH_PROXY_SECRET?.trim() ?? "";
 
 app.setErrorHandler((error, request, reply) => {
   request.log.error(
@@ -160,29 +165,39 @@ app.setErrorHandler((error, request, reply) => {
 
   const errorName = error instanceof Error ? error.name : "UnknownError";
 
-  const statusCode = request.url.startsWith("/api/state/")
-    ? 503
-    : error instanceof RangeError
-      ? 404
-      : errorName === "AbortError" || errorName === "TimeoutError"
-        ? 504
-        : 502;
+  const authRequest = request.url.startsWith("/api/auth/");
+  const persistenceRequest =
+    request.url.startsWith("/api/state/") ||
+    request.url.startsWith("/api/account/state/");
+
+  const statusCode =
+    authRequest || persistenceRequest
+      ? 503
+      : error instanceof RangeError
+        ? 404
+        : errorName === "AbortError" || errorName === "TimeoutError"
+          ? 504
+          : 502;
 
   return reply.code(statusCode).send({
     error:
       statusCode === 404
         ? "NOT_FOUND"
-        : statusCode === 503
-          ? "PERSISTENCE_UNAVAILABLE"
-          : "UPSTREAM_ERROR",
+        : authRequest
+          ? "AUTH_UNAVAILABLE"
+          : persistenceRequest
+            ? "PERSISTENCE_UNAVAILABLE"
+            : "UPSTREAM_ERROR",
     message:
       statusCode === 404
         ? "The requested resource was not found."
-        : statusCode === 503
-          ? "Reading persistence is temporarily unavailable."
-          : statusCode === 504
-            ? "The upstream source timed out."
-            : "The upstream source request failed.",
+        : authRequest
+          ? "Authentication is temporarily unavailable."
+          : persistenceRequest
+            ? "Reading persistence is temporarily unavailable."
+            : statusCode === 504
+              ? "The upstream source timed out."
+              : "The upstream source request failed.",
     requestId: request.id
   });
 });
@@ -192,10 +207,20 @@ app.get("/health", async () => ({
   service: "mangaflux-api",
   version: APP_VERSION,
   source: "mangadex",
-  persistence: database ? "configured" : "disabled"
+  persistence: database ? "configured" : "disabled",
+  auth:
+    database && authProxySecret
+      ? "configured"
+      : "disabled"
 }));
 
-registerStateRoutes(app, database, {
+registerAuthRoutes(app, database, authProxySecret, {
+  signup: authSignupRateLimit,
+  login: authLoginRateLimit,
+  session: authSessionRateLimit
+});
+
+registerStateRoutes(app, database, authProxySecret, {
   read: stateReadRateLimit,
   write: stateWriteRateLimit
 });

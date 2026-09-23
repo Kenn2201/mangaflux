@@ -8,6 +8,13 @@
       "when": 1790202600000,
       "tag": "0000_v040_persistence",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790206500000,
+      "tag": "0001_v050_auth",
+      "breakpoints": true
     }
   ]
 }

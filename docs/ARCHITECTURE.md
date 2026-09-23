@@ -1,60 +1,68 @@
 # Architecture
 
-MangaFlux separates the web experience, source acquisition, and user-owned reading state.
+MangaFlux separates web UX, source acquisition, and persistence/authentication.
 
-1. The Next.js frontend requests normalized metadata through same-origin Next.js routes.
-2. Vercel proxies source requests to the MangaFlux Fastify API.
-3. The API selects a registered source adapter.
-4. Source adapters use bounded HTTPS requests with explicit host allowlists.
-5. MangaDex chapter images pass through the bounded MangaFlux image proxy.
-6. The browser runtime is not bundled in V1 and its compatibility interface fails closed.
-7. Vercel issues an HttpOnly anonymous reader UUID for pre-auth device state.
-8. The Fastify persistence API validates that identifier and stores bookmarks/progress in Neon.
-9. Neon stores user-owned reading state and cache metadata, not chapter-image archives.
-
-## Source contract
-
-Every adapter implements:
-
-- `search(query)`
-- `details(id)`
-- `chapters(id)`
-- `pages(chapterId)`
-
-## Persistence flow
+## Request path
 
 ~~~text
 Browser
   |
-  | HttpOnly mf_reader_v1 cookie
   v
-Next.js state route (Vercel)
+Next.js / Vercel
   |
-  | server-to-server reader UUID
-  v
-Fastify state API (Render)
+  +--> same-origin source/state/auth routes
+  +--> HttpOnly reader + account session cookies
   |
   v
-Neon / Drizzle
-  |- bookmarks
-  |- reading_progress
-  '- source_cache
+Fastify / Render
+  |
+  +--> source validation/rate limiting/cache
+  +--> account/session validation
+  +--> bounded MangaDex image proxy
+  |
+  +--------> Neon / Drizzle
+  |
+  v
+MangaDex API / At-Home
 ~~~
 
-The v0.4 reader UUID is device-scoped convenience state, not authentication. v0.5 replaces this ownership boundary with authenticated sessions.
+## Authentication boundary
+
+The browser calls only the MangaFlux web origin for signup/login/logout/session and saved-state operations.
+
+Vercel forwards auth/account requests to Render with a server-only `MANGAFLUX_AUTH_PROXY_SECRET`. Render accepts those routes only when the matching `AUTH_PROXY_SECRET` header is present.
+
+Authenticated account-state requests also include the opaque session token from the HttpOnly cookie. Render hashes that token and performs the Neon lookup by hash.
+
+## Persistence tables
+
+- `bookmarks`: anonymous-device bookmarks
+- `reading_progress`: anonymous-device latest manga progress/history
+- `users`: account identity/password hash
+- `sessions`: session-token hashes and expiry
+- `user_bookmarks`: account bookmarks
+- `user_reading_progress`: account progress/history
+- `reader_imports`: one-time device → account import ledger
+- `source_cache`: optional persistent source cache metadata
+
+## Source contract
+
+Every source adapter implements search, details, chapters, and pages.
 
 ## Security baseline
 
-- HTTPS only for source acquisition
+- source HTTPS only
 - explicit source host allowlists
 - redirect host revalidation
-- bounded response sizes and timeouts
-- private/literal source address blocking
-- no credentials embedded in source URLs or adapters
-- request validation at public API boundaries
-- separate metadata/image/state rate limits
-- generic client errors with request IDs
-- CI secret scan, migration verification, typecheck, build, and dependency audit
+- bounded response sizes/timeouts
+- request validation
+- metadata/image/state/auth rate limits
+- generic public errors
+- secret scan + migration check + typecheck + build + npm audit in CI
+- HttpOnly session identifiers
+- salted password hashing
+- raw session tokens never stored in Neon
+- internal auth proxy boundary
 - no CAPTCHA/paywall/login/anti-bot bypass logic
 
-See [../SECURITY.md](../SECURITY.md) for operational guidance.
+See [../SECURITY.md](../SECURITY.md).
