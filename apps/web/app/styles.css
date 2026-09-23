@@ -5,6 +5,7 @@
   color: #f5f5f5;
 }
 * { box-sizing: border-box; }
+html, body { max-width: 100%; overflow-x: hidden; }
 body {
   margin: 0;
   background:
@@ -36,6 +37,7 @@ h1 {
 .title-small {
   font-size: clamp(36px, 7vw, 66px);
   line-height: 1;
+  overflow-wrap: anywhere;
 }
 .lede {
   color: #c9c9c9;
@@ -87,7 +89,11 @@ h2 { margin: 0; }
   font-weight: 800;
 }
 .search-form button:disabled { opacity: .6; }
-.message { color: #aaa; margin: 18px 2px; }
+.message {
+  color: #aaa;
+  margin: 18px 2px;
+  overflow-wrap: anywhere;
+}
 .manga-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
@@ -136,10 +142,11 @@ h2 { margin: 0; }
 }
 .details {
   display: grid;
-  grid-template-columns: minmax(180px, 280px) 1fr;
+  grid-template-columns: minmax(180px, 280px) minmax(0, 1fr);
   gap: 34px;
   align-items: start;
 }
+.details > * { min-width: 0; }
 .details-cover {
   aspect-ratio: 2 / 3;
   border-radius: 22px;
@@ -160,7 +167,11 @@ h2 { margin: 0; }
   color: #bdbdbd;
   font-size: 12px;
 }
-.muted, .description { color: #b9b9b9; line-height: 1.65; }
+.muted, .description {
+  color: #b9b9b9;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
 .description { white-space: pre-line; }
 .source-link {
   display: inline-flex;
@@ -181,7 +192,7 @@ h2 { margin: 0; }
 .chapter-list { display: grid; gap: 8px; }
 .chapter-row {
   display: grid;
-  grid-template-columns: 1fr minmax(130px, 260px);
+  grid-template-columns: minmax(0, 1fr) minmax(130px, 260px);
   gap: 16px;
   padding: 14px 15px;
   border: 1px solid #262626;
@@ -194,6 +205,7 @@ h2 { margin: 0; }
   margin-top: 4px;
   color: #858585;
   font-size: 12px;
+  overflow-wrap: anywhere;
 }
 .chapter-meta { text-align: right; }
 .reader {
@@ -210,7 +222,7 @@ h2 { margin: 0; }
   gap: 20px;
   padding: 14px 18px;
   border-bottom: 1px solid #222;
-  background: rgba(5,5,5,.9);
+  background: rgba(5,5,5,.92);
   backdrop-filter: blur(18px);
 }
 .reader-header .back-link { margin: 0 0 5px; font-size: 12px; }
@@ -229,11 +241,38 @@ h2 { margin: 0; }
   width: min(100%, 1100px);
   margin: 0 auto;
 }
-.reader-pages img {
+.reader-page {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  background: #070707;
+}
+.reader-page img {
   display: block;
   width: 100%;
   height: auto;
   margin: 0 auto;
+}
+.reader-page-failed {
+  min-height: 240px;
+  display: grid;
+  place-items: center;
+  border-bottom: 1px solid #222;
+}
+.reader-image-error {
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  color: #aaa;
+  padding: 28px;
+  text-align: center;
+}
+.reader-image-error button {
+  border: 1px solid #333;
+  border-radius: 999px;
+  padding: 9px 14px;
+  background: #151515;
+  color: #eee;
 }
 .reader-footer {
   display: grid;
@@ -243,17 +282,68 @@ h2 { margin: 0; }
   font-size: 12px;
 }
 @media (max-width: 700px) {
-  main { padding-top: 28px; }
+  main {
+    width: min(100% - 24px, 1100px);
+    padding: 28px 0 64px;
+  }
+
+  .hero { padding-top: 18px; }
+  h1 { font-size: clamp(48px, 16vw, 72px); }
+
   .search-form { grid-template-columns: 1fr; }
   .search-form button { padding: 14px 18px; }
-  .manga-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-  .details { grid-template-columns: 118px 1fr; gap: 18px; }
-  .details .description, .details .tag-row, .details .source-link {
-    grid-column: 1 / -1;
+
+  .manga-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
   }
-  .title-small { font-size: 32px; }
-  .chapter-row { grid-template-columns: 1fr; }
+
+  .details {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+
+  .details-cover {
+    width: min(180px, 52vw);
+  }
+
+  .title-small {
+    font-size: clamp(32px, 10vw, 46px);
+  }
+
+  .description {
+    font-size: 15px;
+  }
+
+  .tag-row {
+    gap: 6px;
+  }
+
+  .section-heading {
+    align-items: start;
+  }
+
+  .chapter-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
   .chapter-meta { text-align: left; }
-  .reader-header { position: static; display: grid; }
-  .reader-credit { justify-items: start; text-align: left; }
+
+  .reader-header {
+    position: sticky;
+    top: 0;
+    display: grid;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+
+  .reader-credit {
+    justify-items: start;
+    text-align: left;
+  }
+
+  .reader-pages {
+    width: 100%;
+  }
 }
