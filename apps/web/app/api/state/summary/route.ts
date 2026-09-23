@@ -6,7 +6,10 @@ export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   return forwardReaderState(
     request,
-    (readerId) =>
-      `/api/state/${encodeURIComponent(readerId)}/summary`
+    {
+      reader: (readerId) =>
+        `/api/state/${encodeURIComponent(readerId)}/summary`,
+      account: "/api/account/state/summary"
+    }
   );
 }

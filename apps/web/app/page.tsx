@@ -1,3 +1,4 @@
+import AccountStatus from "./AccountStatus";
 import LibraryClient from "./LibraryClient";
 import SearchClient from "./SearchClient";
 
@@ -24,7 +25,10 @@ export default async function Home({
           A modular manga reader powered by source adapters. V1 currently uses
           the public MangaDex API.
         </p>
-        <div className="status">v0.4.0 — Neon Persistence</div>
+        <div className="hero-status-row">
+          <div className="status">v0.5.0 — Authentication</div>
+          <AccountStatus />
+        </div>
       </section>
 
       {!initialQuery ? <LibraryClient /> : null}
@@ -35,8 +39,8 @@ export default async function Home({
         <h2>V1 scope</h2>
         <p>
           Search, read, bookmark, and resume manga with device-scoped progress
-          stored in Neon. Account-backed sync arrives with the next auth
-          milestone.
+          stored in Neon. Sign in to sync your library and progress through
+          an account instead of only this browser.
         </p>
       </section>
 

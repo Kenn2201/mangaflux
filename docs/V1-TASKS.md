@@ -5,57 +5,57 @@
 - [x] Public GitHub repository
 - [x] Next.js frontend
 - [x] Fastify API
-- [x] Vercel deployment target
-- [x] Render deployment target
+- [x] Vercel + Render deployments
 - [x] Custom frontend/API domains
-- [x] Render health endpoint
 - [x] Neon project
-- [x] cron-job.org health wake
-- [x] CI secret scan, migration check, typecheck, build, and dependency audit
-- [x] Input validation and basic rate limiting
+- [x] health/wake monitor
+- [x] CI secret scan, migration check, typecheck, build, dependency audit
+- [x] Input validation and route rate limiting
 - [x] Bounded source runtime and image proxy
 
-## MangaDex reader
+## Reader
 
-- [x] Common source interface
-- [x] Restricted fetchSource runtime
-- [x] Search and cover art
-- [x] Manga details, tags, authors, and artists
-- [x] Chapter listing and English default
-- [x] Scanlation-group metadata
-- [x] MangaDex At-Home page resolution
-- [x] Normal/data-saver image proxy
-- [x] Search, details, chapter-list, and vertical-reader UI
-- [x] MangaDex/source attribution
-- [x] Preserve search query across navigation
-- [x] Current Page X / Y tracking and progress bar
-- [x] Previous/next chapter navigation
-- [x] Reader data-saver toggle
+- [x] MangaDex search/covers/details
+- [x] authors/artists/tags
+- [x] chapter listing and English default
+- [x] scanlation attribution
+- [x] At-Home resolver + bounded image proxy
+- [x] responsive search/details/reader UI
+- [x] search-state preservation
+- [x] Page X / Y and progress bar
+- [x] previous/next chapter navigation
+- [x] data-saver mode
 
 ## Persistence
 
-- [x] Wire Neon database client
-- [x] Add checked-in Drizzle runtime migrations
-- [x] Add bookmarks
-- [x] Add reading progress
-- [x] Add recent-reading history
-- [x] Add Continue Reading
-- [x] Add page resume
-- [x] Add device-scoped HttpOnly reader identity
+- [x] Neon + Drizzle client
+- [x] checked-in runtime migrations
+- [x] bookmarks
+- [x] reading history/progress
+- [x] Continue Reading
+- [x] page resume
+- [x] anonymous device persistence
 
 ## Accounts
 
-- [ ] Add authentication
-- [ ] Bind library/progress/history to authenticated sessions
-- [ ] Migrate or merge device state into the signed-in account
-- [ ] Add account/session security controls
+- [x] signup/login/logout
+- [x] password hashing
+- [x] server-side session handling
+- [x] account-backed library/progress/history
+- [x] one-time device-state import
+- [x] auth-specific rate limits
+- [ ] email verification / password recovery strategy
+- [ ] richer session management controls
 
 ## V1 stabilization
 
-- [ ] Add pagination/lazy chapter loading for very large series
-- [ ] Add source health/status panel
-- [ ] Add optional production error monitoring
-- [ ] Mobile QA on iPhone
-- [ ] Accessibility QA
-- [ ] Final security/dependency/migration audit
-- [ ] V1 release tag
+- [ ] large-series chapter pagination
+- [ ] language preferences
+- [ ] source health/status panel
+- [ ] improved retry/downstream error UI
+- [ ] optional production error monitoring
+- [ ] iPhone/mobile regression QA
+- [ ] accessibility QA
+- [ ] final auth/security/dependency/migration audit
+- [ ] production smoke test
+- [ ] v1.0.0 release tag

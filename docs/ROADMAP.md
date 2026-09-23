@@ -1,68 +1,59 @@
 # MangaFlux Roadmap
 
-This roadmap is directional. Versions follow Semantic Versioning; features can move between releases based on reliability and source-policy requirements.
+MangaFlux follows Semantic Versioning while pre-1.0 milestones are still being completed.
 
-## v0.4.0 — Neon persistence — current milestone
+## v0.5.0 — Authentication — current milestone
 
-- Neon/Drizzle database client
-- checked-in runtime migrations
-- device-scoped HttpOnly reader identity
-- bookmarks
-- reading progress
-- recent-reading history
-- Continue Reading with page resume
-- migration checks in CI
-- no permanent manga-page storage
+- email/password signup, login, logout
+- salted scrypt password hashing
+- opaque HttpOnly account sessions
+- session-token hashes stored in Neon
+- internal Vercel → Render auth proxy boundary
+- account-backed bookmarks/progress/history
+- one-time device-library import
+- account page and session status
+- auth-specific rate limits
 
-## v0.5.x — Authentication — next
+Known follow-up: email verification/password recovery are still missing.
 
-- signup, login, logout, and secure session handling
-- protected user library endpoints
-- bind bookmarks/progress/history to authenticated users
-- migrate or merge existing device-scoped state after login
-- ownership and authorization checks
-- session rotation/logout behavior
-- account/session security review before release
+## v0.6.0–v0.9.x — V1 stabilization — next
 
-## v0.6.0–v0.9.x — V1 stabilization
+Planned work:
 
-- large-series chapter pagination
-- language preferences
-- better source/downstream error UI
-- source health/status surface
-- optional Sentry production error monitoring
-- iPhone/mobile QA and accessibility QA
-- final security, dependency, migration, and production audit
+- large-series chapter pagination / incremental loading
+- language preference controls
+- source health/status UI
+- clearer downstream error and retry states
+- auth recovery/verification strategy
+- session management polish
+- optional Sentry production monitoring
+- iPhone/mobile regression QA
+- accessibility QA
+- migration/backward-compatibility QA
+- final security/dependency audit
+- production smoke tests and release checklist
 
 ## v1.0.0 — Stable single-source reader
 
-V1 is complete when a user can reliably search MangaDex, open manga details and chapters, read chapter pages with Page X / Y tracking, navigate back without losing the search, move to previous and next chapters, sign in, bookmark manga, save reading progress in Neon, resume from Continue Reading, use the site comfortably on mobile, and receive clear source errors without raw internal details.
-
-V1 also requires CI, secret checks, rate limiting, caching, migrations, and production QA.
+V1 is complete when users can search MangaDex, browse/read chapters reliably, preserve navigation state, track page progress, move between chapters, sign in, bookmark titles, save and resume account-backed progress, and use the site comfortably on mobile with production-grade error/security handling.
 
 ## v1.x — Reader polish
 
-Compatible improvements after V1 may include reader themes/width controls, richer language preferences, chapter pagination/infinite loading, library sorting and collections, source-health messaging, and optional notifications.
+Compatible improvements may include themes, width controls, richer library sorting/collections, notification preferences, and reader customization.
 
 ## v2.0.0 — Multi-source architecture
 
-V2 is the right time to add additional permitted sources.
-
-Planned concepts:
-
-- source registry with capability manifests
-- source health checks
-- unified search across enabled providers
-- normalized title, author, and identifier matching
-- deduplication of the same work across sources
-- source selection/fallback when a provider is unavailable
-- per-source rate limits and cache policies
+- source registry/capabilities
+- health checks
+- unified search
+- normalized identifiers/metadata
+- deduplication
+- source selection/fallback
+- per-source rate/caching policies
 - admin/source status page
-- additional official/public APIs first; HTML adapters only where permitted
-- optional Discord notifications for followed series
+- additional permitted APIs/adapters
+- optional Discord followed-series notifications
 
-If the API grows beyond one Render instance, move rate limiting and hot cache state to shared infrastructure such as Redis/Upstash or an edge layer.
+## v3.0.0+
 
-## v3.0.0 and later
-
-Potential later work includes metadata recommendations, semantic search, custom reading lists, release notifications, a PWA/native client, accessibility presets, source diagnostics, adapter test fixtures, and public adapter documentation.
+Potential work includes semantic metadata search, recommendations, custom reading lists, release notifications, PWA/native clients, richer accessibility controls, adapter fixtures, and public source-adapter documentation.

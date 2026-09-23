@@ -23,8 +23,11 @@ export async function PUT(request: NextRequest) {
 
   return forwardReaderState(
     request,
-    (readerId) =>
-      `/api/state/${encodeURIComponent(readerId)}/progress`,
+    {
+      reader: (readerId) =>
+        `/api/state/${encodeURIComponent(readerId)}/progress`,
+      account: "/api/account/state/progress"
+    },
     {
       method: "PUT",
       headers: { "content-type": "application/json" },

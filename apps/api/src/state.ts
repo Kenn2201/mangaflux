@@ -5,12 +5,18 @@ import type {
 } from "fastify";
 import {
   deleteBookmark,
+  deleteUserBookmark,
   getBookmark,
   getReaderSummary,
+  getUserBookmark,
+  getUserSummary,
   upsertBookmark,
-  upsertProgress
+  upsertProgress,
+  upsertUserBookmark,
+  upsertUserProgress
 } from "@mangaflux/db";
 import type { MangaFluxDatabase } from "@mangaflux/db";
+import { authenticateSession } from "./auth.js";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -120,9 +126,115 @@ function validateSourceAndManga(
   return true;
 }
 
+function validateBookmarkBody(
+  body: BookmarkBody,
+  reply: FastifyReply
+) {
+  if (!validateSourceAndManga(body.source, body.mangaId, reply)) {
+    return null;
+  }
+
+  if (!validText(body.title, 1, 300)) {
+    reply.code(400).send({
+      error: "INVALID_REQUEST",
+      message: "title must contain between 1 and 300 characters"
+    });
+    return null;
+  }
+
+  const cover = normalizeCoverUrl(body.coverUrl);
+  if (!cover.ok) {
+    reply.code(400).send({
+      error: "INVALID_REQUEST",
+      message: "coverUrl is invalid"
+    });
+    return null;
+  }
+
+  return {
+    source: body.source!,
+    mangaId: body.mangaId!,
+    title: body.title!.trim(),
+    coverUrl: cover.value
+  };
+}
+
+function validateProgressBody(
+  body: ProgressBody,
+  reply: FastifyReply
+) {
+  if (!validateSourceAndManga(body.source, body.mangaId, reply)) {
+    return null;
+  }
+
+  if (!validMangaDexId(body.chapterId)) {
+    reply.code(400).send({
+      error: "INVALID_REQUEST",
+      message: "chapterId must be a valid MangaDex UUID"
+    });
+    return null;
+  }
+
+  if (!validText(body.mangaTitle, 1, 300)) {
+    reply.code(400).send({
+      error: "INVALID_REQUEST",
+      message: "mangaTitle must contain between 1 and 300 characters"
+    });
+    return null;
+  }
+
+  if (
+    body.chapterLabel !== undefined &&
+    body.chapterLabel !== null &&
+    !validText(body.chapterLabel, 1, 120)
+  ) {
+    reply.code(400).send({
+      error: "INVALID_REQUEST",
+      message: "chapterLabel is invalid"
+    });
+    return null;
+  }
+
+  if (
+    !Number.isInteger(body.page) ||
+    !Number.isInteger(body.totalPages) ||
+    body.page! < 1 ||
+    body.totalPages! < 1 ||
+    body.totalPages! > 500 ||
+    body.page! > body.totalPages!
+  ) {
+    reply.code(400).send({
+      error: "INVALID_REQUEST",
+      message: "page and totalPages are invalid"
+    });
+    return null;
+  }
+
+  const cover = normalizeCoverUrl(body.coverUrl);
+  if (!cover.ok) {
+    reply.code(400).send({
+      error: "INVALID_REQUEST",
+      message: "coverUrl is invalid"
+    });
+    return null;
+  }
+
+  return {
+    source: body.source!,
+    mangaId: body.mangaId!,
+    mangaTitle: body.mangaTitle!.trim(),
+    coverUrl: cover.value,
+    chapterId: body.chapterId!,
+    chapterLabel: body.chapterLabel?.trim() || undefined,
+    page: body.page!,
+    totalPages: body.totalPages!
+  };
+}
+
 export function registerStateRoutes(
   app: FastifyInstance,
   database: MangaFluxDatabase | null,
+  authProxySecret: string,
   limits: {
     read: LimitHandler;
     write: LimitHandler;
@@ -180,29 +292,15 @@ export function registerStateRoutes(
       if (!validateIdentity(request.params.readerId, reply)) return;
       if (!databaseRequired(database, reply)) return;
 
-      const body = request.body ?? {};
-      if (!validateSourceAndManga(body.source, body.mangaId, reply)) return;
-      if (!validText(body.title, 1, 300)) {
-        return reply.code(400).send({
-          error: "INVALID_REQUEST",
-          message: "title must contain between 1 and 300 characters"
-        });
-      }
-
-      const cover = normalizeCoverUrl(body.coverUrl);
-      if (!cover.ok) {
-        return reply.code(400).send({
-          error: "INVALID_REQUEST",
-          message: "coverUrl is invalid"
-        });
-      }
+      const body = validateBookmarkBody(
+        request.body ?? {},
+        reply
+      );
+      if (!body) return;
 
       const item = await upsertBookmark(database, {
         readerId: request.params.readerId,
-        source: body.source!,
-        mangaId: body.mangaId!,
-        title: body.title!.trim(),
-        coverUrl: cover.value
+        ...body
       });
 
       return { bookmarked: true, item };
@@ -245,64 +343,148 @@ export function registerStateRoutes(
       if (!validateIdentity(request.params.readerId, reply)) return;
       if (!databaseRequired(database, reply)) return;
 
-      const body = request.body ?? {};
-      if (!validateSourceAndManga(body.source, body.mangaId, reply)) return;
-      if (!validMangaDexId(body.chapterId)) {
-        return reply.code(400).send({
-          error: "INVALID_REQUEST",
-          message: "chapterId must be a valid MangaDex UUID"
-        });
-      }
-      if (!validText(body.mangaTitle, 1, 300)) {
-        return reply.code(400).send({
-          error: "INVALID_REQUEST",
-          message: "mangaTitle must contain between 1 and 300 characters"
-        });
-      }
-
-      if (
-        body.chapterLabel !== undefined &&
-        body.chapterLabel !== null &&
-        !validText(body.chapterLabel, 1, 120)
-      ) {
-        return reply.code(400).send({
-          error: "INVALID_REQUEST",
-          message: "chapterLabel is invalid"
-        });
-      }
-
-      if (
-        !Number.isInteger(body.page) ||
-        !Number.isInteger(body.totalPages) ||
-        body.page! < 1 ||
-        body.totalPages! < 1 ||
-        body.totalPages! > 500 ||
-        body.page! > body.totalPages!
-      ) {
-        return reply.code(400).send({
-          error: "INVALID_REQUEST",
-          message: "page and totalPages are invalid"
-        });
-      }
-
-      const cover = normalizeCoverUrl(body.coverUrl);
-      if (!cover.ok) {
-        return reply.code(400).send({
-          error: "INVALID_REQUEST",
-          message: "coverUrl is invalid"
-        });
-      }
+      const body = validateProgressBody(
+        request.body ?? {},
+        reply
+      );
+      if (!body) return;
 
       const item = await upsertProgress(database, {
         readerId: request.params.readerId,
-        source: body.source!,
-        mangaId: body.mangaId!,
-        mangaTitle: body.mangaTitle!.trim(),
-        coverUrl: cover.value,
-        chapterId: body.chapterId!,
-        chapterLabel: body.chapterLabel?.trim() || undefined,
-        page: body.page!,
-        totalPages: body.totalPages!
+        ...body
+      });
+
+      return { saved: true, item };
+    }
+  );
+
+  app.get(
+    "/api/account/state/summary",
+    { preHandler: limits.read },
+    async (request, reply) => {
+      const session = await authenticateSession(
+        request,
+        reply,
+        database,
+        authProxySecret
+      );
+      if (!session || !database) return;
+
+      return getUserSummary(database, session.userId);
+    }
+  );
+
+  app.get<{
+    Querystring: { source?: string; mangaId?: string };
+  }>(
+    "/api/account/state/bookmark",
+    { preHandler: limits.read },
+    async (request, reply) => {
+      const session = await authenticateSession(
+        request,
+        reply,
+        database,
+        authProxySecret
+      );
+      if (!session || !database) return;
+
+      const source = request.query.source ?? "mangadex";
+      const mangaId = request.query.mangaId;
+
+      if (!validateSourceAndManga(source, mangaId, reply)) return;
+
+      const item = await getUserBookmark(
+        database,
+        session.userId,
+        source,
+        mangaId!
+      );
+
+      return {
+        bookmarked: Boolean(item),
+        item
+      };
+    }
+  );
+
+  app.put<{ Body: BookmarkBody }>(
+    "/api/account/state/bookmark",
+    { preHandler: limits.write },
+    async (request, reply) => {
+      const session = await authenticateSession(
+        request,
+        reply,
+        database,
+        authProxySecret
+      );
+      if (!session || !database) return;
+
+      const body = validateBookmarkBody(
+        request.body ?? {},
+        reply
+      );
+      if (!body) return;
+
+      const item = await upsertUserBookmark(database, {
+        userId: session.userId,
+        ...body
+      });
+
+      return { bookmarked: true, item };
+    }
+  );
+
+  app.delete<{
+    Querystring: { source?: string; mangaId?: string };
+  }>(
+    "/api/account/state/bookmark",
+    { preHandler: limits.write },
+    async (request, reply) => {
+      const session = await authenticateSession(
+        request,
+        reply,
+        database,
+        authProxySecret
+      );
+      if (!session || !database) return;
+
+      const source = request.query.source ?? "mangadex";
+      const mangaId = request.query.mangaId;
+
+      if (!validateSourceAndManga(source, mangaId, reply)) return;
+
+      await deleteUserBookmark(
+        database,
+        session.userId,
+        source,
+        mangaId!
+      );
+
+      return { bookmarked: false };
+    }
+  );
+
+  app.put<{ Body: ProgressBody }>(
+    "/api/account/state/progress",
+    { preHandler: limits.write },
+    async (request, reply) => {
+      const session = await authenticateSession(
+        request,
+        reply,
+        database,
+        authProxySecret
+      );
+      if (!session || !database) return;
+
+      const body = validateProgressBody(
+        request.body ?? {},
+        reply
+      );
+      if (!body) return;
+
+      const item = await upsertUserProgress(database, {
+        userId: session.userId,
+        ...body
       });
 
       return { saved: true, item };

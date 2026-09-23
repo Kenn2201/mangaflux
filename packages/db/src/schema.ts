@@ -5,6 +5,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  uniqueIndex,
   uuid
 } from "drizzle-orm/pg-core";
 
@@ -55,6 +56,117 @@ export const readingProgress = pgTable(
       table.readerId,
       table.updatedAt
     )
+  ]
+);
+
+export const users = pgTable(
+  "users",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    email: text("email").notNull(),
+    passwordHash: text("password_hash").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+  },
+  (table) => [
+    uniqueIndex("users_email_unique").on(table.email)
+  ]
+);
+
+export const sessions = pgTable(
+  "sessions",
+  {
+    tokenHash: text("token_hash").primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+  },
+  (table) => [
+    index("sessions_user_expires_idx").on(
+      table.userId,
+      table.expiresAt
+    ),
+    index("sessions_expires_idx").on(table.expiresAt)
+  ]
+);
+
+export const userBookmarks = pgTable(
+  "user_bookmarks",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    source: text("source").notNull(),
+    mangaId: text("manga_id").notNull(),
+    title: text("title").notNull(),
+    coverUrl: text("cover_url"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+  },
+  (table) => [
+    primaryKey({
+      columns: [table.userId, table.source, table.mangaId]
+    }),
+    index("user_bookmarks_user_created_idx").on(
+      table.userId,
+      table.createdAt
+    )
+  ]
+);
+
+export const userReadingProgress = pgTable(
+  "user_reading_progress",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    source: text("source").notNull(),
+    mangaId: text("manga_id").notNull(),
+    mangaTitle: text("manga_title").notNull(),
+    coverUrl: text("cover_url"),
+    chapterId: text("chapter_id").notNull(),
+    chapterLabel: text("chapter_label"),
+    page: integer("page").notNull(),
+    totalPages: integer("total_pages").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+  },
+  (table) => [
+    primaryKey({
+      columns: [table.userId, table.source, table.mangaId]
+    }),
+    index("user_reading_progress_user_updated_idx").on(
+      table.userId,
+      table.updatedAt
+    )
+  ]
+);
+
+export const readerImports = pgTable(
+  "reader_imports",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    readerId: uuid("reader_id").notNull(),
+    importedAt: timestamp("imported_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+  },
+  (table) => [
+    primaryKey({
+      columns: [table.userId, table.readerId]
+    })
   ]
 );
 

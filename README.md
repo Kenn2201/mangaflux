@@ -2,7 +2,7 @@
 
 > A modular manga reader and source-adapter platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v0.4.0--Neon_Persistence-indigo.svg)
+![Version](https://img.shields.io/badge/version-v0.5.0--Authentication-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -15,141 +15,120 @@
 
 ---
 
-## Version and release status
+## Current release
 
-- Current version: **v0.4.0 Neon Persistence**
-- Version policy: [VERSIONING.md](VERSIONING.md)
-- Changelog: [CHANGELOG.md](CHANGELOG.md)
-- Security policy: [SECURITY.md](SECURITY.md)
-- Roadmap: [docs/ROADMAP.md](docs/ROADMAP.md)
+**v0.5.0 — Authentication**
 
-MangaFlux is still pre-1.0. v0.4 adds device-scoped bookmarks, reading history, page progress, and Continue Reading backed by Neon before account authentication is introduced.
+MangaFlux now supports account-backed bookmarks and reading progress while preserving the anonymous device library for signed-out readers.
 
-## Architecture
+## Current flow
 
 ~~~text
-manga.kenncode.me
-      |
-      v
-Next.js / Vercel
-  |   same-origin metadata routes
-  |   HttpOnly anonymous reader cookie
+Search
+  ↓
+Manga details
+  ↓
+Bookmark / choose chapter
+  ↓
+Vertical reader
+  ↓
+Page X / Y + autosaved progress
+  ↓
+Continue Reading
+
+Signed out:
+HttpOnly device reader UUID → Neon device state
+
+Signed in:
+HttpOnly session token → Vercel auth/state proxy
+                      → Render
+                      → Neon account state
+~~~
+
+## Authentication architecture
+
+The browser never receives a usable database credential or Render auth proxy secret.
+
+~~~text
+Browser
+  |
+  | same-origin HTTPS
+  | HttpOnly mf_session_v1 cookie
   v
-api.manga.kenncode.me
+Next.js / Vercel
+  |
+  | X-MangaFlux-Auth-Proxy
+  | Authorization: Bearer <opaque session>
+  v
 Fastify / Render
   |
-  +--> validation + per-IP rate limits
-  +--> short-lived source cache
-  +--> bounded MangaDex image proxy
-  +--> device library / progress API
-  |
-  +----------> Neon Postgres
-  |            bookmarks
-  |            reading progress/history
-  |            source cache table
-  |
+  | hashes session token before DB lookup
   v
-MangaDex API / At-Home
+Neon
+  |- users
+  |- sessions (token hashes only)
+  |- user_bookmarks
+  |- user_reading_progress
+  '- reader_imports
 ~~~
 
-The public API URL is not a secret. Database credentials, auth secrets, platform tokens, and future signing keys stay in server environment settings.
+Passwords are salted and hashed with Node scrypt. Raw session tokens are generated from cryptographically secure random bytes, stored only in the HttpOnly web cookie, and represented in Neon only by SHA-256 hashes.
 
-## Current reader capabilities
+## Required auth environment setup
 
-- MangaDex search with cover art
-- manga details, tags, authors, and artists
-- English chapter listing with scanlation-group metadata
-- MangaDex At-Home chapter resolution
-- bounded server-side image proxy with normal/data-saver fallback
-- responsive manga details and vertical reader
-- preserved search state across details and reader navigation
-- current Page X / Y tracking with a live progress bar
-- previous/next chapter navigation
-- persistent data-saver preference
-- device-scoped bookmarks
-- Neon-backed reading progress and recent history
-- Continue Reading with page resume
-- MangaDex and scanlation-group attribution
-
-## Persistence model before auth
-
-v0.4 deliberately does **not** pretend that the anonymous reader cookie is an account. Vercel issues a random HttpOnly reader UUID and uses it server-to-server when requesting saved state from Render. Only manga IDs, titles, cover URLs, chapter/page progress, and timestamps are stored.
-
-v0.5 will replace this device-only ownership model with authenticated account ownership and migration/sync behavior.
-
-## Database migrations
-
-Render runs the checked-in Drizzle runtime migrations before the API starts:
+Generate one strong random secret locally and set the same value in both places:
 
 ~~~text
-npm run db:migrate
+Render:
+AUTH_PROXY_SECRET=<same secret>
+
+Vercel:
+MANGAFLUX_AUTH_PROXY_SECRET=<same secret>
 ~~~
 
-Migration SQL lives in `packages/db/drizzle`. CI validates the journal and SQL files without needing production database credentials.
+Do **not** prefix either secret with `NEXT_PUBLIC_`.
+
+The Render health response reports `auth: "configured"` only when both the database and Render auth proxy secret are available. The Vercel account routes also require their corresponding proxy secret.
+
+## Current reader features
+
+- MangaDex search, covers, metadata, authors/artists/tags
+- English chapter feed and scanlation attribution
+- bounded MangaDex At-Home image proxy
+- responsive vertical reader
+- Page X / Y tracking and chapter progress bar
+- previous/next chapter controls
+- data-saver mode
+- URL-backed search restoration
+- bookmarks
+- reading history
+- Continue Reading with page resume
+- anonymous device persistence
+- email/password accounts
+- account-backed bookmarks/progress/history
+- one-time import of each device library after sign-in
 
 ## Security baseline
 
-The v0.2+ hardening line includes explicit CORS origins, strict input validation, route-specific rate limits, HTTPS-only source requests, redirect host revalidation, bounded timeouts/response sizes, generic public errors, secret scanning, migration checks, typechecks, builds, dependency audits, and Dependabot.
+MangaFlux uses explicit CORS origins, source allowlists, bounded fetches, redirect revalidation, route-specific rate limits, generic error handling, secret scanning, migration checks, typechecks, builds, dependency audits, HttpOnly cookies, account session token hashing, and an internal auth proxy boundary.
 
 See [SECURITY.md](SECURITY.md).
 
-## Repository layout
+## Known pre-1.0 auth limitation
 
-~~~text
-apps/
-  web/        Next.js frontend + same-origin state proxy
-  api/        Fastify API + persistence endpoints
-packages/
-  runtime/    restricted HTTP runtime
-  sources/    source contract and MangaDex adapter
-  db/         Neon/Drizzle schema, repository and migrations
-scripts/
-  check-secrets.mjs
-  check-migrations.mjs
-docs/
-  ARCHITECTURE.md
-  ROADMAP.md
-  V1-TASKS.md
-~~~
-
-## Local development
-
-Requirements:
-
-- Node.js 22+
-- npm 10+
-- Neon/Postgres connection string for persistence features
-
-~~~bash
-npm install
-cp .env.example .env
-npm run check:secrets
-npm run check:migrations
-npm run typecheck
-npm run build
-npm run db:migrate
-npm run dev:api
-npm run dev:web
-~~~
-
-Keep `DATABASE_URL` server-side. Never place it in a `NEXT_PUBLIC_*` variable.
+Email verification and password recovery are not implemented in v0.5.0. Accounts are therefore functional but not yet considered production-complete. Do not reuse a sensitive password.
 
 ## Deployment
 
 - Frontend: Vercel at `manga.kenncode.me`
 - API: Render at `api.manga.kenncode.me`
 - Database: Neon Postgres
-- Wake and health check: cron-job.org
-- Future monitoring: optional Sentry during V1 stabilization
+- Health/wake: cron-job.org
 
-## Source policy
-
-MangaFlux prefers official/public APIs and permitted integrations. It is not intended to bypass CAPTCHAs, paywalls, login walls, or anti-bot protections.
-
-The MangaDex integration must follow MangaDex API terms and attribution requirements. MangaFlux does not keep permanent manga-page archives in Neon/Object Storage.
+Render continues to run checked-in migrations before starting the API.
 
 ## Roadmap
 
-The next milestone is **v0.5 authentication**, which binds the current library/progress model to authenticated users and adds account sync/security.
+The next phase is **v0.6–v0.9 V1 stabilization**: large-series chapter pagination, better source health/error UI, auth hardening/recovery planning, optional monitoring, iPhone/accessibility QA, and final security/deployment validation before `v1.0.0`.
 
-V2 remains the multi-source milestone with source manifests, health checks, unified search, deduplication, and permitted-source fallback.
+V2 remains the multi-source architecture milestone.

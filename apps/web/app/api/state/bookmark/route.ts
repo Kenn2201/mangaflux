@@ -6,6 +6,17 @@ import { forwardReaderState } from "../../../../lib/stateProxy";
 
 export const dynamic = "force-dynamic";
 
+function paths(source: string, mangaId: string) {
+  const query =
+    `?source=${encodeURIComponent(source)}&mangaId=${encodeURIComponent(mangaId)}`;
+
+  return {
+    reader: (readerId: string) =>
+      `/api/state/${encodeURIComponent(readerId)}/bookmark${query}`,
+    account: `/api/account/state/bookmark${query}`
+  };
+}
+
 export async function GET(request: NextRequest) {
   const source =
     request.nextUrl.searchParams.get("source") ?? "mangadex";
@@ -24,13 +35,17 @@ export async function GET(request: NextRequest) {
 
   return forwardReaderState(
     request,
-    (readerId) =>
-      `/api/state/${encodeURIComponent(readerId)}/bookmark?source=${encodeURIComponent(source)}&mangaId=${encodeURIComponent(mangaId)}`
+    paths(source, mangaId)
   );
 }
 
 export async function PUT(request: NextRequest) {
-  let payload: unknown;
+  let payload: {
+    source?: string;
+    mangaId?: string;
+    title?: string;
+    coverUrl?: string;
+  };
 
   try {
     payload = await request.json();
@@ -44,10 +59,26 @@ export async function PUT(request: NextRequest) {
     );
   }
 
+  const source = payload.source ?? "mangadex";
+  const mangaId = payload.mangaId?.trim();
+
+  if (!mangaId) {
+    return NextResponse.json(
+      {
+        error: "INVALID_REQUEST",
+        message: "Missing mangaId"
+      },
+      { status: 400 }
+    );
+  }
+
   return forwardReaderState(
     request,
-    (readerId) =>
-      `/api/state/${encodeURIComponent(readerId)}/bookmark`,
+    {
+      reader: (readerId) =>
+        `/api/state/${encodeURIComponent(readerId)}/bookmark`,
+      account: "/api/account/state/bookmark"
+    },
     {
       method: "PUT",
       headers: { "content-type": "application/json" },
@@ -74,8 +105,7 @@ export async function DELETE(request: NextRequest) {
 
   return forwardReaderState(
     request,
-    (readerId) =>
-      `/api/state/${encodeURIComponent(readerId)}/bookmark?source=${encodeURIComponent(source)}&mangaId=${encodeURIComponent(mangaId)}`,
+    paths(source, mangaId),
     { method: "DELETE" }
   );
 }

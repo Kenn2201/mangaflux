@@ -6,6 +6,8 @@ import {
   attachReaderCookie,
   getReaderIdentity
 } from "./readerIdentity";
+import { getSessionToken } from "./authSession";
+import { getAuthProxySecret } from "./authProxy";
 
 const API_URL =
   process.env.MANGAFLUX_API_URL ??
@@ -14,15 +16,46 @@ const API_URL =
 
 export async function forwardReaderState(
   request: NextRequest,
-  path: (readerId: string) => string,
+  paths: {
+    reader: (readerId: string) => string;
+    account: string;
+  },
   init: RequestInit = {}
 ) {
-  const identity = getReaderIdentity(request);
+  const sessionToken = getSessionToken(request);
+  const authSecret = getAuthProxySecret();
+  const reader = getReaderIdentity(request);
   const headers = new Headers(init.headers);
+
+  let path: string;
+
+  if (sessionToken) {
+    if (!authSecret) {
+      return NextResponse.json(
+        {
+          error: "AUTH_UNAVAILABLE",
+          message: "Account persistence is temporarily unavailable."
+        },
+        { status: 503 }
+      );
+    }
+
+    headers.set(
+      "authorization",
+      `Bearer ${sessionToken}`
+    );
+    headers.set(
+      "x-mangaflux-auth-proxy",
+      authSecret
+    );
+    path = paths.account;
+  } else {
+    path = paths.reader(reader.id);
+  }
 
   try {
     const upstream = await fetch(
-      `${API_URL.replace(/\/$/, "")}${path(identity.id)}`,
+      `${API_URL.replace(/\/$/, "")}${path}`,
       {
         ...init,
         headers,
@@ -41,7 +74,7 @@ export async function forwardReaderState(
       }
     });
 
-    return attachReaderCookie(response, identity);
+    return attachReaderCookie(response, reader);
   } catch (error) {
     console.error("MangaFlux state proxy failed", error);
 
@@ -53,6 +86,6 @@ export async function forwardReaderState(
       { status: 502 }
     );
 
-    return attachReaderCookie(response, identity);
+    return attachReaderCookie(response, reader);
   }
 }
