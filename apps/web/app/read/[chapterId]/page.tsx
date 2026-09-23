@@ -1,9 +1,8 @@
-import Link from "next/link";
+"use client";
 
-const API_URL =
-  process.env.MANGAFLUX_API_URL ??
-  process.env.NEXT_PUBLIC_API_URL ??
-  "https://api.manga.kenncode.me";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 type ReaderResponse = {
   chapter: {
@@ -26,95 +25,128 @@ type ReaderResponse = {
   };
 };
 
-async function getPages(chapterId: string) {
-  const response = await fetch(
-    `${API_URL}/api/chapter/mangadex/${encodeURIComponent(chapterId)}/pages`,
-    { cache: "no-store" }
-  );
+export default function ReaderPage() {
+  const params = useParams<{ chapterId: string }>();
+  const chapterId = params.chapterId;
 
-  if (!response.ok) {
-    throw new Error("MangaFlux could not load this chapter.");
-  }
+  const [data, setData] = useState<ReaderResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
 
-  return (await response.json()) as ReaderResponse;
-}
+  useEffect(() => {
+    let cancelled = false;
 
-export default async function ReaderPage({
-  params
-}: {
-  params: Promise<{ chapterId: string }>;
-}) {
-  const { chapterId } = await params;
+    async function load() {
+      setLoading(true);
+      setMessage("");
 
-  try {
-    const data = await getPages(chapterId);
+      try {
+        const response = await fetch(
+          `/api/chapter/${encodeURIComponent(chapterId)}/pages`,
+          { cache: "no-store" }
+        );
 
-    return (
-      <div className="reader">
-        <header className="reader-header">
-          <div>
-            {data.chapter.mangaId ? (
-              <Link className="back-link" href={`/manga/${data.chapter.mangaId}`}>
-                ← Chapters
-              </Link>
-            ) : (
-              <Link className="back-link" href="/">
-                ← MangaFlux
-              </Link>
-            )}
-            <h1 className="reader-title">
-              {data.chapter.chapter
-                ? `Chapter ${data.chapter.chapter}`
-                : data.chapter.title}
-            </h1>
-          </div>
+        if (!response.ok) {
+          const body = await response.text();
+          throw new Error(
+            `Reader failed (${response.status})${body ? `: ${body.slice(0, 180)}` : ""}`
+          );
+        }
 
-          <div className="reader-credit">
-            <a href={data.attribution.sourceUrl} target="_blank" rel="noreferrer">
-              Read via {data.attribution.sourceName} ↗
-            </a>
-            <span>
-              {data.attribution.scanlationGroups.length
-                ? `Scanlation: ${data.attribution.scanlationGroups.join(", ")}`
-                : "Scanlation group not provided"}
-            </span>
-          </div>
-        </header>
+        const payload = (await response.json()) as ReaderResponse;
+        if (!cancelled) setData(payload);
+      } catch (error) {
+        if (!cancelled) {
+          setMessage(
+            error instanceof Error
+              ? error.message
+              : "The chapter source is temporarily unavailable."
+          );
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
 
-        <div className="reader-pages">
-          {data.pages.map((page) => (
-            <img
-              key={page.index}
-              src={page.imageUrl}
-              alt={`Page ${page.index}`}
-              loading={page.index <= 2 ? "eager" : "lazy"}
-              referrerPolicy="no-referrer"
-            />
-          ))}
-        </div>
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [chapterId]);
 
-        <footer className="reader-footer">
-          <a href={data.attribution.sourceUrl} target="_blank" rel="noreferrer">
-            MangaDex source / chapter attribution
-          </a>
-        </footer>
-      </div>
-    );
-  } catch {
+  if (loading) {
     return (
       <main>
-        <Link className="back-link" href="/">
-          ← MangaFlux
-        </Link>
-
+        <Link className="back-link" href="/">← MangaFlux</Link>
         <section className="panel">
           <p className="eyebrow">Reader</p>
-          <h2>Couldn&apos;t load this chapter</h2>
-          <p className="message">
-            The chapter source is temporarily unavailable. Try again shortly.
-          </p>
+          <h2>Loading chapter…</h2>
         </section>
       </main>
     );
   }
+
+  if (!data) {
+    return (
+      <main>
+        <Link className="back-link" href="/">← MangaFlux</Link>
+        <section className="panel">
+          <p className="eyebrow">Reader</p>
+          <h2>Couldn't load this chapter</h2>
+          <p className="message">{message || "The chapter source is temporarily unavailable."}</p>
+        </section>
+      </main>
+    );
+  }
+
+  return (
+    <div className="reader">
+      <header className="reader-header">
+        <div>
+          {data.chapter.mangaId ? (
+            <Link className="back-link" href={`/manga/${data.chapter.mangaId}`}>
+              ← Chapters
+            </Link>
+          ) : (
+            <Link className="back-link" href="/">← MangaFlux</Link>
+          )}
+
+          <h1 className="reader-title">
+            {data.chapter.chapter
+              ? `Chapter ${data.chapter.chapter}`
+              : data.chapter.title}
+          </h1>
+        </div>
+
+        <div className="reader-credit">
+          <a href={data.attribution.sourceUrl} target="_blank" rel="noreferrer">
+            Read via {data.attribution.sourceName} ↗
+          </a>
+          <span>
+            {data.attribution.scanlationGroups.length
+              ? `Scanlation: ${data.attribution.scanlationGroups.join(", ")}`
+              : "Scanlation group not provided"}
+          </span>
+        </div>
+      </header>
+
+      <div className="reader-pages">
+        {data.pages.map((page) => (
+          <img
+            key={page.index}
+            src={page.imageUrl}
+            alt={`Page ${page.index}`}
+            loading={page.index <= 2 ? "eager" : "lazy"}
+            referrerPolicy="no-referrer"
+          />
+        ))}
+      </div>
+
+      <footer className="reader-footer">
+        <a href={data.attribution.sourceUrl} target="_blank" rel="noreferrer">
+          MangaDex source / chapter attribution
+        </a>
+      </footer>
+    </div>
+  );
 }
