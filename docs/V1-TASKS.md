@@ -1,51 +1,25 @@
 # MangaFlux V1 tasks
 
-## Infrastructure and security
+## Infrastructure / reader / persistence
 
-- [x] Public GitHub repository
-- [x] Next.js frontend
-- [x] Fastify API
-- [x] Vercel + Render deployments
-- [x] Custom frontend/API domains
-- [x] Neon project
-- [x] health/wake monitor
-- [x] CI secret scan, migration check, typecheck, build, dependency audit
-- [x] Input validation and route rate limiting
-- [x] Bounded source runtime and image proxy
-
-## Reader
-
-- [x] MangaDex search/covers/details
-- [x] authors/artists/tags
-- [x] chapter listing and English default
-- [x] scanlation attribution
-- [x] At-Home resolver + bounded image proxy
-- [x] responsive search/details/reader UI
-- [x] search-state preservation
-- [x] Page X / Y and progress bar
-- [x] previous/next chapter navigation
-- [x] data-saver mode
-
-## Persistence
-
-- [x] Neon + Drizzle client
-- [x] checked-in runtime migrations
-- [x] bookmarks
-- [x] reading history/progress
-- [x] Continue Reading
-- [x] page resume
-- [x] anonymous device persistence
+- [x] Vercel + Render + Neon
+- [x] CI / secret scan / migration checks / dependency audit
+- [x] MangaDex search/details/chapters/image proxy
+- [x] Page X / Y, progress, navigation, data saver
+- [x] bookmarks/history/Continue Reading/device persistence
 
 ## Accounts
 
 - [x] signup/login/logout
-- [x] password hashing
-- [x] server-side session handling
-- [x] account-backed library/progress/history
-- [x] one-time device-state import
-- [x] auth-specific rate limits
-- [ ] email verification / password recovery strategy
-- [ ] richer session management controls
+- [x] secure password hashes and HttpOnly sessions
+- [x] account-backed library/progress
+- [x] device-state import
+- [x] email verification
+- [x] resend verification
+- [x] forgot/reset password
+- [x] one-time expiring email tokens
+- [x] reset revokes old sessions
+- [ ] richer session-management UI
 
 ## V1 stabilization
 
@@ -56,6 +30,6 @@
 - [ ] optional production error monitoring
 - [ ] iPhone/mobile regression QA
 - [ ] accessibility QA
-- [ ] final auth/security/dependency/migration audit
+- [ ] final auth/email/security/dependency/migration audit
 - [ ] production smoke test
 - [ ] v1.0.0 release tag

@@ -22,13 +22,8 @@ export const bookmarks = pgTable(
       .notNull()
   },
   (table) => [
-    primaryKey({
-      columns: [table.readerId, table.source, table.mangaId]
-    }),
-    index("bookmarks_reader_created_idx").on(
-      table.readerId,
-      table.createdAt
-    )
+    primaryKey({ columns: [table.readerId, table.source, table.mangaId] }),
+    index("bookmarks_reader_created_idx").on(table.readerId, table.createdAt)
   ]
 );
 
@@ -49,9 +44,7 @@ export const readingProgress = pgTable(
       .notNull()
   },
   (table) => [
-    primaryKey({
-      columns: [table.readerId, table.source, table.mangaId]
-    }),
+    primaryKey({ columns: [table.readerId, table.source, table.mangaId] }),
     index("reading_progress_reader_updated_idx").on(
       table.readerId,
       table.updatedAt
@@ -65,6 +58,7 @@ export const users = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     email: text("email").notNull(),
     passwordHash: text("password_hash").notNull(),
+    emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -90,11 +84,44 @@ export const sessions = pgTable(
       .notNull()
   },
   (table) => [
-    index("sessions_user_expires_idx").on(
-      table.userId,
-      table.expiresAt
-    ),
+    index("sessions_user_expires_idx").on(table.userId, table.expiresAt),
     index("sessions_expires_idx").on(table.expiresAt)
+  ]
+);
+
+export const emailVerificationTokens = pgTable(
+  "email_verification_tokens",
+  {
+    tokenHash: text("token_hash").primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+  },
+  (table) => [
+    index("email_verification_user_idx").on(table.userId),
+    index("email_verification_expires_idx").on(table.expiresAt)
+  ]
+);
+
+export const passwordResetTokens = pgTable(
+  "password_reset_tokens",
+  {
+    tokenHash: text("token_hash").primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+  },
+  (table) => [
+    index("password_reset_user_idx").on(table.userId),
+    index("password_reset_expires_idx").on(table.expiresAt)
   ]
 );
 
@@ -113,9 +140,7 @@ export const userBookmarks = pgTable(
       .notNull()
   },
   (table) => [
-    primaryKey({
-      columns: [table.userId, table.source, table.mangaId]
-    }),
+    primaryKey({ columns: [table.userId, table.source, table.mangaId] }),
     index("user_bookmarks_user_created_idx").on(
       table.userId,
       table.createdAt
@@ -142,9 +167,7 @@ export const userReadingProgress = pgTable(
       .notNull()
   },
   (table) => [
-    primaryKey({
-      columns: [table.userId, table.source, table.mangaId]
-    }),
+    primaryKey({ columns: [table.userId, table.source, table.mangaId] }),
     index("user_reading_progress_user_updated_idx").on(
       table.userId,
       table.updatedAt
@@ -164,9 +187,7 @@ export const readerImports = pgTable(
       .notNull()
   },
   (table) => [
-    primaryKey({
-      columns: [table.userId, table.readerId]
-    })
+    primaryKey({ columns: [table.userId, table.readerId] })
   ]
 );
 

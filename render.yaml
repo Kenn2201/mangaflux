@@ -16,5 +16,9 @@ services:
         value: 4000
       - key: WEB_ORIGIN
         value: https://manga.kenncode.me
+      - key: APP_ORIGIN
+        value: https://manga.kenncode.me
+      - key: EMAIL_FROM
+        value: MangaFlux <noreply@manga.kenncode.me>
       - key: MANGADEX_BASE_URL
         value: https://api.mangadex.org

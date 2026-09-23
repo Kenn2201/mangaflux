@@ -1,62 +1,48 @@
 # Security Policy
 
-MangaFlux treats public web/API hostnames as public information. Database URLs, proxy secrets, session tokens, provider tokens, and signing keys are secrets and must remain server-side.
+MangaFlux treats public hostnames and sender addresses as public information. Database URLs, API keys, auth proxy secrets, and session/reset/verification tokens are secrets.
 
-## Current supported line
+## Secrets
 
-MangaFlux is pre-1.0. Only the latest deployed version is supported for security fixes.
+Never commit or expose through `NEXT_PUBLIC_*`:
 
-## Secret handling
+- `DATABASE_URL`
+- `AUTH_PROXY_SECRET`
+- `MANGAFLUX_AUTH_PROXY_SECRET`
+- `RESEND_API_KEY`
+- session tokens
+- verification/reset tokens
 
-- Never commit environment files, registry credentials, private keys, database URLs with passwords, auth proxy secrets, or platform tokens.
-- Never put secrets in variables prefixed with `NEXT_PUBLIC_`.
-- Keep `DATABASE_URL` and `AUTH_PROXY_SECRET` on Render only.
-- Keep `MANGAFLUX_AUTH_PROXY_SECRET` on Vercel only.
-- Render and Vercel auth proxy secret values must match.
-- If a credential is ever committed, rotate/revoke it immediately; removing it from the current tree is not enough.
+If any credential is committed, rotate it; deleting the latest file is not enough.
 
-## Authentication
+## Authentication and email
 
-v0.5 uses:
+MangaFlux uses:
 
-- email normalization and input limits
-- passwords of 12–128 characters
-- Node scrypt password hashing with random 16-byte salts
-- cryptographically random 32-byte opaque session tokens
-- only SHA-256 session-token hashes stored in Neon
-- HttpOnly, SameSite=Lax, Secure production cookies
-- fixed 30-day sessions
-- separate signup/login/session rate limits
-- generic invalid-credential login responses
-- an internal Vercel → Render auth proxy secret
-- same-origin + custom-header checks for state-changing browser auth routes
-- account state endpoints that require both the internal proxy boundary and a valid session token
+- salted Node scrypt password hashing
+- random opaque HttpOnly sessions
+- only SHA-256 session-token hashes in Neon
+- internal Vercel → Render auth proxy secret
+- secure random email-verification/reset tokens
+- only token hashes stored in Neon
+- 24-hour verification expiry
+- 30-minute password-reset expiry
+- one-time token deletion
+- password-reset session revocation
+- email-specific rate limiting
+- generic password-recovery responses
+- Resend key stored only on Render
 
-The browser never receives `AUTH_PROXY_SECRET`, `MANGAFLUX_AUTH_PROXY_SECRET`, `DATABASE_URL`, or a readable JavaScript copy of the session token.
+New logins require a verified email. Password reset proves mailbox possession and marks the account email verified.
 
-## Device-state import
+## Receiving email
 
-Signed-out reading data uses a random HttpOnly reader UUID. On signup/login, that browser's device state may be copied into the account once. A `reader_imports` record prevents the same device snapshot from repeatedly overwriting account data.
+Resend inbound receiving is not currently connected to MangaFlux application logic. Do not assume a receiving-enabled domain creates an inbox. Any future inbound webhook must verify Resend webhook authenticity before processing content or attachments.
 
-Device state is not authentication and contains only manga identifiers/metadata and reading progress.
+## Platform baseline
 
-## Known pre-1.0 limitation
-
-v0.5 does not implement email verification or password recovery. Treat accounts as a pre-release feature until a recovery/verification strategy is added and audited.
-
-## API hardening
-
-The API additionally uses explicit CORS origins, source host allowlists, redirect revalidation, input validation, bounded timeouts/response sizes, route-specific rate limits, generic client errors, and a fail-closed browser-source compatibility interface.
-
-## Database
-
-- checked-in Drizzle runtime migrations run before Render API startup
-- CI verifies the migration journal without production DB access
-- manga page binaries are not stored in Neon
-- database/auth failures do not expose connection strings or SQL details
-
-If MangaFlux scales horizontally, move in-memory limits to shared Redis/Upstash or an edge/WAF layer.
+Source requests use HTTPS, explicit allowlists, bounded timeouts/sizes, redirect validation, route-specific rate limits, generic error responses, CI secret scanning, migration checks, builds, and dependency audits.
 
 ## Reporting
 
-Do not post working exploits, credentials, session tokens, or private user data in a public issue. Prefer GitHub private vulnerability reporting when enabled.
+Do not post credentials, session tokens, reset links, or working exploits in public issues.

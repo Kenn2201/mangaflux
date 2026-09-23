@@ -12,6 +12,7 @@ type Session = {
   user?: {
     id: string;
     email: string;
+    emailVerifiedAt?: string | null;
     createdAt: string;
   } | null;
 };
@@ -25,6 +26,7 @@ export default function AccountClient() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [needsVerification, setNeedsVerification] = useState(false);
 
   async function refreshSession() {
     const response = await fetch("/api/auth/session", {
@@ -40,8 +42,7 @@ export default function AccountClient() {
 
       if (response.status === 503) {
         setMessage(
-          body?.message ??
-            "Authentication is not configured yet."
+          body?.message ?? "Authentication is not configured yet."
         );
       }
       return;
@@ -60,6 +61,7 @@ export default function AccountClient() {
 
     setBusy(true);
     setMessage("");
+    setNeedsVerification(false);
 
     try {
       const response = await fetch(
@@ -70,18 +72,22 @@ export default function AccountClient() {
             "content-type": "application/json",
             "x-mangaflux-client": "web"
           },
-          body: JSON.stringify({
-            email,
-            password
-          })
+          body: JSON.stringify({ email, password })
         }
       );
 
       const body = await response.json().catch(() => null) as {
+        error?: string;
         message?: string;
+        verificationRequired?: boolean;
+        emailSent?: boolean;
       } | null;
 
       if (!response.ok) {
+        if (body?.error === "EMAIL_NOT_VERIFIED") {
+          setNeedsVerification(true);
+        }
+
         throw new Error(
           body?.message ??
             (mode === "signup"
@@ -91,18 +97,64 @@ export default function AccountClient() {
       }
 
       setPassword("");
-      setMessage(
-        mode === "signup"
-          ? "Account created. Your device library was imported."
-          : "Signed in. Your device library was checked for import."
-      );
 
+      if (mode === "signup") {
+        setNeedsVerification(true);
+        setMessage(
+          body?.emailSent
+            ? "Account created. Check your email for the MangaFlux verification link."
+            : "Account created, but email delivery is not configured yet."
+        );
+        setMode("login");
+        return;
+      }
+
+      setMessage("Signed in. Your device library was checked for import.");
       await refreshSession();
     } catch (error) {
       setMessage(
         error instanceof Error
           ? error.message
           : "Authentication failed."
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function resendVerification() {
+    if (!email || busy) return;
+
+    setBusy(true);
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/auth/resend-verification", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-mangaflux-client": "web"
+        },
+        body: JSON.stringify({ email })
+      });
+
+      const body = await response.json().catch(() => null) as {
+        message?: string;
+      } | null;
+
+      if (!response.ok) {
+        throw new Error(body?.message ?? "Could not resend verification.");
+      }
+
+      setMessage(
+        body?.message ??
+          "If verification is still needed, a new email has been sent."
+      );
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Could not resend verification."
       );
     } finally {
       setBusy(false);
@@ -118,26 +170,18 @@ export default function AccountClient() {
     try {
       const response = await fetch("/api/auth/logout", {
         method: "POST",
-        headers: {
-          "x-mangaflux-client": "web"
-        }
+        headers: { "x-mangaflux-client": "web" }
       });
 
       if (!response.ok) {
-        const body = await response.json().catch(() => null) as {
-          message?: string;
-        } | null;
-
-        throw new Error(body?.message ?? "Could not sign out.");
+        throw new Error("Could not sign out.");
       }
 
       setSession({ authenticated: false, user: null });
       setMessage("Signed out on this browser.");
     } catch (error) {
       setMessage(
-        error instanceof Error
-          ? error.message
-          : "Could not sign out."
+        error instanceof Error ? error.message : "Could not sign out."
       );
     } finally {
       setBusy(false);
@@ -157,12 +201,38 @@ export default function AccountClient() {
 
       {session?.authenticated && session.user ? (
         <div className="panel account-panel">
-          <p className="eyebrow">Signed in</p>
-          <h2>{session.user.email}</h2>
+          <div className="account-identity-row">
+            <div>
+              <p className="eyebrow">Signed in</p>
+              <h2>{session.user.email}</h2>
+            </div>
+            <span
+              className={`email-badge ${
+                session.user.emailVerifiedAt ? "verified" : "pending"
+              }`}
+            >
+              {session.user.emailVerifiedAt ? "✓ Verified" : "Verification pending"}
+            </span>
+          </div>
+
           <p className="muted">
             Bookmarks, reading history, chapter progress, and Continue Reading
-            now use your account instead of only this browser.
+            use your MangaFlux account.
           </p>
+
+          {!session.user.emailVerifiedAt ? (
+            <button
+              className="email-link-button"
+              type="button"
+              disabled={busy}
+              onClick={() => {
+                setEmail(session.user!.email);
+                void resendVerification();
+              }}
+            >
+              Resend verification email
+            </button>
+          ) : null}
 
           <div className="account-actions">
             <Link className="account-primary-link" href="/">
@@ -222,9 +292,7 @@ export default function AccountClient() {
               <input
                 type="password"
                 autoComplete={
-                  mode === "signup"
-                    ? "new-password"
-                    : "current-password"
+                  mode === "signup" ? "new-password" : "current-password"
                 }
                 required
                 minLength={12}
@@ -248,14 +316,22 @@ export default function AccountClient() {
             </button>
           </form>
 
-          <p className="device-note">
-            Your existing device bookmarks and reading progress are imported
-            once when this browser signs into an account.
-          </p>
+          <div className="auth-helper-row">
+            <Link href="/account/forgot">Forgot password?</Link>
+            {needsVerification ? (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={resendVerification}
+              >
+                Resend verification
+              </button>
+            ) : null}
+          </div>
 
           <p className="device-note">
-            Email verification and password recovery are not part of this
-            pre-1.0 milestone yet. Use a unique password you can retain.
+            New accounts receive a verification email from
+            MangaFlux &lt;noreply@manga.kenncode.me&gt;.
           </p>
         </div>
       )}

@@ -15,6 +15,13 @@
       "when": 1790206500000,
       "tag": "0001_v050_auth",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790211000000,
+      "tag": "0002_v051_email_auth",
+      "breakpoints": true
     }
   ]
 }

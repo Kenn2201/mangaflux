@@ -6,10 +6,6 @@ import {
   authUnavailableResponse,
   callAuthApi
 } from "../../../../lib/authProxy";
-import {
-  attachReaderCookie,
-  getReaderIdentity
-} from "../../../../lib/readerIdentity";
 import { isTrustedMutation } from "../../../../lib/requestSecurity";
 
 export async function POST(request: NextRequest) {
@@ -20,7 +16,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  let payload: { email?: string; password?: string };
+  let payload: unknown;
 
   try {
     payload = await request.json();
@@ -31,21 +27,17 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const reader = getReaderIdentity(request);
-  const upstream = await callAuthApi("/api/auth/signup", {
+  const upstream = await callAuthApi("/api/auth/verify-email", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      email: payload.email,
-      password: payload.password,
-      readerId: reader.id
-    })
+    body: JSON.stringify(payload)
   });
 
   if (!upstream) return authUnavailableResponse();
 
   const body = await upstream.text();
-  const response = new NextResponse(body, {
+
+  return new NextResponse(body, {
     status: upstream.status,
     headers: {
       "content-type":
@@ -53,6 +45,4 @@ export async function POST(request: NextRequest) {
       "cache-control": "no-store"
     }
   });
-
-  return attachReaderCookie(response, reader);
 }
