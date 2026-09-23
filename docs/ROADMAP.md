@@ -1,39 +1,56 @@
 # MangaFlux Roadmap
 
-## v0.5.1 — Transactional Email — current patch
+## v0.6.0 — Mobile UX Foundation — current
 
-- Resend outbound email
-- branded verification/reset templates
-- email verification
-- resend verification
-- password recovery
-- one-time hashed email tokens
-- reset session revocation
-- account recovery UI
+- mobile-first app shell
+- sticky header and mobile bottom navigation
+- safe-area support
+- skeleton loading system
+- global toast/feedback system
+- account/profile redesign
+- Anime.js micro-interactions
+- reduced-motion support
+- responsive/touch-target/iOS autofill pass
 
-Resend inbound receiving is enabled externally but is not part of the application yet; a verified inbound webhook can be added later for support workflows.
+## v0.7.x — Reader + Library polish — next
 
-## v0.6.0–v0.9.x — V1 stabilization — next
+- large-series chapter pagination / incremental loading
+- language preference controls
+- reader quality/settings sheet
+- richer library sorting/filtering
+- chapter-list usability improvements
+- better empty states
+- Continue Reading/library interaction polish
+- reader error/retry improvements
 
-- large-series chapter pagination/incremental loading
-- language preferences
-- source health/status
-- better retry/downstream-error UI
-- richer session controls
-- optional Sentry monitoring
+## v0.8.x — Reliability + Source Health
+
+- source health/status panel
+- downstream availability states
+- retry/backoff UX
+- optional Sentry production monitoring
+- shared rate limits if deployment scales horizontally
+- operational diagnostics without leaking internal details
+
+## v0.9.x — V1 release candidate
+
 - iPhone/mobile regression QA
-- accessibility QA
-- final auth/email/security/migration audit
+- tablet/desktop QA
+- accessibility audit
+- auth/email/session review
+- migration/backward-compatibility review
+- dependency/security audit
 - production smoke tests
+- documentation/screenshots/release checklist
 
 ## v1.0.0 — Stable single-source reader
 
-Stable MangaDex reader with verified accounts, account-backed library/progress, recovery, mobile usability, and production security/error handling.
+Stable MangaDex reader with verified accounts, recovery, account-backed library/progress, reliable mobile UX, accessibility, and production-grade error/security handling.
 
 ## v2.0.0 — Multi-source architecture
 
-Source registry, health checks, unified search, metadata normalization, deduplication, permitted-source fallback, and per-source policies.
+Source registry, capability manifests, health checks, unified search, metadata normalization, deduplication, permitted-source fallback, and per-source policies.
 
 ## v3.0.0+
 
-Semantic metadata search, recommendations, PWA/native clients, richer accessibility, notifications, and adapter tooling.
+Semantic search, recommendations, richer reading lists, notifications, PWA/native clients, accessibility presets, and adapter tooling.

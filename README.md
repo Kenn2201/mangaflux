@@ -1,8 +1,8 @@
 # MangaFlux
 
-> A modular manga reader and source-adapter platform powering manga.kenncode.me.
+> A mobile-first modular manga reader and source-adapter platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v0.5.1--Transactional_Email-indigo.svg)
+![Version](https://img.shields.io/badge/version-v0.6.0--Mobile_UX-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,77 +10,49 @@
 
 ## Current release
 
-**v0.5.1 — Transactional Email**
+**v0.6.0 — Mobile UX Foundation**
 
-MangaFlux now adds verified-email accounts and password recovery through Resend while preserving the v0.5 account/session architecture.
+The v0.6 milestone turns the working v0.5 reader/account stack into a more coherent mobile product.
 
-## Transactional email
+### UX foundation
 
-Production sender:
+- sticky MangaFlux app header
+- iPhone-safe mobile bottom navigation
+- skeleton states for account, library, search, manga details, and reader
+- account session loading no longer flashes the signed-out form
+- redesigned account/profile dashboard with library stats and security controls
+- global success/error/info toast system
+- Anime.js route/toast micro-interactions
+- reduced-motion support
+- improved touch targets and responsive spacing
+- iOS autofill styling that stays inside the dark MangaFlux visual system
+- shared site footer outside the distraction-free reader
 
-~~~text
-MangaFlux <noreply@manga.kenncode.me>
-~~~
+Anime.js is used selectively for short, non-essential motion. The product remains fully usable with reduced motion enabled.
 
-Render-only configuration:
-
-~~~text
-RESEND_API_KEY=<Resend API key>
-EMAIL_FROM=MangaFlux <noreply@manga.kenncode.me>
-APP_ORIGIN=https://manga.kenncode.me
-~~~
-
-Never expose `RESEND_API_KEY` through `NEXT_PUBLIC_*` or commit it.
-
-### Email flows
-
-~~~text
-Create account
-  ↓
-24-hour verification token
-  ↓
-Resend branded verification email
-  ↓
-Verify email
-  ↓
-Sign in
-
-Forgot password
-  ↓
-generic recovery response
-  ↓
-30-minute one-time reset email
-  ↓
-new password
-  ↓
-all old sessions revoked
-~~~
-
-Verification and reset token **hashes** are stored in Neon; raw tokens exist only in the outbound link.
-
-## Account + reader features
+## Current capabilities
 
 - MangaDex search/details/chapters
-- bounded image proxy
-- Page X / Y + reader progress
-- previous/next chapters
+- bounded MangaDex image proxy
+- responsive vertical reader
+- Page X / Y + live progress
+- previous/next chapter navigation
 - data saver
 - bookmarks/history/Continue Reading
-- anonymous device persistence
+- device persistence
 - account signup/login/logout
-- account library sync
-- email verification
-- password recovery
-
-## Resend receiving
-
-Inbound/receiving is optional and separate from transactional sending. MangaFlux does not yet consume inbound-email webhooks. It can later power support/reply workflows without changing the outbound verification/reset implementation.
+- verified email + password recovery through Resend
+- account-backed library/progress
+- mobile-first shell, skeletons, notifications, and profile UI
 
 ## Deployment
 
 - Vercel: `manga.kenncode.me`
 - Render: `api.manga.kenncode.me`
-- Neon: Postgres persistence/auth state
+- Neon: persistence/auth
 - Resend: transactional email
+- MangaDex: current V1 source
 
-The next roadmap phase remains v0.6–v0.9 V1 stabilization.
+## Roadmap
+
+Next: v0.7 Reader + Library polish, followed by v0.8 reliability/source health and v0.9 final accessibility/security/production QA before v1.0.0.

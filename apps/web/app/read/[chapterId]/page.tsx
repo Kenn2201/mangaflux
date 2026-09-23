@@ -8,6 +8,7 @@ import {
   useRef,
   useState
 } from "react";
+import { ReaderSkeleton } from "../../Skeletons";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "https://api.manga.kenncode.me";
@@ -442,16 +443,7 @@ export default function ReaderPage() {
   }
 
   if (loading) {
-    return (
-      <main>
-        <Link className="back-link" href={chaptersHref}>← MangaFlux</Link>
-        <section className="panel loading-panel">
-          <p className="eyebrow">Reader</p>
-          <h2>Loading chapter…</h2>
-          <p className="message">Resolving the chapter and page list.</p>
-        </section>
-      </main>
-    );
+    return <ReaderSkeleton backHref={chaptersHref} />;
   }
 
   if (!data) {

@@ -5,6 +5,7 @@ import {
   FormEvent,
   useState
 } from "react";
+import { notify } from "../../../lib/toast";
 
 export default function ForgotPasswordClient() {
   const [email, setEmail] = useState("");
@@ -36,26 +37,37 @@ export default function ForgotPasswordClient() {
         throw new Error(body?.message ?? "Could not request password reset.");
       }
 
-      setMessage(
+      const text =
         body?.message ??
-          "If an account exists for that email, a reset link has been sent."
-      );
+        "If an account exists for that email, a reset link has been sent.";
+
+      setMessage(text);
+      notify({
+        tone: "success",
+        title: "Check your inbox",
+        message: text
+      });
     } catch (error) {
-      setMessage(
+      const text =
         error instanceof Error
           ? error.message
-          : "Could not request password reset."
-      );
+          : "Could not request password reset.";
+      setMessage(text);
+      notify({
+        tone: "error",
+        title: "Reset email failed",
+        message: text
+      });
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <section className="account-shell">
+    <section className="account-shell compact-account-shell">
       <Link className="back-link" href="/account">← Account</Link>
 
-      <div className="panel account-panel">
+      <div className="panel account-panel recovery-card">
         <p className="eyebrow">Account recovery</p>
         <h1 className="account-title">Reset your password.</h1>
         <p className="muted">
@@ -78,7 +90,14 @@ export default function ForgotPasswordClient() {
           </label>
 
           <button className="account-submit" type="submit" disabled={busy}>
-            {busy ? "Sending…" : "Send reset email"}
+            {busy ? (
+              <span className="button-working">
+                <span className="mini-spinner" aria-hidden="true" />
+                Sending
+              </span>
+            ) : (
+              "Send reset email"
+            )}
           </button>
         </form>
 

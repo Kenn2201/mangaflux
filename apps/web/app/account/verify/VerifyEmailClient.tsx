@@ -5,6 +5,7 @@ import {
   useEffect,
   useState
 } from "react";
+import { notify } from "../../../lib/toast";
 
 export default function VerifyEmailClient({
   token
@@ -21,8 +22,14 @@ export default function VerifyEmailClient({
 
     async function verify() {
       if (!token) {
+        const text = "This verification link is missing its token.";
         setState("error");
-        setMessage("This verification link is missing its token.");
+        setMessage(text);
+        notify({
+          tone: "error",
+          title: "Verification problem",
+          message: text
+        });
         return;
       }
 
@@ -47,20 +54,30 @@ export default function VerifyEmailClient({
         }
 
         if (!cancelled) {
+          const text =
+            body?.message ?? "Email verified. You can sign in now.";
           setState("success");
-          setMessage(
-            body?.message ?? "Email verified. You can sign in now."
-          );
+          setMessage(text);
           window.history.replaceState({}, "", "/account/verify");
+          notify({
+            tone: "success",
+            title: "Email verified",
+            message: "Your MangaFlux account is ready to sign in."
+          });
         }
       } catch (error) {
         if (!cancelled) {
-          setState("error");
-          setMessage(
+          const text =
             error instanceof Error
               ? error.message
-              : "This verification link could not be used."
-          );
+              : "This verification link could not be used.";
+          setState("error");
+          setMessage(text);
+          notify({
+            tone: "error",
+            title: "Verification problem",
+            message: text
+          });
         }
       }
     }
@@ -72,10 +89,16 @@ export default function VerifyEmailClient({
   }, [token]);
 
   return (
-    <section className="account-shell">
+    <section className="account-shell compact-account-shell">
       <div className="panel account-panel email-result-panel">
         <div className={`email-result-icon ${state}`}>
-          {state === "checking" ? "…" : state === "success" ? "✓" : "!"}
+          {state === "checking" ? (
+            <span className="mini-spinner" aria-hidden="true" />
+          ) : state === "success" ? (
+            "✓"
+          ) : (
+            "!"
+          )}
         </div>
         <p className="eyebrow">MangaFlux email</p>
         <h1 className="account-title">
@@ -87,9 +110,11 @@ export default function VerifyEmailClient({
         </h1>
         <p className="muted">{message}</p>
 
-        <Link className="account-primary-link" href="/account">
-          Go to account
-        </Link>
+        {state !== "checking" ? (
+          <Link className="account-primary-link" href="/account">
+            Go to account
+          </Link>
+        ) : null}
       </div>
     </section>
   );

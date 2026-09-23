@@ -6,6 +6,8 @@ import {
   useEffect,
   useState
 } from "react";
+import { notify } from "../../lib/toast";
+import { AccountSkeleton } from "../Skeletons";
 
 type Session = {
   authenticated: boolean;
@@ -17,10 +19,27 @@ type Session = {
   } | null;
 };
 
+type Progress = {
+  mangaId: string;
+  mangaTitle: string;
+  chapterId: string;
+  chapterLabel?: string | null;
+  page: number;
+  totalPages: number;
+};
+
+type ReaderSummary = {
+  bookmarks: Array<{ mangaId: string }>;
+  history: Progress[];
+  continueReading: Progress | null;
+};
+
 type Mode = "login" | "signup";
 
 export default function AccountClient() {
   const [session, setSession] = useState<Session | null>(null);
+  const [summary, setSummary] = useState<ReaderSummary | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -54,6 +73,37 @@ export default function AccountClient() {
   useEffect(() => {
     void refreshSession();
   }, []);
+
+  useEffect(() => {
+    if (!session?.authenticated) {
+      setSummary(null);
+      return;
+    }
+
+    let cancelled = false;
+    setSummaryLoading(true);
+
+    async function loadSummary() {
+      try {
+        const response = await fetch("/api/state/summary", {
+          cache: "no-store"
+        });
+
+        if (!response.ok) return;
+
+        const payload = (await response.json()) as ReaderSummary;
+        if (!cancelled) setSummary(payload);
+      } finally {
+        if (!cancelled) setSummaryLoading(false);
+      }
+    }
+
+    void loadSummary();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [session?.authenticated]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -99,31 +149,44 @@ export default function AccountClient() {
       setPassword("");
 
       if (mode === "signup") {
+        const successMessage = body?.emailSent
+          ? "Check your inbox for the MangaFlux verification link."
+          : "Account created, but email delivery is not configured yet.";
+
         setNeedsVerification(true);
-        setMessage(
-          body?.emailSent
-            ? "Account created. Check your email for the MangaFlux verification link."
-            : "Account created, but email delivery is not configured yet."
-        );
+        setMessage(successMessage);
         setMode("login");
+        notify({
+          tone: "success",
+          title: "Account created",
+          message: successMessage
+        });
         return;
       }
 
-      setMessage("Signed in. Your device library was checked for import.");
       await refreshSession();
+      setMessage("");
+      notify({
+        tone: "success",
+        title: "Welcome back",
+        message: "Your account library and reading progress are ready."
+      });
     } catch (error) {
-      setMessage(
-        error instanceof Error
-          ? error.message
-          : "Authentication failed."
-      );
+      const text =
+        error instanceof Error ? error.message : "Authentication failed.";
+      setMessage(text);
+      notify({
+        tone: "error",
+        title: "Couldn’t continue",
+        message: text
+      });
     } finally {
       setBusy(false);
     }
   }
 
-  async function resendVerification() {
-    if (!email || busy) return;
+  async function resendVerification(targetEmail = email) {
+    if (!targetEmail || busy) return;
 
     setBusy(true);
     setMessage("");
@@ -135,7 +198,7 @@ export default function AccountClient() {
           "content-type": "application/json",
           "x-mangaflux-client": "web"
         },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ email: targetEmail })
       });
 
       const body = await response.json().catch(() => null) as {
@@ -146,16 +209,27 @@ export default function AccountClient() {
         throw new Error(body?.message ?? "Could not resend verification.");
       }
 
-      setMessage(
+      const text =
         body?.message ??
-          "If verification is still needed, a new email has been sent."
-      );
+        "If verification is still needed, a new email has been sent.";
+
+      setMessage(text);
+      notify({
+        tone: "success",
+        title: "Verification email requested",
+        message: text
+      });
     } catch (error) {
-      setMessage(
+      const text =
         error instanceof Error
           ? error.message
-          : "Could not resend verification."
-      );
+          : "Could not resend verification.";
+      setMessage(text);
+      notify({
+        tone: "error",
+        title: "Email not sent",
+        message: text
+      });
     } finally {
       setBusy(false);
     }
@@ -178,64 +252,146 @@ export default function AccountClient() {
       }
 
       setSession({ authenticated: false, user: null });
-      setMessage("Signed out on this browser.");
+      setSummary(null);
+      notify({
+        tone: "success",
+        title: "Signed out",
+        message: "This browser is no longer using your account session."
+      });
     } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Could not sign out."
-      );
+      const text =
+        error instanceof Error ? error.message : "Could not sign out.";
+      setMessage(text);
+      notify({
+        tone: "error",
+        title: "Sign out failed",
+        message: text
+      });
     } finally {
       setBusy(false);
     }
   }
 
+  const user = session?.authenticated ? session.user : null;
+  const initial = user?.email.charAt(0).toUpperCase() || "M";
+
   return (
     <section className="account-shell">
-      <div className="account-header">
+      <div className="account-header account-page-heading">
         <div>
           <p className="eyebrow">MangaFlux account</p>
           <h1 className="account-title">Your library, across devices.</h1>
+          <p className="account-lede">
+            One account for bookmarks, history, Continue Reading, and recovery.
+          </p>
         </div>
-
-        <Link className="back-link" href="/">← MangaFlux</Link>
       </div>
 
-      {session?.authenticated && session.user ? (
-        <div className="panel account-panel">
-          <div className="account-identity-row">
-            <div>
-              <p className="eyebrow">Signed in</p>
-              <h2>{session.user.email}</h2>
+      {session === null ? (
+        <AccountSkeleton />
+      ) : user ? (
+        <div className="profile-stack">
+          <section className="panel account-panel profile-card">
+            <div className="profile-identity">
+              <div className="profile-avatar" aria-hidden="true">
+                {initial}
+              </div>
+
+              <div className="profile-identity-copy">
+                <p className="eyebrow">Signed in</p>
+                <h2>{user.email}</h2>
+                <span
+                  className={`email-badge ${
+                    user.emailVerifiedAt ? "verified" : "pending"
+                  }`}
+                >
+                  {user.emailVerifiedAt
+                    ? "✓ Verified email"
+                    : "Verification pending"}
+                </span>
+              </div>
             </div>
-            <span
-              className={`email-badge ${
-                session.user.emailVerifiedAt ? "verified" : "pending"
-              }`}
-            >
-              {session.user.emailVerifiedAt ? "✓ Verified" : "Verification pending"}
-            </span>
-          </div>
 
-          <p className="muted">
-            Bookmarks, reading history, chapter progress, and Continue Reading
-            use your MangaFlux account.
-          </p>
+            <div className="profile-stats">
+              <div className="profile-stat">
+                <strong>{summaryLoading ? "—" : summary?.bookmarks.length ?? 0}</strong>
+                <span>Bookmarks</span>
+              </div>
+              <div className="profile-stat">
+                <strong>{summaryLoading ? "—" : summary?.history.length ?? 0}</strong>
+                <span>Series in progress</span>
+              </div>
+            </div>
 
-          {!session.user.emailVerifiedAt ? (
-            <button
-              className="email-link-button"
-              type="button"
-              disabled={busy}
-              onClick={() => {
-                setEmail(session.user!.email);
-                void resendVerification();
-              }}
-            >
-              Resend verification email
-            </button>
-          ) : null}
+            {summary?.continueReading ? (
+              <Link
+                className="profile-continue"
+                href={`/read/${summary.continueReading.chapterId}?resume=${summary.continueReading.page}`}
+              >
+                <div>
+                  <p className="eyebrow">Continue reading</p>
+                  <strong>{summary.continueReading.mangaTitle}</strong>
+                  <span>
+                    {summary.continueReading.chapterLabel || "Current chapter"} ·
+                    Page {summary.continueReading.page} /{" "}
+                    {summary.continueReading.totalPages}
+                  </span>
+                </div>
+                <span aria-hidden="true">→</span>
+              </Link>
+            ) : null}
 
-          <div className="account-actions">
-            <Link className="account-primary-link" href="/">
+            {!user.emailVerifiedAt ? (
+              <button
+                className="email-link-button"
+                type="button"
+                disabled={busy}
+                onClick={() => void resendVerification(user.email)}
+              >
+                Resend verification email
+              </button>
+            ) : null}
+          </section>
+
+          <section className="panel account-panel security-card">
+            <div className="section-heading">
+              <div>
+                <p className="eyebrow">Security</p>
+                <h2>Account controls</h2>
+              </div>
+            </div>
+
+            <div className="security-list">
+              <div className="security-row">
+                <div>
+                  <strong>Email</strong>
+                  <span>{user.email}</span>
+                </div>
+                <span className="security-state">
+                  {user.emailVerifiedAt ? "Verified" : "Pending"}
+                </span>
+              </div>
+
+              <div className="security-row">
+                <div>
+                  <strong>Password</strong>
+                  <span>Reset through your verified inbox</span>
+                </div>
+                <Link href="/account/forgot">Change</Link>
+              </div>
+
+              <div className="security-row">
+                <div>
+                  <strong>Session</strong>
+                  <span>This browser is signed in</span>
+                </div>
+                <span className="security-state">Active</span>
+              </div>
+            </div>
+          </section>
+
+          <div className="account-actions profile-actions">
+            <Link className="account-primary-link" href="/#library">
               Open library
             </Link>
             <button
@@ -249,7 +405,7 @@ export default function AccountClient() {
           </div>
         </div>
       ) : (
-        <div className="panel account-panel">
+        <div className="panel account-panel auth-card">
           <div className="auth-tabs">
             <button
               type="button"
@@ -308,11 +464,16 @@ export default function AccountClient() {
               type="submit"
               disabled={busy}
             >
-              {busy
-                ? "Working…"
-                : mode === "signup"
-                  ? "Create MangaFlux account"
-                  : "Sign in"}
+              {busy ? (
+                <span className="button-working">
+                  <span className="mini-spinner" aria-hidden="true" />
+                  Working
+                </span>
+              ) : mode === "signup" ? (
+                "Create MangaFlux account"
+              ) : (
+                "Sign in"
+              )}
             </button>
           </form>
 
@@ -322,7 +483,7 @@ export default function AccountClient() {
               <button
                 type="button"
                 disabled={busy}
-                onClick={resendVerification}
+                onClick={() => void resendVerification()}
               >
                 Resend verification
               </button>
@@ -330,8 +491,8 @@ export default function AccountClient() {
           </div>
 
           <p className="device-note">
-            New accounts receive a verification email from
-            MangaFlux &lt;noreply@manga.kenncode.me&gt;.
+            New accounts receive a verification email from MangaFlux
+            &lt;noreply@manga.kenncode.me&gt;.
           </p>
         </div>
       )}

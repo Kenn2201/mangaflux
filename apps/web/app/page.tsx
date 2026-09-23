@@ -1,4 +1,3 @@
-import AccountStatus from "./AccountStatus";
 import LibraryClient from "./LibraryClient";
 import SearchClient from "./SearchClient";
 
@@ -18,16 +17,16 @@ export default async function Home({
 
   return (
     <main>
-      <section className="hero">
+      <section className="hero home-hero">
         <p className="eyebrow">manga.kenncode.me</p>
         <h1>MangaFlux</h1>
         <p className="lede">
-          A modular manga reader powered by source adapters. V1 currently uses
-          the public MangaDex API.
+          A mobile-first manga reader with fast chapter navigation, synced
+          reading progress, and a source-adapter architecture.
         </p>
         <div className="hero-status-row">
-          <div className="status">v0.5.0 — Authentication</div>
-          <AccountStatus />
+          <div className="status">v0.6.0 — Mobile UX Foundation</div>
+          <div className="status status-subtle">MangaDex · V1 source</div>
         </div>
       </section>
 
@@ -35,19 +34,14 @@ export default async function Home({
 
       <SearchClient initialQuery={initialQuery} />
 
-      <section className="panel compact">
-        <h2>V1 scope</h2>
+      <section className="panel compact v1-scope-card">
+        <p className="eyebrow">V1 direction</p>
+        <h2>Read first. Everything else gets out of the way.</h2>
         <p>
-          Search, read, bookmark, and resume manga with device-scoped progress
-          stored in Neon. Sign in to sync your library and progress through
-          an account instead of only this browser.
+          Search, bookmark, read, and resume on mobile with account-backed
+          progress in Neon and transactional account recovery through Resend.
         </p>
       </section>
-
-      <footer className="footer">
-        MangaFlux credits MangaDex and displays scanlation-group attribution
-        when provided by the API.
-      </footer>
     </main>
   );
 }

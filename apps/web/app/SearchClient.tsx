@@ -8,6 +8,7 @@ import {
   useEffect,
   useState
 } from "react";
+import { SearchSkeleton } from "./Skeletons";
 
 type MangaSummary = {
   id: string;
@@ -38,6 +39,7 @@ export default function SearchClient({
     }
 
     setLoading(true);
+    setItems([]);
     setMessage("");
 
     try {
@@ -104,14 +106,19 @@ export default function SearchClient({
     : "";
 
   return (
-    <section className="search-section">
+    <section id="search" className="search-section">
+      <div className="section-kicker">
+        <p className="eyebrow">Explore MangaDex</p>
+        <h2>Find your next read.</h2>
+      </div>
+
       <form className="search-form" onSubmit={submit}>
         <input
           aria-label="Search manga"
           maxLength={120}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search MangaDex..."
+          placeholder="Title, series, or manga…"
         />
         <div className="search-actions">
           {initialQuery ? (
@@ -124,7 +131,14 @@ export default function SearchClient({
             </button>
           ) : null}
           <button type="submit" disabled={loading}>
-            {loading ? "Searching…" : "Search"}
+            {loading ? (
+              <span className="button-working">
+                <span className="mini-spinner" aria-hidden="true" />
+                Searching
+              </span>
+            ) : (
+              "Search"
+            )}
           </button>
         </div>
       </form>
@@ -137,7 +151,9 @@ export default function SearchClient({
 
       {message ? <p className="message">{message}</p> : null}
 
-      {items.length > 0 ? (
+      {loading ? <SearchSkeleton /> : null}
+
+      {!loading && items.length > 0 ? (
         <div className="manga-grid" aria-live="polite">
           {items.map((item) => (
             <Link

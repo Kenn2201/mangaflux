@@ -5,6 +5,7 @@ import {
   FormEvent,
   useState
 } from "react";
+import { notify } from "../../../lib/toast";
 
 export default function ResetPasswordClient({
   token
@@ -22,12 +23,16 @@ export default function ResetPasswordClient({
     if (busy) return;
 
     if (!token) {
-      setMessage("This reset link is missing its token.");
+      const text = "This reset link is missing its token.";
+      setMessage(text);
+      notify({ tone: "error", title: "Invalid reset link", message: text });
       return;
     }
 
     if (password !== confirm) {
-      setMessage("The passwords do not match.");
+      const text = "The passwords do not match.";
+      setMessage(text);
+      notify({ tone: "error", title: "Passwords don’t match", message: text });
       return;
     }
 
@@ -52,30 +57,39 @@ export default function ResetPasswordClient({
         throw new Error(body?.message ?? "Could not reset password.");
       }
 
+      const text =
+        body?.message ??
+        "Password updated. Sign in again with your new password.";
+
       setDone(true);
       setPassword("");
       setConfirm("");
-      setMessage(
-        body?.message ??
-          "Password updated. Sign in again with your new password."
-      );
+      setMessage(text);
       window.history.replaceState({}, "", "/account/reset");
+      notify({
+        tone: "success",
+        title: "Password updated",
+        message: "Old account sessions were signed out for your security."
+      });
     } catch (error) {
-      setMessage(
-        error instanceof Error
-          ? error.message
-          : "Could not reset password."
-      );
+      const text =
+        error instanceof Error ? error.message : "Could not reset password.";
+      setMessage(text);
+      notify({
+        tone: "error",
+        title: "Password reset failed",
+        message: text
+      });
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <section className="account-shell">
+    <section className="account-shell compact-account-shell">
       <Link className="back-link" href="/account">← Account</Link>
 
-      <div className="panel account-panel">
+      <div className="panel account-panel recovery-card">
         <p className="eyebrow">Secure reset</p>
         <h1 className="account-title">Choose a new password.</h1>
 
@@ -110,7 +124,14 @@ export default function ResetPasswordClient({
             </label>
 
             <button className="account-submit" type="submit" disabled={busy}>
-              {busy ? "Updating…" : "Update password"}
+              {busy ? (
+                <span className="button-working">
+                  <span className="mini-spinner" aria-hidden="true" />
+                  Updating
+                </span>
+              ) : (
+                "Update password"
+              )}
             </button>
           </form>
         ) : (

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { LibrarySkeleton } from "./Skeletons";
 
 type Bookmark = {
   source: string;
@@ -64,18 +65,13 @@ export default function LibraryClient() {
   }, []);
 
   if (loading) {
-    return (
-      <section className="library-panel panel compact">
-        <p className="eyebrow">Your device</p>
-        <h2>Loading library…</h2>
-      </section>
-    );
+    return <LibrarySkeleton />;
   }
 
   if (unavailable) {
     return (
-      <section className="library-panel panel compact">
-        <p className="eyebrow">Your device</p>
+      <section id="library" className="library-panel panel compact">
+        <p className="eyebrow">Your library</p>
         <h2>Library temporarily unavailable</h2>
         <p>
           Manga search and reading still work. Saved progress will resume once
@@ -87,25 +83,25 @@ export default function LibraryClient() {
 
   if (!data?.continueReading && !data?.bookmarks.length) {
     return (
-      <section className="library-panel panel compact">
-        <p className="eyebrow">Your device</p>
-        <h2>Your MangaFlux library</h2>
+      <section id="library" className="library-panel panel compact">
+        <p className="eyebrow">Your library</p>
+        <h2>Start building your shelf.</h2>
         <p>
-          Bookmark a manga or start reading a chapter and it will appear here.
-          Sign in to make that library account-backed across browsers.
+          Bookmark a manga or start reading a chapter and MangaFlux will keep
+          your place. Signed-in libraries sync through your account.
         </p>
       </section>
     );
   }
 
   return (
-    <section className="library-panel panel">
+    <section id="library" className="library-panel panel">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">Your device</p>
-          <h2>Library</h2>
+          <p className="eyebrow">Your library</p>
+          <h2>Pick up where you left off.</h2>
         </div>
-        <span>Stored in Neon</span>
+        <span>{data.bookmarks.length} saved</span>
       </div>
 
       {data.continueReading ? (
@@ -145,6 +141,8 @@ export default function LibraryClient() {
               />
             </div>
           </div>
+
+          <span className="continue-arrow" aria-hidden="true">→</span>
         </Link>
       ) : null}
 
@@ -205,8 +203,8 @@ export default function LibraryClient() {
       ) : null}
 
       <p className="device-note">
-        When signed out, this library belongs to this browser. Sign in to use
-        account-backed bookmarks and progress instead.
+        Signed-out libraries stay on this browser. Sign in to use the same
+        bookmarks and progress across devices.
       </p>
     </section>
   );

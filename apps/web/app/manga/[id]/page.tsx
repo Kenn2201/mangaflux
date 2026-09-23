@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { notify } from "../../../lib/toast";
+import { MangaDetailsSkeleton } from "../../Skeletons";
 
 type MangaDetails = {
   id: string;
@@ -161,9 +163,23 @@ export default function MangaPage() {
         throw new Error("Bookmark update failed");
       }
 
-      setBookmarked(!bookmarked);
+      const nextBookmarked = !bookmarked;
+      setBookmarked(nextBookmarked);
+      notify({
+        tone: "success",
+        title: nextBookmarked ? "Added to library" : "Removed from library",
+        message: nextBookmarked
+          ? `${manga.title} is bookmarked.`
+          : `${manga.title} was removed from bookmarks.`
+      });
     } catch {
-      setMessage("Bookmark storage is temporarily unavailable.");
+      const text = "Bookmark storage is temporarily unavailable.";
+      setMessage(text);
+      notify({
+        tone: "error",
+        title: "Bookmark failed",
+        message: text
+      });
     } finally {
       setBookmarkBusy(false);
     }
@@ -177,16 +193,7 @@ export default function MangaPage() {
     : "/";
 
   if (loading) {
-    return (
-      <main>
-        <Link className="back-link" href={searchHref}>← Search</Link>
-        <section className="panel loading-panel">
-          <p className="eyebrow">MangaDex</p>
-          <h2>Loading manga…</h2>
-          <p className="message">Fetching details and the latest English chapters.</p>
-        </section>
-      </main>
-    );
+    return <MangaDetailsSkeleton backHref={searchHref} />;
   }
 
   if (!manga) {
