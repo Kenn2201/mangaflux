@@ -9,16 +9,32 @@ MangaFlux is pre-1.0. Only the latest deployed version is supported for security
 ## Secret handling
 
 - Never commit environment files, npm registry credentials, private keys, database URLs with passwords, or platform tokens.
-- Never put secrets in variables prefixed with NEXT_PUBLIC_. Next.js intentionally exposes those values to the browser.
-- Keep DATABASE_URL and the future AUTH_SECRET in Render or Vercel environment settings only.
-- If a credential is ever committed, rotate or revoke it immediately. Deleting it from the latest file is not enough because Git history may still contain it.
-- The environment example file must contain placeholders only.
+- Never put secrets in variables prefixed with `NEXT_PUBLIC_`.
+- Keep `DATABASE_URL` and the future `AUTH_SECRET` in server environment settings only.
+- If a credential is ever committed, rotate or revoke it immediately. Deleting it from the current tree does not remove it from Git history.
+- `.env.example` must contain placeholders only.
 
 ## API hardening
 
-The V1 API uses explicit CORS origins, request validation, per-IP in-memory rate limits, bounded response sizes and timeouts, HTTPS-only source requests, redirect revalidation, no credentials in source URLs, short-lived metadata caches, and generic public errors with request IDs. Browser-backed execution is not bundled in V1; the compatibility interface fails closed.
+The V1 API uses explicit CORS origins, validation, per-IP rate limits, bounded response sizes/timeouts, HTTPS-only source requests, redirect revalidation, short-lived source caches, generic public errors, and a fail-closed browser-source compatibility interface.
 
-The in-memory limiter is appropriate for the single-instance V1 Render deployment. If MangaFlux scales to multiple API instances, move limits to a shared store such as Redis or Upstash, or enforce limits at an edge/WAF layer.
+## Pre-auth persistence
+
+v0.4 uses a random HttpOnly browser reader UUID so bookmarks and reading progress can be stored before accounts exist.
+
+This identifier is **not authentication** and must not be treated as proof of account ownership. The pre-auth store contains only manga metadata and reading state: source/manga/chapter IDs, titles, cover URLs, page counts, and timestamps. It should not contain email addresses, names, passwords, tokens, private notes, or other sensitive profile data.
+
+Vercel keeps the anonymous reader UUID out of normal client JavaScript and forwards it server-to-server to the Render persistence endpoints. v0.5 will introduce real authenticated ownership and device-state migration/sync.
+
+## Database
+
+- `DATABASE_URL` is server-only.
+- Render runs checked-in Drizzle runtime migrations before API startup.
+- CI validates the migration journal and SQL files without using production database credentials.
+- Manga chapter image binaries are not stored in Neon.
+- Persistence failures return generic errors without connection strings or database internals.
+
+The current in-memory rate limiter is suitable for the single-instance V1 Render deployment. If MangaFlux scales horizontally, move rate limits to shared infrastructure such as Redis/Upstash or an edge/WAF layer.
 
 ## Reporting
 

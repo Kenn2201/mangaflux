@@ -37,6 +37,12 @@ type Chapter = {
   chapter?: string;
 };
 
+type MangaMeta = {
+  id: string;
+  title: string;
+  coverUrl?: string;
+};
+
 function proxyImageUrl(
   chapterId: string,
   index: number,
@@ -130,8 +136,11 @@ export default function ReaderPage() {
   const params = useParams<{ chapterId: string }>();
   const chapterId = params.chapterId;
   const pagesRef = useRef<HTMLDivElement | null>(null);
+  const resumePageRef = useRef<number | null>(null);
+  const lastSavedRef = useRef("");
 
   const [data, setData] = useState<ReaderResponse | null>(null);
+  const [mangaMeta, setMangaMeta] = useState<MangaMeta | null>(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -139,6 +148,9 @@ export default function ReaderPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [previousChapter, setPreviousChapter] = useState<Chapter>();
   const [nextChapter, setNextChapter] = useState<Chapter>();
+  const [saveState, setSaveState] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -146,6 +158,11 @@ export default function ReaderPage() {
     setDataSaver(
       window.localStorage.getItem("mangaflux:data-saver") === "true"
     );
+
+    const resume = Number(params.get("resume") ?? "0");
+    if (Number.isInteger(resume) && resume > 0 && resume <= 500) {
+      resumePageRef.current = resume;
+    }
   }, []);
 
   useEffect(() => {
@@ -155,9 +172,12 @@ export default function ReaderPage() {
       setLoading(true);
       setMessage("");
       setData(null);
+      setMangaMeta(null);
       setPreviousChapter(undefined);
       setNextChapter(undefined);
       setCurrentPage(1);
+      setSaveState("idle");
+      lastSavedRef.current = "";
 
       try {
         const response = await fetch(
@@ -201,36 +221,54 @@ export default function ReaderPage() {
 
     let cancelled = false;
 
-    async function loadChapterNavigation() {
+    async function loadMangaContext() {
+      const mangaId = data!.chapter.mangaId;
+
       try {
-        const response = await fetch(
-          `/api/manga/${encodeURIComponent(data!.chapter.mangaId)}/chapters?language=en`,
-          { cache: "no-store" }
-        );
+        const [chaptersResponse, detailsResponse] = await Promise.all([
+          fetch(
+            `/api/manga/${encodeURIComponent(mangaId)}/chapters?language=en`,
+            { cache: "no-store" }
+          ),
+          fetch(
+            `/api/manga/${encodeURIComponent(mangaId)}`,
+            { cache: "no-store" }
+          )
+        ]);
 
-        if (!response.ok) return;
+        if (chaptersResponse.ok) {
+          const payload = (await chaptersResponse.json()) as {
+            items: Chapter[];
+          };
+          const currentIndex = payload.items.findIndex(
+            (chapter) => chapter.id === chapterId
+          );
 
-        const payload = (await response.json()) as { items: Chapter[] };
-        const currentIndex = payload.items.findIndex(
-          (chapter) => chapter.id === chapterId
-        );
+          if (!cancelled && currentIndex >= 0) {
+            setPreviousChapter(
+              findDistinctNeighbor(payload.items, currentIndex, 1)
+            );
+            setNextChapter(
+              findDistinctNeighbor(payload.items, currentIndex, -1)
+            );
+          }
+        }
 
-        if (cancelled || currentIndex < 0) return;
+        if (detailsResponse.ok) {
+          const payload = (await detailsResponse.json()) as {
+            item: MangaMeta;
+          };
 
-        // MangaDex feed is descending: +1 is an older/lower chapter,
-        // -1 is a newer/higher chapter.
-        setPreviousChapter(
-          findDistinctNeighbor(payload.items, currentIndex, 1)
-        );
-        setNextChapter(
-          findDistinctNeighbor(payload.items, currentIndex, -1)
-        );
+          if (!cancelled) {
+            setMangaMeta(payload.item);
+          }
+        }
       } catch {
-        // Reader remains usable even if adjacent chapter lookup fails.
+        // Reader remains usable even if supplemental context fails.
       }
     }
 
-    void loadChapterNavigation();
+    void loadMangaContext();
     return () => {
       cancelled = true;
     };
@@ -252,7 +290,11 @@ export default function ReaderPage() {
             (entry.target as HTMLElement).dataset.pageIndex ?? "0"
           );
           if (!page) continue;
-          visibility.set(page, entry.isIntersecting ? entry.intersectionRatio : 0);
+
+          visibility.set(
+            page,
+            entry.isIntersecting ? entry.intersectionRatio : 0
+          );
         }
 
         let bestPage = 0;
@@ -281,7 +323,95 @@ export default function ReaderPage() {
     return () => observer.disconnect();
   }, [chapterId, data?.pages.length]);
 
+  useEffect(() => {
+    const requestedPage = resumePageRef.current;
+    const container = pagesRef.current;
+
+    if (
+      !requestedPage ||
+      !container ||
+      !data?.pages.length ||
+      requestedPage > data.pages.length
+    ) {
+      return;
+    }
+
+    setCurrentPage(requestedPage);
+    resumePageRef.current = null;
+
+    const timer = window.setTimeout(() => {
+      container
+        .querySelector<HTMLElement>(
+          `[data-page-index="${requestedPage}"]`
+        )
+        ?.scrollIntoView({
+          block: "start",
+          behavior: "auto"
+        });
+    }, 350);
+
+    return () => window.clearTimeout(timer);
+  }, [chapterId, data?.pages.length]);
+
   const totalPages = data?.pages.length ?? 0;
+
+  useEffect(() => {
+    if (
+      !data?.chapter.mangaId ||
+      !mangaMeta ||
+      !totalPages ||
+      currentPage < 1
+    ) {
+      return;
+    }
+
+    const chapterLabel = data.chapter.chapter
+      ? `Chapter ${data.chapter.chapter}`
+      : data.chapter.title;
+    const saveKey =
+      `${chapterId}:${currentPage}:${totalPages}`;
+
+    if (lastSavedRef.current === saveKey) return;
+
+    setSaveState("saving");
+
+    const timer = window.setTimeout(async () => {
+      try {
+        const response = await fetch("/api/state/progress", {
+          method: "PUT",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            source: "mangadex",
+            mangaId: data.chapter.mangaId,
+            mangaTitle: mangaMeta.title,
+            coverUrl: mangaMeta.coverUrl,
+            chapterId,
+            chapterLabel,
+            page: currentPage,
+            totalPages
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error("Progress save failed");
+        }
+
+        lastSavedRef.current = saveKey;
+        setSaveState("saved");
+      } catch {
+        setSaveState("error");
+      }
+    }, 900);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    chapterId,
+    currentPage,
+    data,
+    mangaMeta,
+    totalPages
+  ]);
+
   const progress = totalPages
     ? Math.min(100, Math.max(0, (currentPage / totalPages) * 100))
     : 0;
@@ -355,9 +485,23 @@ export default function ReaderPage() {
         </div>
 
         <div className="reader-tools">
-          <strong className="reader-page-count" aria-live="polite">
-            {pageLabel}
-          </strong>
+          <div className="reader-progress-state">
+            <strong className="reader-page-count" aria-live="polite">
+              {pageLabel}
+            </strong>
+            <span
+              className={`reader-save-state reader-save-${saveState}`}
+              aria-live="polite"
+            >
+              {saveState === "saving"
+                ? "Saving…"
+                : saveState === "saved"
+                  ? "Saved"
+                  : saveState === "error"
+                    ? "Save unavailable"
+                    : "Device progress"}
+            </span>
+          </div>
 
           <button
             className={`reader-mode-button ${dataSaver ? "is-active" : ""}`}
@@ -392,7 +536,10 @@ export default function ReaderPage() {
         </div>
       </header>
 
-      <nav className="reader-chapter-nav reader-chapter-nav-top" aria-label="Chapter navigation">
+      <nav
+        className="reader-chapter-nav reader-chapter-nav-top"
+        aria-label="Chapter navigation"
+      >
         {previousChapter ? (
           <Link href={chapterHref(previousChapter.id)}>
             ← Previous

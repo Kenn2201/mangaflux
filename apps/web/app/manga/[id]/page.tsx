@@ -36,6 +36,8 @@ export default function MangaPage() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [bookmarked, setBookmarked] = useState<boolean | null>(null);
+  const [bookmarkBusy, setBookmarkBusy] = useState(false);
 
   useEffect(() => {
     const query =
@@ -102,6 +104,70 @@ export default function MangaPage() {
       cancelled = true;
     };
   }, [id]);
+
+  useEffect(() => {
+    if (!manga) return;
+
+    let cancelled = false;
+
+    async function loadBookmark() {
+      try {
+        const response = await fetch(
+          `/api/state/bookmark?source=mangadex&mangaId=${encodeURIComponent(id)}`,
+          { cache: "no-store" }
+        );
+
+        if (!response.ok) return;
+
+        const payload = (await response.json()) as {
+          bookmarked: boolean;
+        };
+
+        if (!cancelled) setBookmarked(payload.bookmarked);
+      } catch {
+        // Bookmark state is optional; manga details stay usable.
+      }
+    }
+
+    void loadBookmark();
+    return () => {
+      cancelled = true;
+    };
+  }, [id, manga]);
+
+  async function toggleBookmark() {
+    if (!manga || bookmarkBusy) return;
+
+    setBookmarkBusy(true);
+
+    try {
+      const response = bookmarked
+        ? await fetch(
+            `/api/state/bookmark?source=mangadex&mangaId=${encodeURIComponent(id)}`,
+            { method: "DELETE" }
+          )
+        : await fetch("/api/state/bookmark", {
+            method: "PUT",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              source: "mangadex",
+              mangaId: id,
+              title: manga.title,
+              coverUrl: manga.coverUrl
+            })
+          });
+
+      if (!response.ok) {
+        throw new Error("Bookmark update failed");
+      }
+
+      setBookmarked(!bookmarked);
+    } catch {
+      setMessage("Bookmark storage is temporarily unavailable.");
+    } finally {
+      setBookmarkBusy(false);
+    }
+  }
 
   const querySuffix = searchQuery
     ? `?q=${encodeURIComponent(searchQuery)}`
@@ -176,16 +242,32 @@ export default function MangaPage() {
             </div>
           ) : null}
 
-          {manga.externalUrl ? (
-            <a
-              className="source-link"
-              href={manga.externalUrl}
-              target="_blank"
-              rel="noreferrer"
+          <div className="manga-actions">
+            <button
+              className={`bookmark-button ${bookmarked ? "is-active" : ""}`}
+              type="button"
+              onClick={toggleBookmark}
+              disabled={bookmarkBusy || bookmarked === null}
+              aria-pressed={bookmarked === true}
             >
-              View on MangaDex ↗
-            </a>
-          ) : null}
+              {bookmarkBusy
+                ? "Saving…"
+                : bookmarked
+                  ? "★ Bookmarked"
+                  : "☆ Bookmark"}
+            </button>
+
+            {manga.externalUrl ? (
+              <a
+                className="source-link"
+                href={manga.externalUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                View on MangaDex ↗
+              </a>
+            ) : null}
+          </div>
         </div>
       </section>
 

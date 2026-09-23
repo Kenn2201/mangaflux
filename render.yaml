@@ -5,7 +5,7 @@ services:
     plan: free
     rootDir: .
     buildCommand: npm install
-    startCommand: npm run start --workspace=@mangaflux/api
+    startCommand: npm run db:migrate && npm run start --workspace=@mangaflux/api
     healthCheckPath: /health
     envVars:
       - key: NODE_VERSION
