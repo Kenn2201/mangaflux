@@ -1,0 +1,11 @@
+{
+  "name": "@mangaflux/db",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": "./src/schema.ts",
+  "dependencies": {
+    "drizzle-orm": "^0.44.0",
+    "@neondatabase/serverless": "^1.0.0"
+  }
+}
