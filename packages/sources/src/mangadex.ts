@@ -10,7 +10,6 @@ import type {
 const BASE = process.env.MANGADEX_BASE_URL ?? "https://api.mangadex.org";
 const HOSTS = ["api.mangadex.org"];
 const COVER_BASE = "https://uploads.mangadex.org/covers";
-const MAX_CHAPTERS = 2000;
 
 type Relationship = {
   id: string;
@@ -185,32 +184,23 @@ export const mangaDexSource: MangaSource = {
 
   async chapters(id, options): Promise<Chapter[]> {
     const language = options?.language?.trim() || "en";
-    const chapters: Chapter[] = [];
-    let offset = 0;
-    const limit = 100;
+    const url = new URL(`/manga/${encodeURIComponent(id)}/feed`, BASE);
 
-    while (chapters.length < MAX_CHAPTERS) {
-      const url = new URL(`/manga/${encodeURIComponent(id)}/feed`, BASE);
-      url.searchParams.set("limit", String(limit));
-      url.searchParams.set("offset", String(offset));
-      url.searchParams.append("translatedLanguage[]", language);
-      url.searchParams.append("includes[]", "scanlation_group");
-      url.searchParams.set("order[chapter]", "desc");
+    // V1 loads one page of the most recent chapters first. This keeps Render
+    // and Vercel response times predictable; pagination is a later milestone.
+    url.searchParams.set("limit", "100");
+    url.searchParams.set("offset", "0");
+    url.searchParams.append("translatedLanguage[]", language);
+    url.searchParams.append("includes[]", "scanlation_group");
+    url.searchParams.set("order[chapter]", "desc");
 
-      const response = await fetchSource(url.toString(), { allowedHosts: HOSTS });
-      if (!response.ok) {
-        throw new Error(`MangaDex chapters failed with ${response.status}`);
-      }
-
-      const payload = response.json<MangaDexCollection<ChapterEntity>>();
-      chapters.push(...payload.data.map((chapter) => chapterFromEntity(chapter, id)));
-
-      offset += payload.data.length;
-      const total = payload.total ?? chapters.length;
-      if (payload.data.length === 0 || offset >= total) break;
+    const response = await fetchSource(url.toString(), { allowedHosts: HOSTS });
+    if (!response.ok) {
+      throw new Error(`MangaDex chapters failed with ${response.status}`);
     }
 
-    return chapters.slice(0, MAX_CHAPTERS);
+    const payload = response.json<MangaDexCollection<ChapterEntity>>();
+    return payload.data.map((chapter) => chapterFromEntity(chapter, id));
   },
 
   async pages(chapterId, options): Promise<ChapterPages> {
