@@ -1,13 +1,16 @@
 {
   "name": "mangaflux",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "engines": { "node": ">=22" },
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
     "dev:web": "npm run dev --workspace=@mangaflux/web",
     "dev:api": "npm run dev --workspace=@mangaflux/api",
     "build": "npm run build --workspaces --if-present",
-    "typecheck": "npm run typecheck --workspaces --if-present"
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "check:secrets": "node scripts/check-secrets.mjs",
+    "verify": "npm run check:secrets && npm run typecheck && npm run build",
+    "audit:prod": "npm audit --omit=dev --audit-level=high"
   }
 }

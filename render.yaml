@@ -10,7 +10,15 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 22
+      - key: NODE_ENV
+        value: production
       - key: PORT
         value: 4000
+      - key: WEB_ORIGIN
+        value: https://manga.kenncode.me
+      - key: MANGADEX_BASE_URL
+        value: https://api.mangadex.org
+      - key: ENABLE_BROWSER_SOURCE
+        value: "false"
       - key: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD
         value: "1"

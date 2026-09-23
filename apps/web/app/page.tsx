@@ -10,7 +10,7 @@ export default function Home() {
           A modular manga reader powered by source adapters. V1 currently uses
           the public MangaDex API.
         </p>
-        <div className="status">V0.1 — MangaDex reader online</div>
+        <div className="status">v0.2.0 — Security Preview</div>
       </section>
 
       <SearchClient />
@@ -19,7 +19,7 @@ export default function Home() {
         <h2>V1 scope</h2>
         <p>
           Search MangaDex, open a title, choose an English chapter, and read
-          directly from MangaDex&apos;s At-Home image delivery.
+          through MangaFlux&apos;s bounded image proxy with MangaDex attribution.
         </p>
       </section>
 

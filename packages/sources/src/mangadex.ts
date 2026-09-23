@@ -1,4 +1,7 @@
-import { fetchSource } from "@mangaflux/runtime";
+import {
+  fetchBinarySource,
+  fetchSource
+} from "@mangaflux/runtime";
 import type {
   Chapter,
   ChapterPages,
@@ -10,9 +13,13 @@ import type {
 const BASE = process.env.MANGADEX_BASE_URL ?? "https://api.mangadex.org";
 const HOSTS = ["api.mangadex.org"];
 const COVER_BASE = "https://uploads.mangadex.org/covers";
-const USER_AGENT = "MangaFlux/0.1 (+https://manga.kenncode.me)";
+const USER_AGENT = "MangaFlux/0.2.0 (+https://manga.kenncode.me)";
 const MANIFEST_TTL_MS = 60_000;
+const SEARCH_TTL_MS = 30_000;
+const DETAILS_TTL_MS = 5 * 60_000;
+const CHAPTERS_TTL_MS = 60_000;
 const MAX_IMAGE_BYTES = 15_000_000;
+const MANGADEX_MIN_INTERVAL_MS = 250;
 
 type Relationship = {
   id: string;
@@ -69,12 +76,69 @@ type AtHomeResponse = {
   };
 };
 
-type AtHomeCacheEntry = {
+type CacheEntry<T> = {
   expiresAt: number;
-  value: AtHomeResponse;
+  value: T;
 };
 
-const atHomeCache = new Map<string, AtHomeCacheEntry>();
+const atHomeCache = new Map<string, CacheEntry<AtHomeResponse>>();
+const searchCache = new Map<string, CacheEntry<MangaSummary[]>>();
+const detailsCache = new Map<string, CacheEntry<MangaDetails>>();
+const chaptersCache = new Map<string, CacheEntry<Chapter[]>>();
+
+let requestQueue: Promise<void> = Promise.resolve();
+let lastRequestAt = 0;
+
+function readCache<T>(cache: Map<string, CacheEntry<T>>, key: string) {
+  const entry = cache.get(key);
+  if (!entry) return undefined;
+
+  if (entry.expiresAt <= Date.now()) {
+    cache.delete(key);
+    return undefined;
+  }
+
+  return entry.value;
+}
+
+function writeCache<T>(
+  cache: Map<string, CacheEntry<T>>,
+  key: string,
+  value: T,
+  ttlMs: number
+) {
+  cache.set(key, {
+    value,
+    expiresAt: Date.now() + ttlMs
+  });
+}
+
+async function paceMangaDexRequest<T>(task: () => Promise<T>) {
+  let release!: () => void;
+  const previous = requestQueue;
+
+  requestQueue = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+
+  await previous;
+
+  try {
+    const waitFor = Math.max(
+      0,
+      MANGADEX_MIN_INTERVAL_MS - (Date.now() - lastRequestAt)
+    );
+
+    if (waitFor > 0) {
+      await new Promise((resolve) => setTimeout(resolve, waitFor));
+    }
+
+    lastRequestAt = Date.now();
+    return await task();
+  } finally {
+    release();
+  }
+}
 
 function mangaDexHeaders() {
   return {
@@ -84,10 +148,12 @@ function mangaDexHeaders() {
 }
 
 async function mangaDexFetch(url: string) {
-  return fetchSource(url, {
-    allowedHosts: HOSTS,
-    init: { headers: mangaDexHeaders() }
-  });
+  return paceMangaDexRequest(() =>
+    fetchSource(url, {
+      allowedHosts: HOSTS,
+      init: { headers: mangaDexHeaders() }
+    })
+  );
 }
 
 function pickText(values: Record<string, string> | undefined) {
@@ -158,10 +224,8 @@ async function getChapter(chapterId: string) {
 }
 
 async function getAtHomeManifest(chapterId: string) {
-  const cached = atHomeCache.get(chapterId);
-  if (cached && cached.expiresAt > Date.now()) {
-    return cached.value;
-  }
+  const cached = readCache(atHomeCache, chapterId);
+  if (cached) return cached;
 
   const atHomeUrl = new URL(
     `/at-home/server/${encodeURIComponent(chapterId)}`,
@@ -181,11 +245,7 @@ async function getAtHomeManifest(chapterId: string) {
     throw new Error("MangaDex returned a non-HTTPS image server");
   }
 
-  atHomeCache.set(chapterId, {
-    value,
-    expiresAt: Date.now() + MANIFEST_TTL_MS
-  });
-
+  writeCache(atHomeCache, chapterId, value, MANIFEST_TTL_MS);
   return value;
 }
 
@@ -212,14 +272,19 @@ async function downloadPage(
   dataSaver: boolean
 ) {
   const url = atHomePageUrl(manifest, pageIndex, dataSaver);
+  const baseHost = new URL(manifest.baseUrl).hostname;
 
-  const response = await fetch(url, {
-    headers: {
-      "User-Agent": USER_AGENT,
-      Accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8"
-    },
-    redirect: "follow",
-    signal: AbortSignal.timeout(20_000)
+  const response = await fetchBinarySource(url, {
+    allowedHosts: [baseHost],
+    maxBytes: MAX_IMAGE_BYTES,
+    timeoutMs: 20_000,
+    maxRedirects: 2,
+    init: {
+      headers: {
+        "User-Agent": USER_AGENT,
+        Accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8"
+      }
+    }
   });
 
   if (!response.ok) {
@@ -227,23 +292,16 @@ async function downloadPage(
   }
 
   const contentType =
-    response.headers.get("content-type") ?? "application/octet-stream";
+    response.headers["content-type"] ?? "application/octet-stream";
 
   if (!contentType.toLowerCase().startsWith("image/")) {
     throw new Error("MangaDex returned a non-image response");
   }
 
-  const declaredSize = Number(response.headers.get("content-length") ?? "0");
-  if (declaredSize > MAX_IMAGE_BYTES) {
-    throw new Error("MangaDex image exceeds the configured size limit");
-  }
-
-  const bytes = new Uint8Array(await response.arrayBuffer());
-  if (bytes.byteLength > MAX_IMAGE_BYTES) {
-    throw new Error("MangaDex image exceeds the configured size limit");
-  }
-
-  return { bytes, contentType };
+  return {
+    bytes: response.bytes,
+    contentType
+  };
 }
 
 export async function fetchMangaDexPageImage(
@@ -269,6 +327,10 @@ export const mangaDexSource: MangaSource = {
   name: "MangaDex",
 
   async search(query): Promise<MangaSummary[]> {
+    const cacheKey = query.trim().toLowerCase();
+    const cached = readCache(searchCache, cacheKey);
+    if (cached) return cached;
+
     const url = new URL("/manga", BASE);
     url.searchParams.set("title", query);
     url.searchParams.set("limit", "24");
@@ -281,10 +343,15 @@ export const mangaDexSource: MangaSource = {
     }
 
     const payload = response.json<MangaDexCollection<MangaEntity>>();
-    return payload.data.map(mangaSummary);
+    const items = payload.data.map(mangaSummary);
+    writeCache(searchCache, cacheKey, items, SEARCH_TTL_MS);
+    return items;
   },
 
   async details(id): Promise<MangaDetails> {
+    const cached = readCache(detailsCache, id);
+    if (cached) return cached;
+
     const url = new URL(`/manga/${encodeURIComponent(id)}`, BASE);
     url.searchParams.append("includes[]", "cover_art");
     url.searchParams.append("includes[]", "author");
@@ -298,7 +365,7 @@ export const mangaDexSource: MangaSource = {
     const item = response.json<MangaDexEntityResponse<MangaEntity>>().data;
     const summary = mangaSummary(item);
 
-    return {
+    const details: MangaDetails = {
       ...summary,
       description: pickText(item.attributes.description),
       status: item.attributes.status,
@@ -311,10 +378,17 @@ export const mangaDexSource: MangaSource = {
       artists: relationshipNames(item, "artist"),
       externalUrl: `https://mangadex.org/title/${item.id}`
     };
+
+    writeCache(detailsCache, id, details, DETAILS_TTL_MS);
+    return details;
   },
 
   async chapters(id, options): Promise<Chapter[]> {
     const language = options?.language?.trim() || "en";
+    const cacheKey = `${id}:${language.toLowerCase()}`;
+    const cached = readCache(chaptersCache, cacheKey);
+    if (cached) return cached;
+
     const url = new URL(`/manga/${encodeURIComponent(id)}/feed`, BASE);
 
     url.searchParams.set("limit", "100");
@@ -329,7 +403,9 @@ export const mangaDexSource: MangaSource = {
     }
 
     const payload = response.json<MangaDexCollection<ChapterEntity>>();
-    return payload.data.map((chapter) => chapterFromEntity(chapter, id));
+    const items = payload.data.map((chapter) => chapterFromEntity(chapter, id));
+    writeCache(chaptersCache, cacheKey, items, CHAPTERS_TTL_MS);
+    return items;
   },
 
   async pages(chapterId, options): Promise<ChapterPages> {
@@ -353,7 +429,9 @@ export const mangaDexSource: MangaSource = {
 
     const normalizedChapter = chapterFromEntity(
       chapter,
-      chapter.relationships?.find((relationship) => relationship.type === "manga")?.id ?? ""
+      chapter.relationships?.find(
+        (relationship) => relationship.type === "manga"
+      )?.id ?? ""
     );
 
     return {
@@ -362,7 +440,8 @@ export const mangaDexSource: MangaSource = {
       dataSaver,
       attribution: {
         sourceName: "MangaDex",
-        sourceUrl: normalizedChapter.externalUrl ?? "https://mangadex.org",
+        sourceUrl:
+          normalizedChapter.externalUrl ?? "https://mangadex.org",
         scanlationGroups: normalizedChapter.scanlationGroups ?? []
       }
     };
