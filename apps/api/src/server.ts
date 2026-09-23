@@ -1,6 +1,9 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
-import { mangaDexSource } from "@mangaflux/sources";
+import {
+  fetchMangaDexPageImage,
+  mangaDexSource
+} from "@mangaflux/sources";
 
 const app = Fastify({ logger: true });
 
@@ -17,8 +20,6 @@ const allowedOrigins = new Set(
 
 await app.register(cors, {
   origin(origin, callback) {
-    // Requests such as health checks and direct server-to-server calls may not
-    // include an Origin header. They do not need browser CORS enforcement.
     if (!origin) {
       callback(null, true);
       return;
@@ -40,10 +41,15 @@ await app.register(cors, {
 
 app.setErrorHandler((error, request, reply) => {
   request.log.error(error);
-  const statusCode = error.name === "AbortError" ? 504 : 502;
+  const statusCode =
+    error instanceof RangeError
+      ? 404
+      : error.name === "AbortError" || error.name === "TimeoutError"
+        ? 504
+        : 502;
 
   return reply.code(statusCode).send({
-    error: "UPSTREAM_ERROR",
+    error: statusCode === 404 ? "NOT_FOUND" : "UPSTREAM_ERROR",
     message: error.message
   });
 });
@@ -100,6 +106,36 @@ app.get<{
   async (request) => {
     const dataSaver = request.query.dataSaver === "true";
     return mangaDexSource.pages(request.params.chapterId, { dataSaver });
+  }
+);
+
+app.get<{
+  Params: { chapterId: string; pageIndex: string };
+  Querystring: { dataSaver?: string };
+}>(
+  "/api/chapter/mangadex/:chapterId/image/:pageIndex",
+  async (request, reply) => {
+    const pageIndex = Number(request.params.pageIndex);
+
+    if (!Number.isInteger(pageIndex) || pageIndex < 1) {
+      return reply.code(400).send({
+        error: "INVALID_REQUEST",
+        message: "pageIndex must be a positive integer"
+      });
+    }
+
+    const dataSaver = request.query.dataSaver === "true";
+    const image = await fetchMangaDexPageImage(
+      request.params.chapterId,
+      pageIndex,
+      dataSaver
+    );
+
+    reply.header("Content-Type", image.contentType);
+    reply.header("Cache-Control", "private, max-age=300");
+    reply.header("X-Content-Type-Options", "nosniff");
+
+    return reply.send(Buffer.from(image.bytes));
   }
 );
 

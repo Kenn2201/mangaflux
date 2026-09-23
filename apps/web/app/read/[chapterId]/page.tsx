@@ -4,6 +4,9 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "https://api.manga.kenncode.me";
+
 type ReaderResponse = {
   chapter: {
     id: string;
@@ -15,8 +18,6 @@ type ReaderResponse = {
   };
   pages: Array<{
     index: number;
-    imageUrl: string;
-    dataSaverUrl?: string;
   }>;
   attribution: {
     sourceName: string;
@@ -25,17 +26,25 @@ type ReaderResponse = {
   };
 };
 
+function proxyImageUrl(
+  chapterId: string,
+  index: number,
+  dataSaver: boolean
+) {
+  const base = API_URL.replace(/\/$/, "");
+  return `${base}/api/chapter/mangadex/${encodeURIComponent(chapterId)}/image/${index}?dataSaver=${dataSaver}`;
+}
+
 function ReaderImage({
-  index,
-  imageUrl,
-  dataSaverUrl
+  chapterId,
+  index
 }: {
+  chapterId: string;
   index: number;
-  imageUrl: string;
-  dataSaverUrl?: string;
 }) {
-  const [src, setSrc] = useState(imageUrl);
+  const [dataSaver, setDataSaver] = useState(false);
   const [failed, setFailed] = useState(false);
+  const src = proxyImageUrl(chapterId, index, dataSaver);
 
   return (
     <figure className={`reader-page ${failed ? "reader-page-failed" : ""}`}>
@@ -44,12 +53,12 @@ function ReaderImage({
           src={src}
           alt={`Page ${index}`}
           loading={index <= 2 ? "eager" : "lazy"}
-          referrerPolicy="no-referrer"
           onError={() => {
-            if (dataSaverUrl && src !== dataSaverUrl) {
-              setSrc(dataSaverUrl);
+            if (!dataSaver) {
+              setDataSaver(true);
               return;
             }
+
             setFailed(true);
           }}
         />
@@ -60,7 +69,7 @@ function ReaderImage({
             type="button"
             onClick={() => {
               setFailed(false);
-              setSrc(dataSaverUrl ?? imageUrl);
+              setDataSaver(false);
             }}
           >
             Retry page
@@ -182,9 +191,8 @@ export default function ReaderPage() {
         {data.pages.map((page) => (
           <ReaderImage
             key={page.index}
+            chapterId={chapterId}
             index={page.index}
-            imageUrl={page.imageUrl}
-            dataSaverUrl={page.dataSaverUrl}
           />
         ))}
       </div>

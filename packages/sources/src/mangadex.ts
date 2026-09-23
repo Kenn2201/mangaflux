@@ -10,6 +10,9 @@ import type {
 const BASE = process.env.MANGADEX_BASE_URL ?? "https://api.mangadex.org";
 const HOSTS = ["api.mangadex.org"];
 const COVER_BASE = "https://uploads.mangadex.org/covers";
+const USER_AGENT = "MangaFlux/0.1 (+https://manga.kenncode.me)";
+const MANIFEST_TTL_MS = 60_000;
+const MAX_IMAGE_BYTES = 15_000_000;
 
 type Relationship = {
   id: string;
@@ -65,6 +68,27 @@ type AtHomeResponse = {
     dataSaver: string[];
   };
 };
+
+type AtHomeCacheEntry = {
+  expiresAt: number;
+  value: AtHomeResponse;
+};
+
+const atHomeCache = new Map<string, AtHomeCacheEntry>();
+
+function mangaDexHeaders() {
+  return {
+    "User-Agent": USER_AGENT,
+    Accept: "application/json"
+  };
+}
+
+async function mangaDexFetch(url: string) {
+  return fetchSource(url, {
+    allowedHosts: HOSTS,
+    init: { headers: mangaDexHeaders() }
+  });
+}
 
 function pickText(values: Record<string, string> | undefined) {
   if (!values) return undefined;
@@ -125,12 +149,119 @@ async function getChapter(chapterId: string) {
   const url = new URL(`/chapter/${encodeURIComponent(chapterId)}`, BASE);
   url.searchParams.append("includes[]", "scanlation_group");
 
-  const response = await fetchSource(url.toString(), { allowedHosts: HOSTS });
+  const response = await mangaDexFetch(url.toString());
   if (!response.ok) {
     throw new Error(`MangaDex chapter lookup failed with ${response.status}`);
   }
 
   return response.json<MangaDexEntityResponse<ChapterEntity>>().data;
+}
+
+async function getAtHomeManifest(chapterId: string) {
+  const cached = atHomeCache.get(chapterId);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.value;
+  }
+
+  const atHomeUrl = new URL(
+    `/at-home/server/${encodeURIComponent(chapterId)}`,
+    BASE
+  );
+  atHomeUrl.searchParams.set("forcePort443", "true");
+
+  const response = await mangaDexFetch(atHomeUrl.toString());
+  if (!response.ok) {
+    throw new Error(`MangaDex At-Home lookup failed with ${response.status}`);
+  }
+
+  const value = response.json<AtHomeResponse>();
+  const base = new URL(value.baseUrl);
+
+  if (base.protocol !== "https:") {
+    throw new Error("MangaDex returned a non-HTTPS image server");
+  }
+
+  atHomeCache.set(chapterId, {
+    value,
+    expiresAt: Date.now() + MANIFEST_TTL_MS
+  });
+
+  return value;
+}
+
+function atHomePageUrl(
+  manifest: AtHomeResponse,
+  pageIndex: number,
+  dataSaver: boolean
+) {
+  const files = dataSaver
+    ? manifest.chapter.dataSaver
+    : manifest.chapter.data;
+
+  const fileName = files[pageIndex - 1];
+  if (!fileName) {
+    throw new RangeError(`Page ${pageIndex} does not exist`);
+  }
+
+  return `${manifest.baseUrl}/${dataSaver ? "data-saver" : "data"}/${manifest.chapter.hash}/${fileName}`;
+}
+
+async function downloadPage(
+  manifest: AtHomeResponse,
+  pageIndex: number,
+  dataSaver: boolean
+) {
+  const url = atHomePageUrl(manifest, pageIndex, dataSaver);
+
+  const response = await fetch(url, {
+    headers: {
+      "User-Agent": USER_AGENT,
+      Accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8"
+    },
+    redirect: "follow",
+    signal: AbortSignal.timeout(20_000)
+  });
+
+  if (!response.ok) {
+    throw new Error(`MangaDex image request failed with ${response.status}`);
+  }
+
+  const contentType =
+    response.headers.get("content-type") ?? "application/octet-stream";
+
+  if (!contentType.toLowerCase().startsWith("image/")) {
+    throw new Error("MangaDex returned a non-image response");
+  }
+
+  const declaredSize = Number(response.headers.get("content-length") ?? "0");
+  if (declaredSize > MAX_IMAGE_BYTES) {
+    throw new Error("MangaDex image exceeds the configured size limit");
+  }
+
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  if (bytes.byteLength > MAX_IMAGE_BYTES) {
+    throw new Error("MangaDex image exceeds the configured size limit");
+  }
+
+  return { bytes, contentType };
+}
+
+export async function fetchMangaDexPageImage(
+  chapterId: string,
+  pageIndex: number,
+  preferDataSaver = false
+) {
+  const manifest = await getAtHomeManifest(chapterId);
+
+  try {
+    return await downloadPage(manifest, pageIndex, preferDataSaver);
+  } catch (error) {
+    if (preferDataSaver || !manifest.chapter.dataSaver[pageIndex - 1]) {
+      throw error;
+    }
+
+    return downloadPage(manifest, pageIndex, true);
+  }
 }
 
 export const mangaDexSource: MangaSource = {
@@ -144,7 +275,7 @@ export const mangaDexSource: MangaSource = {
     url.searchParams.append("includes[]", "cover_art");
     url.searchParams.set("order[relevance]", "desc");
 
-    const response = await fetchSource(url.toString(), { allowedHosts: HOSTS });
+    const response = await mangaDexFetch(url.toString());
     if (!response.ok) {
       throw new Error(`MangaDex search failed with ${response.status}`);
     }
@@ -159,7 +290,7 @@ export const mangaDexSource: MangaSource = {
     url.searchParams.append("includes[]", "author");
     url.searchParams.append("includes[]", "artist");
 
-    const response = await fetchSource(url.toString(), { allowedHosts: HOSTS });
+    const response = await mangaDexFetch(url.toString());
     if (!response.ok) {
       throw new Error(`MangaDex details failed with ${response.status}`);
     }
@@ -192,7 +323,7 @@ export const mangaDexSource: MangaSource = {
     url.searchParams.append("includes[]", "scanlation_group");
     url.searchParams.set("order[chapter]", "desc");
 
-    const response = await fetchSource(url.toString(), { allowedHosts: HOSTS });
+    const response = await mangaDexFetch(url.toString());
     if (!response.ok) {
       throw new Error(`MangaDex chapters failed with ${response.status}`);
     }
@@ -202,26 +333,10 @@ export const mangaDexSource: MangaSource = {
   },
 
   async pages(chapterId, options): Promise<ChapterPages> {
-    const atHomeUrl = new URL(
-      `/at-home/server/${encodeURIComponent(chapterId)}`,
-      BASE
-    );
-    atHomeUrl.searchParams.set("forcePort443", "true");
-
-    const [chapter, atHomeResponse] = await Promise.all([
+    const [chapter, atHome] = await Promise.all([
       getChapter(chapterId),
-      fetchSource(atHomeUrl.toString(), { allowedHosts: HOSTS })
+      getAtHomeManifest(chapterId)
     ]);
-
-    if (!atHomeResponse.ok) {
-      throw new Error(`MangaDex At-Home lookup failed with ${atHomeResponse.status}`);
-    }
-
-    const atHome = atHomeResponse.json<AtHomeResponse>();
-    const base = new URL(atHome.baseUrl);
-    if (base.protocol !== "https:") {
-      throw new Error("MangaDex returned a non-HTTPS image server");
-    }
 
     const normalPages = atHome.chapter.data;
     const saverPages = atHome.chapter.dataSaver;
