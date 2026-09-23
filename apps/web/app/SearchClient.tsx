@@ -3,9 +3,6 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "https://api.manga.kenncode.me";
-
 type MangaSummary = {
   id: string;
   source: string;
@@ -29,8 +26,11 @@ export default function SearchClient() {
     setMessage("");
 
     try {
+      // Use a same-origin Next.js route. The Vercel server then calls Render
+      // server-to-server, which removes browser CORS from the search path.
       const response = await fetch(
-        `${API_URL}/api/search?q=${encodeURIComponent(value)}`
+        `/api/search?q=${encodeURIComponent(value)}`,
+        { cache: "no-store" }
       );
 
       if (!response.ok) {
@@ -39,6 +39,7 @@ export default function SearchClient() {
 
       const payload = (await response.json()) as { items: MangaSummary[] };
       setItems(payload.items);
+
       if (payload.items.length === 0) {
         setMessage("No MangaDex results found.");
       }
