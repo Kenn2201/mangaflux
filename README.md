@@ -1,10 +1,10 @@
 # MangaFlux
 
-MangaFlux is a modular manga reader and source-adapter platform intended to power **manga.kenncode.me**.
+MangaFlux is a modular manga reader and source-adapter platform powering **manga.kenncode.me**.
 
-The project is inspired by the adapter pattern used by multi-source readers, but the runtime and source integrations here are original implementations. Each source exposes the same interface so the web app does not need to understand each upstream site's API or HTML structure.
+The project uses an original adapter/runtime architecture: each source implements the same normalized contract while the web app talks only to the MangaFlux API.
 
-## Planned architecture
+## V1 architecture
 
 ```text
 manga.kenncode.me
@@ -13,48 +13,57 @@ manga.kenncode.me
 Next.js web app (Vercel)
       |
       v
-MangaFlux API (Render)
-      |
-      +--> fetchSource()    normal HTTPS / JSON / HTML
-      +--> browserSource()  Playwright, only when necessary
+api.manga.kenncode.me
+Fastify API (Render)
       |
       v
 Source adapters
       |
-      v
-Normalized manga / chapter / page data
+      +--> MangaDex API
+      +--> future permitted sources
       |
-      +--> Neon Postgres for bookmarks, progress and cache metadata
+      v
+Neon Postgres
+bookmarks / progress / cache (next milestone)
 ```
 
-## Goals
+## V1 reader flow
 
-- Pluggable source adapters with a common contract
-- Prefer official/public APIs where available
-- Direct HTTPS fetching first; browser automation only when required
-- Server-side host allowlists, response limits and timeouts
-- Cache metadata instead of mirroring manga image files
-- User library, bookmarks and reading progress
-- Optional Discord notifications later
-- Deploy the frontend on Vercel and the API on Render
+The MangaDex adapter now supports:
 
-## Initial sources
+- Search with cover art
+- Manga details, tags, authors and artists
+- English chapter listing with scanlation-group metadata
+- MangaDex At-Home chapter page resolution
+- Normal and data-saver page URL support
+- Source and scanlation-group attribution
 
-- MangaDex — official/public API integration
-- Internet Archive — experimental metadata adapter
+API routes:
 
-Only use sources in ways permitted by their API terms, robots/access rules, and content licenses. MangaFlux is not intended to bypass CAPTCHAs, paywalls, login walls, or anti-bot protections.
+```text
+GET /health
+GET /api/sources
+GET /api/search?q=one+piece
+GET /api/manga/mangadex/:id
+GET /api/manga/mangadex/:id/chapters?language=en
+GET /api/chapter/mangadex/:chapterId/pages
+```
+
+The Next.js app includes a searchable home page, manga-details page, chapter list, and vertical reader.
 
 ## Repository layout
 
 ```text
 apps/
   web/        Next.js frontend
-  api/        Node.js API
+  api/        Fastify API
 packages/
-  runtime/    HTTP/browser runtime and cache primitives
-  sources/    source contracts and adapters
-  db/         Neon/Drizzle database schema
+  runtime/    restricted HTTP + optional browser runtime
+  sources/    source contract and MangaDex adapter
+  db/         Neon/Drizzle schema
+docs/
+  ARCHITECTURE.md
+  V1-TASKS.md
 ```
 
 ## Local development
@@ -67,19 +76,35 @@ Requirements:
 ```bash
 npm install
 cp .env.example .env
-npm run dev
+npm run dev:api
+npm run dev:web
 ```
 
-The starter ships with MangaDex enabled. Browser-backed fetching is available as a runtime primitive but should only be used for sources that explicitly allow the required access pattern.
+Environment variables:
 
-## Deployment target
+```text
+NEXT_PUBLIC_API_URL=http://localhost:4000
+WEB_ORIGIN=http://localhost:3000
+DATABASE_URL=
+MANGADEX_BASE_URL=https://api.mangadex.org
+```
+
+## Deployment
 
 - **Frontend:** Vercel → `manga.kenncode.me`
-- **API:** Render
+- **API:** Render → `api.manga.kenncode.me`
 - **Database:** Neon Postgres
-- **Scheduled refreshes:** not required for V1; use lazy cache refresh first
-- **Discord bot:** optional client/notification layer, not a dependency of the website
+- **Wake/health check:** cron-job.org
+- **Discord:** optional client/notification layer later
+
+## Source policy
+
+MangaFlux should prefer official/public APIs and permitted integrations. It is not intended to bypass CAPTCHAs, paywalls, login walls, or anti-bot protections.
+
+The MangaDex integration must follow the MangaDex API acceptable-use policy, including MangaDex attribution and scanlation-group attribution/removal requirements. MangaFlux does not mirror chapter image files into its own object storage.
 
 ## Status
 
-Early scaffold. Authentication, production database migrations, reader UX, caching policy, and deployment configuration are the next milestones.
+**V0.1 reader milestone:** MangaDex search → details → chapters → page URLs → vertical reader is implemented.
+
+Next milestones are Neon persistence/caching, authentication, bookmarks, reading progress, continue-reading, and reader navigation/polish.
