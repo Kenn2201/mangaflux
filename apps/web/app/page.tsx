@@ -1,10 +1,4 @@
-const features = [
-  "Pluggable source adapters",
-  "Normalized manga/chapter/page contracts",
-  "Lazy metadata caching",
-  "Neon-ready reading progress",
-  "Optional Discord notifications"
-];
+import SearchClient from "./SearchClient";
 
 export default function Home() {
   return (
@@ -12,19 +6,27 @@ export default function Home() {
       <section className="hero">
         <p className="eyebrow">manga.kenncode.me</p>
         <h1>MangaFlux</h1>
-        <p className="lede">One reader interface backed by modular, source-specific adapters.</p>
-        <div className="status">V0.1 scaffold — source runtime in progress</div>
+        <p className="lede">
+          A modular manga reader powered by source adapters. V1 currently uses
+          the public MangaDex API.
+        </p>
+        <div className="status">V0.1 — MangaDex reader online</div>
       </section>
 
-      <section className="panel">
-        <h2>Architecture</h2>
-        <div className="flow">Web → API → Source adapter → Upstream API/HTML</div>
+      <SearchClient />
+
+      <section className="panel compact">
+        <h2>V1 scope</h2>
+        <p>
+          Search MangaDex, open a title, choose an English chapter, and read
+          directly from MangaDex&apos;s At-Home image delivery.
+        </p>
       </section>
 
-      <section className="panel">
-        <h2>Planned V1</h2>
-        <ul>{features.map((feature) => <li key={feature}>{feature}</li>)}</ul>
-      </section>
+      <footer className="footer">
+        MangaFlux credits MangaDex and displays scanlation-group attribution
+        when provided by the API.
+      </footer>
     </main>
   );
 }
