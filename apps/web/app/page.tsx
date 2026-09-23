@@ -10,7 +10,7 @@ export default function Home() {
           A modular manga reader powered by source adapters. V1 currently uses
           the public MangaDex API.
         </p>
-        <div className="status">v0.2.0 — Security Preview</div>
+        <div className="status">v0.2.1 — Security Patch</div>
       </section>
 
       <SearchClient />

@@ -12,6 +12,14 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 - Neon migrations, bookmarks, reading progress, and Continue Reading
 - Authentication after the security baseline is verified
 
+## 0.2.1 - 2026-09-24 — Security Patch
+
+### Security
+- Removed Playwright from the V1 dependency tree because no browser-backed source is currently enabled.
+- Changed the browserSource compatibility function to fail closed until a future permitted browser source explicitly reintroduces the runtime.
+- Expanded CI to audit both production and development dependencies at high severity or above.
+- Verified the complete installed dependency tree reports zero npm vulnerabilities at release time.
+
 ## 0.2.0 - 2026-09-24 — Security Preview
 
 ### Security

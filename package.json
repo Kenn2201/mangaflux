@@ -1,7 +1,7 @@
 {
   "name": "mangaflux",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.2.1",
   "engines": { "node": ">=22" },
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
@@ -10,7 +10,7 @@
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "check:secrets": "node scripts/check-secrets.mjs",
-    "verify": "npm run check:secrets && npm run typecheck && npm run build",
-    "audit:prod": "npm audit --omit=dev --audit-level=high"
+    "verify": "npm run check:secrets && npm run typecheck && npm run build && npm run audit",
+    "audit": "npm audit --audit-level=high"
   }
 }

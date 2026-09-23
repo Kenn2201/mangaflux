@@ -16,7 +16,7 @@ MangaFlux is pre-1.0. Only the latest deployed version is supported for security
 
 ## API hardening
 
-The V1 API uses explicit CORS origins, request validation, per-IP in-memory rate limits, bounded response sizes and timeouts, HTTPS-only source requests, redirect revalidation, no credentials in source URLs, a disabled-by-default browser runtime, short-lived metadata caches, and generic public errors with request IDs.
+The V1 API uses explicit CORS origins, request validation, per-IP in-memory rate limits, bounded response sizes and timeouts, HTTPS-only source requests, redirect revalidation, no credentials in source URLs, short-lived metadata caches, and generic public errors with request IDs. Browser-backed execution is not bundled in V1; the compatibility interface fails closed.
 
 The in-memory limiter is appropriate for the single-instance V1 Render deployment. If MangaFlux scales to multiple API instances, move limits to a shared store such as Redis or Upstash, or enforce limits at an edge/WAF layer.
 
