@@ -186,8 +186,6 @@ export const mangaDexSource: MangaSource = {
     const language = options?.language?.trim() || "en";
     const url = new URL(`/manga/${encodeURIComponent(id)}/feed`, BASE);
 
-    // V1 loads one page of the most recent chapters first. This keeps Render
-    // and Vercel response times predictable; pagination is a later milestone.
     url.searchParams.set("limit", "100");
     url.searchParams.set("offset", "0");
     url.searchParams.append("translatedLanguage[]", language);
@@ -204,12 +202,15 @@ export const mangaDexSource: MangaSource = {
   },
 
   async pages(chapterId, options): Promise<ChapterPages> {
+    const atHomeUrl = new URL(
+      `/at-home/server/${encodeURIComponent(chapterId)}`,
+      BASE
+    );
+    atHomeUrl.searchParams.set("forcePort443", "true");
+
     const [chapter, atHomeResponse] = await Promise.all([
       getChapter(chapterId),
-      fetchSource(
-        `${BASE}/at-home/server/${encodeURIComponent(chapterId)}`,
-        { allowedHosts: HOSTS }
-      )
+      fetchSource(atHomeUrl.toString(), { allowedHosts: HOSTS })
     ]);
 
     if (!atHomeResponse.ok) {
