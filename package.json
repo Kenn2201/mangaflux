@@ -1,0 +1,13 @@
+{
+  "name": "mangaflux",
+  "private": true,
+  "version": "0.1.0",
+  "engines": { "node": ">=22" },
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev:web": "npm run dev --workspace=@mangaflux/web",
+    "dev:api": "npm run dev --workspace=@mangaflux/api",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  }
+}
