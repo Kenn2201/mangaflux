@@ -11,10 +11,19 @@ import type {
 import {
   createSession,
   createUser,
+  deleteEmailVerificationTokens,
+  deletePasswordResetTokens,
   deleteSession,
+  deleteUserSessions,
   findUserByEmail,
+  getEmailVerificationToken,
+  getPasswordResetToken,
   getSessionUser,
-  importReaderState
+  importReaderState,
+  markUserEmailVerified,
+  replaceEmailVerificationToken,
+  replacePasswordResetToken,
+  updateUserPassword
 } from "@mangaflux/db";
 import type { MangaFluxDatabase } from "@mangaflux/db";
 import {
@@ -22,12 +31,18 @@ import {
   hashSessionToken,
   requireAuthProxy
 } from "./authSecurity.js";
+import {
+  isEmailConfigured,
+  sendPasswordResetEmail,
+  sendVerificationEmail
+} from "./email.js";
 
-const EMAIL_RE =
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30;
+const VERIFY_TTL_MS = 1000 * 60 * 60 * 24;
+const RESET_TTL_MS = 1000 * 60 * 30;
 const SCRYPT_N = 32768;
 const SCRYPT_R = 8;
 const SCRYPT_P = 1;
@@ -42,6 +57,7 @@ type AuthBody = {
   email?: string;
   password?: string;
   readerId?: string;
+  token?: string;
 };
 
 function normalizeEmail(value: unknown) {
@@ -69,6 +85,14 @@ function validPassword(value: unknown): value is string {
 
 function validReaderId(value: unknown): value is string {
   return typeof value === "string" && UUID_RE.test(value);
+}
+
+function validOpaqueToken(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    value.length >= 32 &&
+    value.length <= 256
+  );
 }
 
 function deriveKey(password: string, salt: Buffer) {
@@ -120,11 +144,7 @@ async function verifyPassword(
   const r = Number(parts[2]);
   const p = Number(parts[3]);
 
-  if (
-    n !== SCRYPT_N ||
-    r !== SCRYPT_R ||
-    p !== SCRYPT_P
-  ) {
+  if (n !== SCRYPT_N || r !== SCRYPT_R || p !== SCRYPT_P) {
     return false;
   }
 
@@ -138,10 +158,7 @@ async function verifyPassword(
     return false;
   }
 
-  if (
-    salt.length !== 16 ||
-    expected.length !== SCRYPT_KEY_BYTES
-  ) {
+  if (salt.length !== 16 || expected.length !== SCRYPT_KEY_BYTES) {
     return false;
   }
 
@@ -149,20 +166,53 @@ async function verifyPassword(
   return timingSafeEqual(actual, expected);
 }
 
+function newOpaqueToken() {
+  return randomBytes(32).toString("base64url");
+}
+
 async function issueSession(
   db: MangaFluxDatabase,
   userId: string
 ) {
-  const token = randomBytes(32).toString("base64url");
+  const token = newOpaqueToken();
   const tokenHash = hashSessionToken(token);
   const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
 
   await createSession(db, userId, tokenHash, expiresAt);
 
-  return {
-    token,
-    expiresAt
-  };
+  return { token, expiresAt };
+}
+
+async function issueVerification(
+  db: MangaFluxDatabase,
+  userId: string,
+  email: string
+) {
+  const token = newOpaqueToken();
+  await replaceEmailVerificationToken(
+    db,
+    userId,
+    hashSessionToken(token),
+    new Date(Date.now() + VERIFY_TTL_MS)
+  );
+
+  return sendVerificationEmail(email, token);
+}
+
+async function issueReset(
+  db: MangaFluxDatabase,
+  userId: string,
+  email: string
+) {
+  const token = newOpaqueToken();
+  await replacePasswordResetToken(
+    db,
+    userId,
+    hashSessionToken(token),
+    new Date(Date.now() + RESET_TTL_MS)
+  );
+
+  return sendPasswordResetEmail(email, token);
 }
 
 function databaseRequired(
@@ -220,6 +270,7 @@ export function registerAuthRoutes(
     signup: LimitHandler;
     login: LimitHandler;
     session: LimitHandler;
+    email: LimitHandler;
   }
 ) {
   app.post<{ Body: AuthBody }>(
@@ -248,23 +299,27 @@ export function registerAuthRoutes(
         });
       }
 
-      const passwordHash = await hashPassword(password);
       const user = await createUser(
         database,
         email,
-        passwordHash
+        await hashPassword(password)
       );
 
       if (validReaderId(readerId)) {
         await importReaderState(database, user.id, readerId);
       }
 
-      const session = await issueSession(database, user.id);
+      const emailSent = isEmailConfigured()
+        ? await issueVerification(database, user.id, email)
+        : false;
 
       return reply.code(201).send({
         user,
-        sessionToken: session.token,
-        expiresAt: session.expiresAt.toISOString()
+        verificationRequired: true,
+        emailSent,
+        message: emailSent
+          ? "Check your email to verify your MangaFlux account."
+          : "Account created, but verification email is not configured yet."
       });
     }
   );
@@ -299,6 +354,13 @@ export function registerAuthRoutes(
         });
       }
 
+      if (!user.emailVerifiedAt) {
+        return reply.code(403).send({
+          error: "EMAIL_NOT_VERIFIED",
+          message: "Verify your email before signing in."
+        });
+      }
+
       if (validReaderId(readerId)) {
         await importReaderState(database, user.id, readerId);
       }
@@ -309,10 +371,150 @@ export function registerAuthRoutes(
         user: {
           id: user.id,
           email: user.email,
+          emailVerifiedAt: user.emailVerifiedAt,
           createdAt: user.createdAt
         },
         sessionToken: session.token,
         expiresAt: session.expiresAt.toISOString()
+      };
+    }
+  );
+
+  app.post<{ Body: AuthBody }>(
+    "/api/auth/resend-verification",
+    { preHandler: limits.email },
+    async (request, reply) => {
+      if (!requireAuthProxy(request, reply, authProxySecret)) return;
+      if (!databaseRequired(database, reply)) return;
+
+      const email = normalizeEmail(request.body?.email);
+      if (!email) {
+        return reply.code(400).send({
+          error: "INVALID_REQUEST",
+          message: "Enter a valid email."
+        });
+      }
+
+      const user = await findUserByEmail(database, email);
+
+      if (user && !user.emailVerifiedAt && isEmailConfigured()) {
+        await issueVerification(database, user.id, user.email);
+      }
+
+      return {
+        ok: true,
+        message:
+          "If that account still needs verification, a new email has been sent."
+      };
+    }
+  );
+
+  app.post<{ Body: AuthBody }>(
+    "/api/auth/verify-email",
+    { preHandler: limits.email },
+    async (request, reply) => {
+      if (!requireAuthProxy(request, reply, authProxySecret)) return;
+      if (!databaseRequired(database, reply)) return;
+
+      const token = request.body?.token;
+      if (!validOpaqueToken(token)) {
+        return reply.code(400).send({
+          error: "INVALID_TOKEN",
+          message: "This verification link is invalid or expired."
+        });
+      }
+
+      const row = await getEmailVerificationToken(
+        database,
+        hashSessionToken(token)
+      );
+
+      if (!row) {
+        return reply.code(400).send({
+          error: "INVALID_TOKEN",
+          message: "This verification link is invalid or expired."
+        });
+      }
+
+      const user = await markUserEmailVerified(database, row.userId);
+      await deleteEmailVerificationTokens(database, row.userId);
+
+      return {
+        verified: true,
+        user,
+        message: "Email verified. You can sign in to MangaFlux."
+      };
+    }
+  );
+
+  app.post<{ Body: AuthBody }>(
+    "/api/auth/forgot-password",
+    { preHandler: limits.email },
+    async (request, reply) => {
+      if (!requireAuthProxy(request, reply, authProxySecret)) return;
+      if (!databaseRequired(database, reply)) return;
+
+      const email = normalizeEmail(request.body?.email);
+
+      if (email) {
+        const user = await findUserByEmail(database, email);
+        if (user && isEmailConfigured()) {
+          await issueReset(database, user.id, user.email);
+        }
+      }
+
+      return {
+        ok: true,
+        message:
+          "If an account exists for that email, a password reset link has been sent."
+      };
+    }
+  );
+
+  app.post<{ Body: AuthBody }>(
+    "/api/auth/reset-password",
+    { preHandler: limits.email },
+    async (request, reply) => {
+      if (!requireAuthProxy(request, reply, authProxySecret)) return;
+      if (!databaseRequired(database, reply)) return;
+
+      const token = request.body?.token;
+      const password = request.body?.password;
+
+      if (!validOpaqueToken(token) || !validPassword(password)) {
+        return reply.code(400).send({
+          error: "INVALID_REQUEST",
+          message:
+            "Use a valid reset link and a password between 12 and 128 characters."
+        });
+      }
+
+      const row = await getPasswordResetToken(
+        database,
+        hashSessionToken(token)
+      );
+
+      if (!row) {
+        return reply.code(400).send({
+          error: "INVALID_TOKEN",
+          message: "This password reset link is invalid or expired."
+        });
+      }
+
+      await updateUserPassword(
+        database,
+        row.userId,
+        await hashPassword(password)
+      );
+      await Promise.all([
+        deletePasswordResetTokens(database, row.userId),
+        deleteUserSessions(database, row.userId),
+        deleteEmailVerificationTokens(database, row.userId)
+      ]);
+
+      return {
+        reset: true,
+        message: "Password updated. Sign in again with your new password."
       };
     }
   );
@@ -335,6 +537,7 @@ export function registerAuthRoutes(
         user: {
           id: session.userId,
           email: session.email,
+          emailVerifiedAt: session.emailVerifiedAt,
           createdAt: session.createdAt
         },
         expiresAt: session.expiresAt.toISOString()
@@ -351,10 +554,7 @@ export function registerAuthRoutes(
 
       const token = getBearerToken(request);
       if (token) {
-        await deleteSession(
-          database,
-          hashSessionToken(token)
-        );
+        await deleteSession(database, hashSessionToken(token));
       }
 
       return { ok: true };

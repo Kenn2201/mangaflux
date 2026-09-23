@@ -915,3 +915,96 @@ h2 { margin: 0; }
     grid-template-columns: 1fr;
   }
 }
+
+
+/* v0.5.1 transactional email + recovery */
+.account-identity-row {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.email-badge {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  border: 1px solid #3a3a3a;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+}
+.email-badge.verified {
+  color: #bcd7bc;
+  border-color: #365036;
+  background: #101a10;
+}
+.email-badge.pending {
+  color: #d7c89c;
+  border-color: #544a2c;
+  background: #1a170d;
+}
+.auth-helper-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  justify-content: space-between;
+  margin-top: 16px;
+  font-size: 12px;
+}
+.auth-helper-row a,
+.auth-helper-row button,
+.email-link-button {
+  color: #bdbdbd;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.auth-helper-row button,
+.email-link-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+}
+.auth-helper-row button:disabled,
+.email-link-button:disabled {
+  opacity: .55;
+  cursor: wait;
+}
+.email-result-panel {
+  text-align: center;
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+}
+.email-result-panel .account-title {
+  margin-top: 0;
+}
+.email-result-icon {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #333;
+  border-radius: 50%;
+  background: #111;
+  font-size: 28px;
+  font-weight: 900;
+}
+.email-result-icon.success {
+  border-color: #365036;
+  background: #101a10;
+  color: #bcd7bc;
+}
+.email-result-icon.error {
+  border-color: #5a3434;
+  background: #1c1010;
+  color: #ddb1b1;
+}
+
+@media (max-width: 700px) {
+  .account-identity-row {
+    display: grid;
+  }
+  .email-badge {
+    justify-self: start;
+  }
+}

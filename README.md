@@ -2,133 +2,85 @@
 
 > A modular manga reader and source-adapter platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v0.5.0--Authentication-indigo.svg)
+![Version](https://img.shields.io/badge/version-v0.5.1--Transactional_Email-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-![Next.js](https://img.shields.io/badge/Next.js-16-black.svg?logo=nextdotjs)
-![Fastify](https://img.shields.io/badge/Fastify-5-black.svg?logo=fastify)
-![Render](https://img.shields.io/badge/Render-API-46E3B7.svg?logo=render)
-![Vercel](https://img.shields.io/badge/Vercel-Web-black.svg?logo=vercel)
-![Neon](https://img.shields.io/badge/Neon-Postgres-00E599.svg)
-
----
 
 ## Current release
 
-**v0.5.0 — Authentication**
+**v0.5.1 — Transactional Email**
 
-MangaFlux now supports account-backed bookmarks and reading progress while preserving the anonymous device library for signed-out readers.
+MangaFlux now adds verified-email accounts and password recovery through Resend while preserving the v0.5 account/session architecture.
 
-## Current flow
+## Transactional email
 
-~~~text
-Search
-  ↓
-Manga details
-  ↓
-Bookmark / choose chapter
-  ↓
-Vertical reader
-  ↓
-Page X / Y + autosaved progress
-  ↓
-Continue Reading
-
-Signed out:
-HttpOnly device reader UUID → Neon device state
-
-Signed in:
-HttpOnly session token → Vercel auth/state proxy
-                      → Render
-                      → Neon account state
-~~~
-
-## Authentication architecture
-
-The browser never receives a usable database credential or Render auth proxy secret.
+Production sender:
 
 ~~~text
-Browser
-  |
-  | same-origin HTTPS
-  | HttpOnly mf_session_v1 cookie
-  v
-Next.js / Vercel
-  |
-  | X-MangaFlux-Auth-Proxy
-  | Authorization: Bearer <opaque session>
-  v
-Fastify / Render
-  |
-  | hashes session token before DB lookup
-  v
-Neon
-  |- users
-  |- sessions (token hashes only)
-  |- user_bookmarks
-  |- user_reading_progress
-  '- reader_imports
+MangaFlux <noreply@manga.kenncode.me>
 ~~~
 
-Passwords are salted and hashed with Node scrypt. Raw session tokens are generated from cryptographically secure random bytes, stored only in the HttpOnly web cookie, and represented in Neon only by SHA-256 hashes.
-
-## Required auth environment setup
-
-Generate one strong random secret locally and set the same value in both places:
+Render-only configuration:
 
 ~~~text
-Render:
-AUTH_PROXY_SECRET=<same secret>
-
-Vercel:
-MANGAFLUX_AUTH_PROXY_SECRET=<same secret>
+RESEND_API_KEY=<Resend API key>
+EMAIL_FROM=MangaFlux <noreply@manga.kenncode.me>
+APP_ORIGIN=https://manga.kenncode.me
 ~~~
 
-Do **not** prefix either secret with `NEXT_PUBLIC_`.
+Never expose `RESEND_API_KEY` through `NEXT_PUBLIC_*` or commit it.
 
-The Render health response reports `auth: "configured"` only when both the database and Render auth proxy secret are available. The Vercel account routes also require their corresponding proxy secret.
+### Email flows
 
-## Current reader features
+~~~text
+Create account
+  ↓
+24-hour verification token
+  ↓
+Resend branded verification email
+  ↓
+Verify email
+  ↓
+Sign in
 
-- MangaDex search, covers, metadata, authors/artists/tags
-- English chapter feed and scanlation attribution
-- bounded MangaDex At-Home image proxy
-- responsive vertical reader
-- Page X / Y tracking and chapter progress bar
-- previous/next chapter controls
-- data-saver mode
-- URL-backed search restoration
-- bookmarks
-- reading history
-- Continue Reading with page resume
+Forgot password
+  ↓
+generic recovery response
+  ↓
+30-minute one-time reset email
+  ↓
+new password
+  ↓
+all old sessions revoked
+~~~
+
+Verification and reset token **hashes** are stored in Neon; raw tokens exist only in the outbound link.
+
+## Account + reader features
+
+- MangaDex search/details/chapters
+- bounded image proxy
+- Page X / Y + reader progress
+- previous/next chapters
+- data saver
+- bookmarks/history/Continue Reading
 - anonymous device persistence
-- email/password accounts
-- account-backed bookmarks/progress/history
-- one-time import of each device library after sign-in
+- account signup/login/logout
+- account library sync
+- email verification
+- password recovery
 
-## Security baseline
+## Resend receiving
 
-MangaFlux uses explicit CORS origins, source allowlists, bounded fetches, redirect revalidation, route-specific rate limits, generic error handling, secret scanning, migration checks, typechecks, builds, dependency audits, HttpOnly cookies, account session token hashing, and an internal auth proxy boundary.
-
-See [SECURITY.md](SECURITY.md).
-
-## Known pre-1.0 auth limitation
-
-Email verification and password recovery are not implemented in v0.5.0. Accounts are therefore functional but not yet considered production-complete. Do not reuse a sensitive password.
+Inbound/receiving is optional and separate from transactional sending. MangaFlux does not yet consume inbound-email webhooks. It can later power support/reply workflows without changing the outbound verification/reset implementation.
 
 ## Deployment
 
-- Frontend: Vercel at `manga.kenncode.me`
-- API: Render at `api.manga.kenncode.me`
-- Database: Neon Postgres
-- Health/wake: cron-job.org
+- Vercel: `manga.kenncode.me`
+- Render: `api.manga.kenncode.me`
+- Neon: Postgres persistence/auth state
+- Resend: transactional email
 
-Render continues to run checked-in migrations before starting the API.
-
-## Roadmap
-
-The next phase is **v0.6–v0.9 V1 stabilization**: large-series chapter pagination, better source health/error UI, auth hardening/recovery planning, optional monitoring, iPhone/accessibility QA, and final security/deployment validation before `v1.0.0`.
-
-V2 remains the multi-source architecture milestone.
+The next roadmap phase remains v0.6–v0.9 V1 stabilization.

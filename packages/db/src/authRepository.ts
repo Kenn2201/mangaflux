@@ -7,6 +7,8 @@ import {
 import type { MangaFluxDatabase } from "./client.js";
 import {
   bookmarks,
+  emailVerificationTokens,
+  passwordResetTokens,
   readerImports,
   readingProgress,
   sessions,
@@ -35,17 +37,54 @@ export async function createUser(
 ) {
   const [user] = await db
     .insert(users)
-    .values({
-      email,
-      passwordHash
-    })
+    .values({ email, passwordHash })
     .returning({
       id: users.id,
       email: users.email,
+      emailVerifiedAt: users.emailVerifiedAt,
       createdAt: users.createdAt
     });
 
   return user;
+}
+
+export async function markUserEmailVerified(
+  db: MangaFluxDatabase,
+  userId: string
+) {
+  const verifiedAt = new Date();
+
+  const [user] = await db
+    .update(users)
+    .set({
+      emailVerifiedAt: verifiedAt,
+      updatedAt: verifiedAt
+    })
+    .where(eq(users.id, userId))
+    .returning({
+      id: users.id,
+      email: users.email,
+      emailVerifiedAt: users.emailVerifiedAt
+    });
+
+  return user ?? null;
+}
+
+export async function updateUserPassword(
+  db: MangaFluxDatabase,
+  userId: string,
+  passwordHash: string
+) {
+  const now = new Date();
+
+  await db
+    .update(users)
+    .set({
+      passwordHash,
+      emailVerifiedAt: now,
+      updatedAt: now
+    })
+    .where(eq(users.id, userId));
 }
 
 export async function createSession(
@@ -54,11 +93,7 @@ export async function createSession(
   tokenHash: string,
   expiresAt: Date
 ) {
-  await db.insert(sessions).values({
-    tokenHash,
-    userId,
-    expiresAt
-  });
+  await db.insert(sessions).values({ tokenHash, userId, expiresAt });
 }
 
 export async function getSessionUser(
@@ -71,6 +106,7 @@ export async function getSessionUser(
       expiresAt: sessions.expiresAt,
       userId: users.id,
       email: users.email,
+      emailVerifiedAt: users.emailVerifiedAt,
       createdAt: users.createdAt
     })
     .from(sessions)
@@ -90,9 +126,102 @@ export async function deleteSession(
   db: MangaFluxDatabase,
   tokenHash: string
 ) {
+  await db.delete(sessions).where(eq(sessions.tokenHash, tokenHash));
+}
+
+export async function deleteUserSessions(
+  db: MangaFluxDatabase,
+  userId: string
+) {
+  await db.delete(sessions).where(eq(sessions.userId, userId));
+}
+
+export async function replaceEmailVerificationToken(
+  db: MangaFluxDatabase,
+  userId: string,
+  tokenHash: string,
+  expiresAt: Date
+) {
   await db
-    .delete(sessions)
-    .where(eq(sessions.tokenHash, tokenHash));
+    .delete(emailVerificationTokens)
+    .where(eq(emailVerificationTokens.userId, userId));
+
+  await db.insert(emailVerificationTokens).values({
+    tokenHash,
+    userId,
+    expiresAt
+  });
+}
+
+export async function getEmailVerificationToken(
+  db: MangaFluxDatabase,
+  tokenHash: string
+) {
+  const [token] = await db
+    .select()
+    .from(emailVerificationTokens)
+    .where(
+      and(
+        eq(emailVerificationTokens.tokenHash, tokenHash),
+        gt(emailVerificationTokens.expiresAt, new Date())
+      )
+    )
+    .limit(1);
+
+  return token ?? null;
+}
+
+export async function deleteEmailVerificationTokens(
+  db: MangaFluxDatabase,
+  userId: string
+) {
+  await db
+    .delete(emailVerificationTokens)
+    .where(eq(emailVerificationTokens.userId, userId));
+}
+
+export async function replacePasswordResetToken(
+  db: MangaFluxDatabase,
+  userId: string,
+  tokenHash: string,
+  expiresAt: Date
+) {
+  await db
+    .delete(passwordResetTokens)
+    .where(eq(passwordResetTokens.userId, userId));
+
+  await db.insert(passwordResetTokens).values({
+    tokenHash,
+    userId,
+    expiresAt
+  });
+}
+
+export async function getPasswordResetToken(
+  db: MangaFluxDatabase,
+  tokenHash: string
+) {
+  const [token] = await db
+    .select()
+    .from(passwordResetTokens)
+    .where(
+      and(
+        eq(passwordResetTokens.tokenHash, tokenHash),
+        gt(passwordResetTokens.expiresAt, new Date())
+      )
+    )
+    .limit(1);
+
+  return token ?? null;
+}
+
+export async function deletePasswordResetTokens(
+  db: MangaFluxDatabase,
+  userId: string
+) {
+  await db
+    .delete(passwordResetTokens)
+    .where(eq(passwordResetTokens.userId, userId));
 }
 
 export async function getUserBookmark(
@@ -128,10 +257,7 @@ export async function upsertUserBookmark(
 ) {
   const [item] = await db
     .insert(userBookmarks)
-    .values({
-      ...input,
-      coverUrl: input.coverUrl ?? null
-    })
+    .values({ ...input, coverUrl: input.coverUrl ?? null })
     .onConflictDoUpdate({
       target: [
         userBookmarks.userId,
@@ -250,18 +376,11 @@ export async function importReaderState(
     .limit(1);
 
   if (existingImport) {
-    return {
-      imported: false,
-      bookmarks: 0,
-      progress: 0
-    };
+    return { imported: false, bookmarks: 0, progress: 0 };
   }
 
   const [deviceBookmarks, deviceProgress] = await Promise.all([
-    db
-      .select()
-      .from(bookmarks)
-      .where(eq(bookmarks.readerId, readerId)),
+    db.select().from(bookmarks).where(eq(bookmarks.readerId, readerId)),
     db
       .select()
       .from(readingProgress)
@@ -311,10 +430,7 @@ export async function importReaderState(
 
   await db
     .insert(readerImports)
-    .values({
-      userId,
-      readerId
-    })
+    .values({ userId, readerId })
     .onConflictDoNothing();
 
   return {
