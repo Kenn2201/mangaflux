@@ -26,8 +26,6 @@ export default function SearchClient() {
     setMessage("");
 
     try {
-      // Use a same-origin Next.js route. The Vercel server then calls Render
-      // server-to-server, which removes browser CORS from the search path.
       const response = await fetch(
         `/api/search?q=${encodeURIComponent(value)}`,
         { cache: "no-store" }
@@ -75,7 +73,12 @@ export default function SearchClient() {
             <Link className="manga-card" href={`/manga/${item.id}`} key={item.id}>
               <div className="cover-shell">
                 {item.coverUrl ? (
-                  <img src={item.coverUrl} alt="" loading="lazy" />
+                  <img
+                    src={item.coverUrl}
+                    alt=""
+                    loading="lazy"
+                    referrerPolicy="no-referrer"
+                  />
                 ) : (
                   <div className="cover-placeholder">No cover</div>
                 )}
