@@ -1,33 +1,60 @@
 # Architecture
 
-MangaFlux separates the website from source acquisition.
+MangaFlux separates the web experience, source acquisition, and user-owned reading state.
 
-1. The Next.js frontend requests normalized metadata through same-origin Next.js API routes.
-2. The Next.js server proxies metadata requests to the MangaFlux Fastify API.
+1. The Next.js frontend requests normalized metadata through same-origin Next.js routes.
+2. Vercel proxies source requests to the MangaFlux Fastify API.
 3. The API selects a registered source adapter.
-4. The adapter uses fetchSource for bounded HTTPS, JSON, or HTML requests.
-5. MangaDex chapter images are fetched by the MangaFlux API because direct third-party hotlinking is not used.
-6. browserSource remains as a compatibility interface for future permitted browser-required integrations, but V1 does not bundle a browser runtime and fails closed.
-7. Neon stores user-owned state and cache metadata, not mirrored chapter archives.
+4. Source adapters use bounded HTTPS requests with explicit host allowlists.
+5. MangaDex chapter images pass through the bounded MangaFlux image proxy.
+6. The browser runtime is not bundled in V1 and its compatibility interface fails closed.
+7. Vercel issues an HttpOnly anonymous reader UUID for pre-auth device state.
+8. The Fastify persistence API validates that identifier and stores bookmarks/progress in Neon.
+9. Neon stores user-owned reading state and cache metadata, not chapter-image archives.
 
 ## Source contract
 
-Every adapter implements search, details, chapters, and pages.
+Every adapter implements:
+
+- `search(query)`
+- `details(id)`
+- `chapters(id)`
+- `pages(chapterId)`
+
+## Persistence flow
+
+~~~text
+Browser
+  |
+  | HttpOnly mf_reader_v1 cookie
+  v
+Next.js state route (Vercel)
+  |
+  | server-to-server reader UUID
+  v
+Fastify state API (Render)
+  |
+  v
+Neon / Drizzle
+  |- bookmarks
+  |- reading_progress
+  '- source_cache
+~~~
+
+The v0.4 reader UUID is device-scoped convenience state, not authentication. v0.5 replaces this ownership boundary with authenticated sessions.
 
 ## Security baseline
 
-- HTTPS only
-- explicit host allowlists
+- HTTPS only for source acquisition
+- explicit source host allowlists
 - redirect host revalidation
 - bounded response sizes and timeouts
-- private or literal address blocking
+- private/literal source address blocking
 - no credentials embedded in source URLs or adapters
-- browser runtime not bundled in V1
 - request validation at public API boundaries
-- per-IP rate limits
+- separate metadata/image/state rate limits
 - generic client errors with request IDs
-- short-lived in-memory caching to reduce upstream pressure
-- CI secret-pattern scan, typecheck, build, and production dependency audit
-- no CAPTCHA, paywall, login, or anti-bot bypass logic
+- CI secret scan, migration verification, typecheck, build, and dependency audit
+- no CAPTCHA/paywall/login/anti-bot bypass logic
 
-See SECURITY.md at the repository root for operational guidance.
+See [../SECURITY.md](../SECURITY.md) for operational guidance.

@@ -32,6 +32,9 @@ jobs:
       - name: Scan tracked files for common secret formats
         run: npm run check:secrets
 
+      - name: Validate migration journal
+        run: npm run check:migrations
+
       - name: Typecheck
         run: npm run typecheck
 

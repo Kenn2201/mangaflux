@@ -11,7 +11,7 @@
 - [x] Render health endpoint
 - [x] Neon project
 - [x] cron-job.org health wake
-- [x] CI secret scan, typecheck, build, and dependency audit
+- [x] CI secret scan, migration check, typecheck, build, and dependency audit
 - [x] Input validation and basic rate limiting
 - [x] Bounded source runtime and image proxy
 
@@ -19,36 +19,36 @@
 
 - [x] Common source interface
 - [x] Restricted fetchSource runtime
-- [x] Search
-- [x] Cover art
-- [x] Manga details
-- [x] Tags/authors/artists
-- [x] Chapter listing
-- [x] Language filter (English default)
+- [x] Search and cover art
+- [x] Manga details, tags, authors, and artists
+- [x] Chapter listing and English default
 - [x] Scanlation-group metadata
 - [x] MangaDex At-Home page resolution
 - [x] Normal/data-saver image proxy
-- [x] Search UI
-- [x] Manga details UI
-- [x] Chapter-list UI
-- [x] Vertical reader
+- [x] Search, details, chapter-list, and vertical-reader UI
 - [x] MangaDex/source attribution
-- [x] Preserve search query across back navigation
-- [x] Current Page X / Y tracking
-- [x] Reader progress bar
+- [x] Preserve search query across navigation
+- [x] Current Page X / Y tracking and progress bar
 - [x] Previous/next chapter navigation
 - [x] Reader data-saver toggle
 
-## Persistence and accounts
+## Persistence
 
-- [ ] Wire Neon database client
-- [ ] Add Drizzle migrations
-- [ ] Add bookmarks
-- [ ] Add reading progress
-- [ ] Add reading history
-- [ ] Add Continue Reading
+- [x] Wire Neon database client
+- [x] Add checked-in Drizzle runtime migrations
+- [x] Add bookmarks
+- [x] Add reading progress
+- [x] Add recent-reading history
+- [x] Add Continue Reading
+- [x] Add page resume
+- [x] Add device-scoped HttpOnly reader identity
+
+## Accounts
+
 - [ ] Add authentication
-- [ ] Bind user-owned data to authenticated sessions
+- [ ] Bind library/progress/history to authenticated sessions
+- [ ] Migrate or merge device state into the signed-in account
+- [ ] Add account/session security controls
 
 ## V1 stabilization
 
@@ -57,5 +57,5 @@
 - [ ] Add optional production error monitoring
 - [ ] Mobile QA on iPhone
 - [ ] Accessibility QA
-- [ ] Final security/dependency audit
+- [ ] Final security/dependency/migration audit
 - [ ] V1 release tag

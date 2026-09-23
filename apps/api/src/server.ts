@@ -1,11 +1,13 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
+import { createDatabase } from "@mangaflux/db";
+import { registerStateRoutes } from "./state.js";
 import {
   fetchMangaDexPageImage,
   mangaDexSource
 } from "@mangaflux/sources";
 
-const APP_VERSION = "0.3.0";
+const APP_VERSION = "0.4.0";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LANGUAGE_RE = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i;
@@ -43,7 +45,7 @@ await app.register(cors, {
 
     callback(null, allowed);
   },
-  methods: ["GET", "OPTIONS"],
+  methods: ["GET", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type"],
   maxAge: 86400
 });
@@ -121,6 +123,8 @@ function makeRateLimit(name: string, limit: number, windowMs = 60_000) {
 const searchRateLimit = makeRateLimit("search", 30);
 const metadataRateLimit = makeRateLimit("metadata", 90);
 const imageRateLimit = makeRateLimit("images", 240);
+const stateReadRateLimit = makeRateLimit("state-read", 120);
+const stateWriteRateLimit = makeRateLimit("state-write", 60);
 
 function requireUuid(value: string, reply: any, field = "id") {
   if (UUID_RE.test(value)) return true;
@@ -144,6 +148,10 @@ function parseDataSaver(value: string | undefined, reply: any) {
   return null;
 }
 
+const database = process.env.DATABASE_URL?.trim()
+  ? createDatabase(process.env.DATABASE_URL.trim())
+  : null;
+
 app.setErrorHandler((error, request, reply) => {
   request.log.error(
     { err: error, requestId: request.id },
@@ -152,21 +160,29 @@ app.setErrorHandler((error, request, reply) => {
 
   const errorName = error instanceof Error ? error.name : "UnknownError";
 
-  const statusCode =
-    error instanceof RangeError
+  const statusCode = request.url.startsWith("/api/state/")
+    ? 503
+    : error instanceof RangeError
       ? 404
       : errorName === "AbortError" || errorName === "TimeoutError"
         ? 504
         : 502;
 
   return reply.code(statusCode).send({
-    error: statusCode === 404 ? "NOT_FOUND" : "UPSTREAM_ERROR",
+    error:
+      statusCode === 404
+        ? "NOT_FOUND"
+        : statusCode === 503
+          ? "PERSISTENCE_UNAVAILABLE"
+          : "UPSTREAM_ERROR",
     message:
       statusCode === 404
         ? "The requested resource was not found."
-        : statusCode === 504
-          ? "The upstream source timed out."
-          : "The upstream source request failed.",
+        : statusCode === 503
+          ? "Reading persistence is temporarily unavailable."
+          : statusCode === 504
+            ? "The upstream source timed out."
+            : "The upstream source request failed.",
     requestId: request.id
   });
 });
@@ -175,8 +191,14 @@ app.get("/health", async () => ({
   ok: true,
   service: "mangaflux-api",
   version: APP_VERSION,
-  source: "mangadex"
+  source: "mangadex",
+  persistence: database ? "configured" : "disabled"
 }));
+
+registerStateRoutes(app, database, {
+  read: stateReadRateLimit,
+  write: stateWriteRateLimit
+});
 
 app.get(
   "/api/sources",

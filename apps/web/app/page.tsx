@@ -1,3 +1,4 @@
+import LibraryClient from "./LibraryClient";
 import SearchClient from "./SearchClient";
 
 type HomeSearchParams = {
@@ -23,17 +24,19 @@ export default async function Home({
           A modular manga reader powered by source adapters. V1 currently uses
           the public MangaDex API.
         </p>
-        <div className="status">v0.3.0 — Reader UX</div>
+        <div className="status">v0.4.0 — Neon Persistence</div>
       </section>
+
+      {!initialQuery ? <LibraryClient /> : null}
 
       <SearchClient initialQuery={initialQuery} />
 
       <section className="panel compact">
         <h2>V1 scope</h2>
         <p>
-          Search MangaDex, open a title, choose an English chapter, and read
-          through MangaFlux&apos;s bounded image proxy with page tracking and
-          preserved navigation state.
+          Search, read, bookmark, and resume manga with device-scoped progress
+          stored in Neon. Account-backed sync arrives with the next auth
+          milestone.
         </p>
       </section>
 
