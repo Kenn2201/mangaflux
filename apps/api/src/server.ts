@@ -46,7 +46,7 @@ await app.register(cors, {
 
     callback(null, allowed);
   },
-  methods: ["GET", "PUT", "DELETE", "OPTIONS"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type"],
   maxAge: 86400
 });
@@ -165,29 +165,39 @@ app.setErrorHandler((error, request, reply) => {
 
   const errorName = error instanceof Error ? error.name : "UnknownError";
 
-  const statusCode = request.url.startsWith("/api/state/")
-    ? 503
-    : error instanceof RangeError
-      ? 404
-      : errorName === "AbortError" || errorName === "TimeoutError"
-        ? 504
-        : 502;
+  const authRequest = request.url.startsWith("/api/auth/");
+  const persistenceRequest =
+    request.url.startsWith("/api/state/") ||
+    request.url.startsWith("/api/account/state/");
+
+  const statusCode =
+    authRequest || persistenceRequest
+      ? 503
+      : error instanceof RangeError
+        ? 404
+        : errorName === "AbortError" || errorName === "TimeoutError"
+          ? 504
+          : 502;
 
   return reply.code(statusCode).send({
     error:
       statusCode === 404
         ? "NOT_FOUND"
-        : statusCode === 503
-          ? "PERSISTENCE_UNAVAILABLE"
-          : "UPSTREAM_ERROR",
+        : authRequest
+          ? "AUTH_UNAVAILABLE"
+          : persistenceRequest
+            ? "PERSISTENCE_UNAVAILABLE"
+            : "UPSTREAM_ERROR",
     message:
       statusCode === 404
         ? "The requested resource was not found."
-        : statusCode === 503
-          ? "Reading persistence is temporarily unavailable."
-          : statusCode === 504
-            ? "The upstream source timed out."
-            : "The upstream source request failed.",
+        : authRequest
+          ? "Authentication is temporarily unavailable."
+          : persistenceRequest
+            ? "Reading persistence is temporarily unavailable."
+            : statusCode === 504
+              ? "The upstream source timed out."
+              : "The upstream source request failed.",
     requestId: request.id
   });
 });

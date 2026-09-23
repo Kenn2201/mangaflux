@@ -59,7 +59,7 @@ function normalizeEmail(value: unknown) {
   return email;
 }
 
-function validPassword(value: unknown) {
+function validPassword(value: unknown): value is string {
   return (
     typeof value === "string" &&
     value.length >= 12 &&
@@ -280,7 +280,7 @@ export function registerAuthRoutes(
       const password = request.body?.password;
       const readerId = request.body?.readerId;
 
-      if (!email || typeof password !== "string") {
+      if (!email || !validPassword(password)) {
         return reply.code(401).send({
           error: "INVALID_CREDENTIALS",
           message: "Invalid email or password."

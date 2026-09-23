@@ -2,10 +2,7 @@ import {
   NextRequest,
   NextResponse
 } from "next/server";
-import {
-  authUnavailableResponse,
-  callAuthApi
-} from "../../../../lib/authProxy";
+import { callAuthApi } from "../../../../lib/authProxy";
 import {
   clearSessionCookie,
   getSessionToken
@@ -23,14 +20,16 @@ export async function POST(request: NextRequest) {
   const token = getSessionToken(request);
 
   if (token) {
-    const upstream = await callAuthApi("/api/auth/logout", {
-      method: "POST",
-      headers: {
-        authorization: `Bearer ${token}`
-      }
-    });
-
-    if (!upstream) return authUnavailableResponse();
+    try {
+      await callAuthApi("/api/auth/logout", {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${token}`
+        }
+      });
+    } catch {
+      // Local sign-out must still succeed if the API is temporarily offline.
+    }
   }
 
   const response = NextResponse.json({ ok: true });

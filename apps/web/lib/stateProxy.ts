@@ -6,7 +6,10 @@ import {
   attachReaderCookie,
   getReaderIdentity
 } from "./readerIdentity";
-import { getSessionToken } from "./authSession";
+import {
+  clearSessionCookie,
+  getSessionToken
+} from "./authSession";
 import { getAuthProxySecret } from "./authProxy";
 
 const API_URL =
@@ -73,6 +76,10 @@ export async function forwardReaderState(
         "cache-control": "no-store"
       }
     });
+
+    if (sessionToken && upstream.status === 401) {
+      clearSessionCookie(response);
+    }
 
     return attachReaderCookie(response, reader);
   } catch (error) {
