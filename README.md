@@ -2,7 +2,7 @@
 
 > A modular manga reader and source-adapter platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v0.2.0--Security_Preview-indigo.svg)
+![Version](https://img.shields.io/badge/version-v0.2.1--Security_Patch-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -17,7 +17,7 @@
 
 ## Version and release status
 
-- Current version: v0.2.0 Security Preview
+- Current version: v0.2.1 Security Patch
 - Version policy: VERSIONING.md
 - Changelog: CHANGELOG.md
 - Security policy: SECURITY.md
@@ -64,7 +64,7 @@ The public API URL is not a secret. Database credentials, auth secrets, platform
 
 ## Security baseline
 
-The v0.2.0 hardening pass adds explicit CORS origins, strict input validation, route-specific in-memory rate limits, HTTPS-only source requests, redirect host revalidation, bounded timeouts and response sizes, disabled-by-default browser execution, generic public errors with request IDs, short-lived source caches, CI secret scanning/typechecks/builds/npm audits, and weekly Dependabot review.
+The v0.2.x hardening line adds explicit CORS origins, strict input validation, route-specific in-memory rate limits, HTTPS-only source requests, redirect host revalidation, bounded timeouts and response sizes, disabled-by-default browser execution, generic public errors with request IDs, short-lived source caches, CI secret scanning/typechecks/builds/npm audits, and weekly Dependabot review.
 
 See SECURITY.md for credential-handling rules and limitations.
 

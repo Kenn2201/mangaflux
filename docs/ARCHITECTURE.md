@@ -7,7 +7,7 @@ MangaFlux separates the website from source acquisition.
 3. The API selects a registered source adapter.
 4. The adapter uses fetchSource for bounded HTTPS, JSON, or HTML requests.
 5. MangaDex chapter images are fetched by the MangaFlux API because direct third-party hotlinking is not used.
-6. browserSource exists for future permitted browser-required integrations, but it is disabled by default.
+6. browserSource remains as a compatibility interface for future permitted browser-required integrations, but V1 does not bundle a browser runtime and fails closed.
 7. Neon stores user-owned state and cache metadata, not mirrored chapter archives.
 
 ## Source contract
@@ -22,7 +22,7 @@ Every adapter implements search, details, chapters, and pages.
 - bounded response sizes and timeouts
 - private or literal address blocking
 - no credentials embedded in source URLs or adapters
-- browser runtime disabled unless explicitly enabled
+- browser runtime not bundled in V1
 - request validation at public API boundaries
 - per-IP rate limits
 - generic client errors with request IDs

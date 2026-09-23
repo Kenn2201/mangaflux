@@ -18,7 +18,3 @@ services:
         value: https://manga.kenncode.me
       - key: MANGADEX_BASE_URL
         value: https://api.mangadex.org
-      - key: ENABLE_BROWSER_SOURCE
-        value: "false"
-      - key: PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD
-        value: "1"

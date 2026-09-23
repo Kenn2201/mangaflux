@@ -190,51 +190,10 @@ export async function fetchSource(url: string, options: FetchSourceOptions) {
 }
 
 export async function browserSource(url: string, allowedHosts: string[]) {
-  if (process.env.ENABLE_BROWSER_SOURCE !== "true") {
-    throw new Error(
-      "Browser source runtime is disabled. Set ENABLE_BROWSER_SOURCE=true explicitly."
-    );
-  }
-
-  const initial = assertAllowedUrl(url, allowedHosts);
-  const { chromium } = await import("playwright");
-  const browser = await chromium.launch({ headless: true });
-
-  try {
-    const page = await browser.newPage();
-
-    await page.route("**/*", async (route) => {
-      const requestUrl = route.request().url();
-
-      if (
-        requestUrl.startsWith("data:") ||
-        requestUrl.startsWith("blob:") ||
-        requestUrl.startsWith("about:")
-      ) {
-        await route.continue();
-        return;
-      }
-
-      try {
-        assertAllowedUrl(requestUrl, allowedHosts);
-        await route.continue();
-      } catch {
-        await route.abort();
-      }
-    });
-
-    await page.goto(initial.toString(), {
-      waitUntil: "domcontentloaded",
-      timeout: 20_000
-    });
-
-    assertAllowedUrl(page.url(), allowedHosts);
-
-    return {
-      finalUrl: page.url(),
-      html: await page.content()
-    };
-  } finally {
-    await browser.close();
-  }
+  // V1 intentionally does not bundle a headless browser. Keep the interface
+  // reserved for a future permitted source adapter, but fail closed today.
+  assertAllowedUrl(url, allowedHosts);
+  throw new Error(
+    "Browser-backed source execution is not bundled in MangaFlux V1."
+  );
 }
