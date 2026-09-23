@@ -2,12 +2,12 @@
 
 > A modular manga reader and source-adapter platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v0.2.1--Security_Patch-indigo.svg)
+![Version](https://img.shields.io/badge/version-v0.3.0--Reader_UX-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-![Next.js](https://img.shields.io/badge/Next.js-15-black.svg?logo=nextdotjs)
+![Next.js](https://img.shields.io/badge/Next.js-16-black.svg?logo=nextdotjs)
 ![Fastify](https://img.shields.io/badge/Fastify-5-black.svg?logo=fastify)
 ![Render](https://img.shields.io/badge/Render-API-46E3B7.svg?logo=render)
 ![Vercel](https://img.shields.io/badge/Vercel-Web-black.svg?logo=vercel)
@@ -17,13 +17,13 @@
 
 ## Version and release status
 
-- Current version: v0.2.1 Security Patch
+- Current version: v0.3.0 Reader UX
 - Version policy: VERSIONING.md
 - Changelog: CHANGELOG.md
 - Security policy: SECURITY.md
 - Roadmap: docs/ROADMAP.md
 
-MangaFlux is still pre-1.0. The current milestone hardens the reader and runtime before authentication and user-owned state are added.
+MangaFlux is still pre-1.0. The current milestone adds URL-backed search state, page tracking, reader progress, adjacent-chapter navigation, and a persistent data-saver preference before Neon persistence and authentication.
 
 ## Architecture
 
@@ -59,7 +59,7 @@ The public API URL is not a secret. Database credentials, auth secrets, platform
 - English chapter listing with scanlation-group metadata
 - MangaDex At-Home chapter resolution
 - bounded server-side image proxy with normal/data-saver fallback
-- responsive manga details and vertical reader
+- responsive manga details and vertical reader\n- preserved search state across details/reader navigation\n- current Page X / Y tracking with a live progress bar\n- previous/next chapter navigation\n- persistent data-saver reader preference
 - MangaDex and scanlation-group attribution
 
 ## Security baseline

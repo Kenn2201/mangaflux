@@ -7,10 +7,25 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- URL-backed search state and back-navigation restoration
-- Reader page indicator and scroll progress
-- Neon migrations, bookmarks, reading progress, and Continue Reading
-- Authentication after the security baseline is verified
+- Neon database client and migrations
+- Bookmarks, reading progress, and Continue Reading
+- Authentication after persistence endpoints are hardened
+- Final V1 production and mobile QA
+
+## 0.3.0 - 2026-09-24 — Reader UX
+
+### Added
+- URL-backed search queries so returning from a manga or chapter restores the search and result list.
+- Live Page X / Y tracking with IntersectionObserver.
+- Sticky chapter progress bar.
+- Previous and next chapter navigation with duplicate scanlation entries skipped where possible.
+- Reader-wide data-saver toggle stored as a browser preference.
+
+### Improved
+- Search clear/reload behavior and preserved query links.
+- Reader loading and failure states.
+- Small-screen reader header, chapter navigation, manga details, and search controls.
+- Manga description width and long-text wrapping.
 
 ## 0.2.1 - 2026-09-24 — Security Patch
 
@@ -36,10 +51,6 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 - Added conservative pacing for MangaDex metadata requests to reduce accidental upstream bursts.
 - Hardened the MangaDex image proxy with bounded image sizes and host-validated redirects.
 - Added Dependabot configuration for weekly npm dependency review.
-
-### Documentation
-- Added SECURITY.md, VERSIONING.md, and a versioned roadmap.
-- Updated README architecture and deployment documentation.
 
 ## 0.1.0 - 2026-09-24 — Reader Prototype
 

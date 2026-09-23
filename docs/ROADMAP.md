@@ -2,6 +2,43 @@
 
 This roadmap is directional. Versions follow Semantic Versioning; features can move between releases based on reliability and source-policy requirements.
 
+## v0.3.0 — Reader UX — current milestone
+
+- URL-backed search state and restored results on Back
+- Page X / Y tracking
+- live chapter progress bar
+- previous and next chapter navigation
+- persistent data-saver reader preference
+- mobile reader/header/navigation polish
+
+## v0.4.0 — Neon persistence — next
+
+- wire the Neon database client
+- add Drizzle migration tooling and initial migrations
+- persist bookmarks
+- persist reading history and chapter/page progress
+- add Continue Reading
+- add safe metadata cache tables where persistence is useful
+- keep manga page binaries out of Neon storage
+
+## v0.5.x — Authentication
+
+- signup, login, logout, and session handling
+- protected user library endpoints
+- bind bookmarks/progress/history to the authenticated user
+- ownership and authorization checks
+- account/session security review before release
+
+## v0.6.0–v0.9.x — V1 stabilization
+
+- large-series chapter pagination
+- language preferences
+- better source/downstream error UI
+- source health/status surface
+- optional Sentry production error monitoring
+- iPhone/mobile QA and accessibility QA
+- final security, dependency, and production audit
+
 ## v1.0.0 — Stable single-source reader
 
 V1 is complete when a user can reliably search MangaDex, open manga details and chapters, read chapter pages with Page X / Y tracking, navigate back without losing the search, move to previous and next chapters, sign in, bookmark manga, save reading progress in Neon, resume from Continue Reading, use the site comfortably on mobile, and receive clear source errors without raw internal details.
@@ -10,7 +47,7 @@ V1 also requires CI, secret checks, rate limiting, caching, and production QA.
 
 ## v1.x — Reader polish
 
-Compatible improvements after V1 may include reader themes and width controls, a data-saver toggle, language preferences, chapter pagination, library sorting and collections, source-health messaging, and optional Sentry error monitoring.
+Compatible improvements after V1 may include reader themes and width controls, richer language preferences, chapter pagination/infinite loading, library sorting and collections, source-health messaging, and optional notifications.
 
 ## v2.0.0 — Multi-source architecture
 
