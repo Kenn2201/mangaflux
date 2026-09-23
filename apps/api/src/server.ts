@@ -4,8 +4,38 @@ import { mangaDexSource } from "@mangaflux/sources";
 
 const app = Fastify({ logger: true });
 
+const allowedOrigins = new Set(
+  [
+    "https://manga.kenncode.me",
+    "http://localhost:3000",
+    ...(process.env.WEB_ORIGIN ?? "")
+      .split(",")
+      .map((origin) => origin.trim())
+      .filter(Boolean)
+  ].map((origin) => origin.replace(/\/$/, ""))
+);
+
 await app.register(cors, {
-  origin: process.env.WEB_ORIGIN ?? "http://localhost:3000"
+  origin(origin, callback) {
+    // Requests such as health checks and direct server-to-server calls may not
+    // include an Origin header. They do not need browser CORS enforcement.
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+
+    const normalizedOrigin = origin.replace(/\/$/, "");
+    const allowed = allowedOrigins.has(normalizedOrigin);
+
+    if (!allowed) {
+      app.log.warn({ origin }, "Blocked CORS origin");
+    }
+
+    callback(null, allowed);
+  },
+  methods: ["GET", "OPTIONS"],
+  allowedHeaders: ["Content-Type"],
+  maxAge: 86400
 });
 
 app.setErrorHandler((error, request, reply) => {
@@ -21,7 +51,8 @@ app.setErrorHandler((error, request, reply) => {
 app.get("/health", async () => ({
   ok: true,
   service: "mangaflux-api",
-  source: "mangadex"
+  source: "mangadex",
+  corsOrigins: Array.from(allowedOrigins)
 }));
 
 app.get("/api/sources", async () => ({
