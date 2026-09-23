@@ -8,7 +8,7 @@
 - [x] Page X / Y, progress, navigation, data saver
 - [x] bookmarks/history/Continue Reading/device persistence
 
-## Accounts
+## Accounts and email
 
 - [x] signup/login/logout
 - [x] secure password hashes and HttpOnly sessions
@@ -19,12 +19,25 @@
 - [x] forgot/reset password
 - [x] one-time expiring email tokens
 - [x] reset revokes old sessions
-- [ ] richer session-management UI
+
+## Mobile UX foundation
+
+- [x] app header
+- [x] iPhone-safe bottom navigation
+- [x] account/session skeleton instead of auth flash
+- [x] library/search/details/reader skeletons
+- [x] global toast notifications
+- [x] account/profile dashboard
+- [x] Anime.js micro-interactions
+- [x] reduced-motion support
+- [x] iOS autofill dark-theme fix
+- [x] minimum touch-target pass
 
 ## V1 stabilization
 
 - [ ] large-series chapter pagination
 - [ ] language preferences
+- [ ] reader/library settings polish
 - [ ] source health/status panel
 - [ ] improved retry/downstream error UI
 - [ ] optional production error monitoring

@@ -44,11 +44,29 @@ export default function AccountStatus() {
     };
   }, []);
 
+  if (session === null) {
+    return (
+      <span
+        className="account-chip account-chip-loading"
+        aria-label="Checking account status"
+      >
+        <span className="skeleton skeleton-dot" />
+        <span className="skeleton skeleton-account-label" />
+      </span>
+    );
+  }
+
+  const email = session.user?.email;
+  const initial = email?.trim().charAt(0).toUpperCase() || "M";
+
   return (
     <Link className="account-chip" href="/account">
-      {session?.authenticated
-        ? session.user?.email ?? "Account"
-        : "Sign in / Create account"}
+      <span className="account-chip-avatar" aria-hidden="true">
+        {session.authenticated ? initial : "○"}
+      </span>
+      <span className="account-chip-label">
+        {session.authenticated ? email ?? "Account" : "Sign in"}
+      </span>
     </Link>
   );
 }
