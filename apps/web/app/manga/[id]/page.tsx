@@ -35,6 +35,13 @@ export default function MangaPage() {
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    const query =
+      new URLSearchParams(window.location.search).get("q")?.slice(0, 120) ?? "";
+    setSearchQuery(query);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -45,7 +52,9 @@ export default function MangaPage() {
 
       try {
         const [detailsResponse, chaptersResponse] = await Promise.all([
-          fetch(`/api/manga/${encodeURIComponent(id)}`, { cache: "no-store" }),
+          fetch(`/api/manga/${encodeURIComponent(id)}`, {
+            cache: "no-store"
+          }),
           fetch(
             `/api/manga/${encodeURIComponent(id)}/chapters?language=en`,
             { cache: "no-store" }
@@ -53,9 +62,8 @@ export default function MangaPage() {
         ]);
 
         if (!detailsResponse.ok) {
-          const body = await detailsResponse.text();
           throw new Error(
-            `Details failed (${detailsResponse.status})${body ? `: ${body.slice(0, 180)}` : ""}`
+            `Manga details failed (${detailsResponse.status}). Try again shortly.`
           );
         }
 
@@ -71,12 +79,10 @@ export default function MangaPage() {
             items: Chapter[];
           };
           if (!cancelled) setChapters(chapterPayload.items);
-        } else {
-          if (!cancelled) {
-            setMessage(
-              `Manga loaded, but chapters failed (${chaptersResponse.status}).`
-            );
-          }
+        } else if (!cancelled) {
+          setMessage(
+            `Manga loaded, but chapters failed (${chaptersResponse.status}).`
+          );
         }
       } catch (error) {
         if (!cancelled) {
@@ -91,19 +97,27 @@ export default function MangaPage() {
       }
     }
 
-    load();
+    void load();
     return () => {
       cancelled = true;
     };
   }, [id]);
 
+  const querySuffix = searchQuery
+    ? `?q=${encodeURIComponent(searchQuery)}`
+    : "";
+  const searchHref = searchQuery
+    ? `/?q=${encodeURIComponent(searchQuery)}`
+    : "/";
+
   if (loading) {
     return (
       <main>
-        <Link className="back-link" href="/">← Search</Link>
-        <section className="panel">
+        <Link className="back-link" href={searchHref}>← Search</Link>
+        <section className="panel loading-panel">
           <p className="eyebrow">MangaDex</p>
           <h2>Loading manga…</h2>
+          <p className="message">Fetching details and the latest English chapters.</p>
         </section>
       </main>
     );
@@ -112,11 +126,13 @@ export default function MangaPage() {
   if (!manga) {
     return (
       <main>
-        <Link className="back-link" href="/">← Search</Link>
+        <Link className="back-link" href={searchHref}>← Search</Link>
         <section className="panel">
           <p className="eyebrow">MangaDex</p>
-          <h2>Couldn't load this manga</h2>
-          <p className="message">{message || "The source request failed temporarily."}</p>
+          <h2>Couldn&apos;t load this manga</h2>
+          <p className="message">
+            {message || "The source request failed temporarily."}
+          </p>
         </section>
       </main>
     );
@@ -124,7 +140,9 @@ export default function MangaPage() {
 
   return (
     <main>
-      <Link className="back-link" href="/">← Search</Link>
+      <Link className="back-link" href={searchHref}>
+        ← {searchQuery ? `Back to “${searchQuery}”` : "Search"}
+      </Link>
 
       <section className="details">
         <div className="details-cover">
@@ -186,7 +204,7 @@ export default function MangaPage() {
           {chapters.map((chapter) => (
             <Link
               className="chapter-row"
-              href={`/read/${chapter.id}`}
+              href={`/read/${chapter.id}${querySuffix}`}
               key={chapter.id}
             >
               <div>

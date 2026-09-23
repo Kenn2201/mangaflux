@@ -1,6 +1,19 @@
 import SearchClient from "./SearchClient";
 
-export default function Home() {
+type HomeSearchParams = {
+  q?: string | string[];
+};
+
+export default async function Home({
+  searchParams
+}: {
+  searchParams: Promise<HomeSearchParams>;
+}) {
+  const params = await searchParams;
+  const initialQuery = Array.isArray(params.q)
+    ? params.q[0] ?? ""
+    : params.q ?? "";
+
   return (
     <main>
       <section className="hero">
@@ -10,16 +23,17 @@ export default function Home() {
           A modular manga reader powered by source adapters. V1 currently uses
           the public MangaDex API.
         </p>
-        <div className="status">v0.2.1 — Security Patch</div>
+        <div className="status">v0.3.0 — Reader UX</div>
       </section>
 
-      <SearchClient />
+      <SearchClient initialQuery={initialQuery} />
 
       <section className="panel compact">
         <h2>V1 scope</h2>
         <p>
           Search MangaDex, open a title, choose an English chapter, and read
-          through MangaFlux&apos;s bounded image proxy with MangaDex attribution.
+          through MangaFlux&apos;s bounded image proxy with page tracking and
+          preserved navigation state.
         </p>
       </section>
 

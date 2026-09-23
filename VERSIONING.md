@@ -10,7 +10,7 @@ The repository is currently pre-1.0.
 
 ## Current version
 
-v0.2.1 — Security Patch
+v0.3.0 — Reader UX
 
 The canonical machine-readable version is the root package.json. Private workspace package versions should be updated to the same value during a release.
 
@@ -35,4 +35,4 @@ Before merging a release into main:
 - main is the deployable production branch.
 - kenn/* branches are used for development, security, and release work.
 
-Use pull requests for security, dependency, schema, and authentication work so CI can validate changes before production deployment.
+Use pull requests for reader milestones, security, dependency, schema, and authentication work so CI can validate changes before production deployment.

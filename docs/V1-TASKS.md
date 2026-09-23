@@ -1,6 +1,6 @@
 # MangaFlux V1 tasks
 
-## Infrastructure
+## Infrastructure and security
 
 - [x] Public GitHub repository
 - [x] Next.js frontend
@@ -11,12 +11,14 @@
 - [x] Render health endpoint
 - [x] Neon project
 - [x] cron-job.org health wake
+- [x] CI secret scan, typecheck, build, and dependency audit
+- [x] Input validation and basic rate limiting
+- [x] Bounded source runtime and image proxy
 
 ## MangaDex reader
 
 - [x] Common source interface
-- [x] Restricted `fetchSource()`
-- [x] Optional `browserSource()`
+- [x] Restricted fetchSource runtime
 - [x] Search
 - [x] Cover art
 - [x] Manga details
@@ -25,28 +27,35 @@
 - [x] Language filter (English default)
 - [x] Scanlation-group metadata
 - [x] MangaDex At-Home page resolution
-- [x] Normal/data-saver page URLs
+- [x] Normal/data-saver image proxy
 - [x] Search UI
 - [x] Manga details UI
 - [x] Chapter-list UI
 - [x] Vertical reader
 - [x] MangaDex/source attribution
+- [x] Preserve search query across back navigation
+- [x] Current Page X / Y tracking
+- [x] Reader progress bar
+- [x] Previous/next chapter navigation
+- [x] Reader data-saver toggle
 
-## Next
+## Persistence and accounts
 
-- [ ] Verify production Vercel → Render API environment variable
 - [ ] Wire Neon database client
 - [ ] Add Drizzle migrations
-- [ ] Add metadata cache
-- [ ] Add authentication
 - [ ] Add bookmarks
 - [ ] Add reading progress
-- [ ] Add continue-reading
-- [ ] Add next/previous chapter navigation
-- [ ] Add reader data-saver toggle
+- [ ] Add reading history
+- [ ] Add Continue Reading
+- [ ] Add authentication
+- [ ] Bind user-owned data to authenticated sessions
+
+## V1 stabilization
+
 - [ ] Add pagination/lazy chapter loading for very large series
-- [ ] Add graceful source/API error pages
-- [ ] Add basic rate limiting
 - [ ] Add source health/status panel
+- [ ] Add optional production error monitoring
 - [ ] Mobile QA on iPhone
+- [ ] Accessibility QA
+- [ ] Final security/dependency audit
 - [ ] V1 release tag

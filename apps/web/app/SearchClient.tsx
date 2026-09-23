@@ -1,7 +1,13 @@
 "use client";
 
-import { FormEvent, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+  FormEvent,
+  useCallback,
+  useEffect,
+  useState
+} from "react";
 
 type MangaSummary = {
   id: string;
@@ -11,16 +17,25 @@ type MangaSummary = {
   altTitles?: string[];
 };
 
-export default function SearchClient() {
-  const [query, setQuery] = useState("");
+export default function SearchClient({
+  initialQuery = ""
+}: {
+  initialQuery?: string;
+}) {
+  const router = useRouter();
+  const [query, setQuery] = useState(initialQuery);
   const [items, setItems] = useState<MangaSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const value = query.trim();
-    if (!value) return;
+  const performSearch = useCallback(async (rawQuery: string) => {
+    const value = rawQuery.trim();
+
+    if (!value) {
+      setItems([]);
+      setMessage("");
+      return;
+    }
 
     setLoading(true);
     setMessage("");
@@ -49,28 +64,87 @@ export default function SearchClient() {
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    const value = initialQuery.trim().slice(0, 120);
+    setQuery(value);
+    void performSearch(value);
+  }, [initialQuery, performSearch]);
+
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const value = query.trim().slice(0, 120);
+
+    if (!value) {
+      router.replace("/", { scroll: false });
+      setItems([]);
+      setMessage("");
+      return;
+    }
+
+    if (value === initialQuery.trim()) {
+      void performSearch(value);
+      return;
+    }
+
+    router.replace(`/?q=${encodeURIComponent(value)}`, { scroll: false });
   }
+
+  function clearSearch() {
+    setQuery("");
+    setItems([]);
+    setMessage("");
+    router.replace("/", { scroll: false });
+  }
+
+  const preservedQuery = initialQuery.trim().slice(0, 120);
+  const mangaQuerySuffix = preservedQuery
+    ? `?q=${encodeURIComponent(preservedQuery)}`
+    : "";
 
   return (
     <section className="search-section">
       <form className="search-form" onSubmit={submit}>
         <input
           aria-label="Search manga"
+          maxLength={120}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Search MangaDex..."
         />
-        <button type="submit" disabled={loading}>
-          {loading ? "Searching…" : "Search"}
-        </button>
+        <div className="search-actions">
+          {initialQuery ? (
+            <button
+              className="secondary-button"
+              type="button"
+              onClick={clearSearch}
+            >
+              Clear
+            </button>
+          ) : null}
+          <button type="submit" disabled={loading}>
+            {loading ? "Searching…" : "Search"}
+          </button>
+        </div>
       </form>
+
+      {initialQuery && !loading ? (
+        <p className="search-context">
+          Showing results for <strong>{initialQuery}</strong>
+        </p>
+      ) : null}
 
       {message ? <p className="message">{message}</p> : null}
 
       {items.length > 0 ? (
-        <div className="manga-grid">
+        <div className="manga-grid" aria-live="polite">
           {items.map((item) => (
-            <Link className="manga-card" href={`/manga/${item.id}`} key={item.id}>
+            <Link
+              className="manga-card"
+              href={`/manga/${item.id}${mangaQuerySuffix}`}
+              key={item.id}
+            >
               <div className="cover-shell">
                 {item.coverUrl ? (
                   <img
