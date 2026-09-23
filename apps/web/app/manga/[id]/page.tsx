@@ -1,9 +1,8 @@
-import Link from "next/link";
+"use client";
 
-const API_URL =
-  process.env.MANGAFLUX_API_URL ??
-  process.env.NEXT_PUBLIC_API_URL ??
-  "https://api.manga.kenncode.me";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 type MangaDetails = {
   id: string;
@@ -28,163 +27,190 @@ type Chapter = {
   scanlationGroups?: string[];
 };
 
-async function getManga(id: string) {
-  const detailsPromise = fetch(
-    `${API_URL}/api/manga/mangadex/${encodeURIComponent(id)}`,
-    { cache: "no-store" }
-  );
+export default function MangaPage() {
+  const params = useParams<{ id: string }>();
+  const id = params.id;
 
-  const chaptersPromise = fetch(
-    `${API_URL}/api/manga/mangadex/${encodeURIComponent(id)}/chapters?language=en`,
-    { cache: "no-store" }
-  );
+  const [manga, setManga] = useState<MangaDetails | null>(null);
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
 
-  const [detailsResult, chaptersResult] = await Promise.allSettled([
-    detailsPromise,
-    chaptersPromise
-  ]);
+  useEffect(() => {
+    let cancelled = false;
 
-  if (detailsResult.status !== "fulfilled" || !detailsResult.value.ok) {
-    throw new Error("Manga details are temporarily unavailable.");
-  }
+    async function load() {
+      setLoading(true);
+      setMessage("");
 
-  const details = (await detailsResult.value.json()) as { item: MangaDetails };
+      try {
+        const [detailsResponse, chaptersResponse] = await Promise.all([
+          fetch(`/api/manga/${encodeURIComponent(id)}`, { cache: "no-store" }),
+          fetch(
+            `/api/manga/${encodeURIComponent(id)}/chapters?language=en`,
+            { cache: "no-store" }
+          )
+        ]);
 
-  let chapters: Chapter[] = [];
-  let chapterWarning = "";
+        if (!detailsResponse.ok) {
+          const body = await detailsResponse.text();
+          throw new Error(
+            `Details failed (${detailsResponse.status})${body ? `: ${body.slice(0, 180)}` : ""}`
+          );
+        }
 
-  if (
-    chaptersResult.status === "fulfilled" &&
-    chaptersResult.value.ok
-  ) {
-    const payload = (await chaptersResult.value.json()) as { items: Chapter[] };
-    chapters = payload.items;
-  } else {
-    chapterWarning = "Chapter list is temporarily unavailable. Try again shortly.";
-  }
+        const detailsPayload = (await detailsResponse.json()) as {
+          item: MangaDetails;
+        };
 
-  return { manga: details.item, chapters, chapterWarning };
-}
+        if (cancelled) return;
+        setManga(detailsPayload.item);
 
-export default async function MangaPage({
-  params
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
+        if (chaptersResponse.ok) {
+          const chapterPayload = (await chaptersResponse.json()) as {
+            items: Chapter[];
+          };
+          if (!cancelled) setChapters(chapterPayload.items);
+        } else {
+          if (!cancelled) {
+            setMessage(
+              `Manga loaded, but chapters failed (${chaptersResponse.status}).`
+            );
+          }
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setMessage(
+            error instanceof Error
+              ? error.message
+              : "The source request failed temporarily."
+          );
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
 
-  try {
-    const { manga, chapters, chapterWarning } = await getManga(id);
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
 
+  if (loading) {
     return (
       <main>
-        <Link className="back-link" href="/">
-          ← Search
-        </Link>
-
-        <section className="details">
-          <div className="details-cover">
-            {manga.coverUrl ? (
-              <img src={manga.coverUrl} alt="" referrerPolicy="no-referrer" />
-            ) : null}
-          </div>
-
-          <div>
-            <p className="eyebrow">MangaDex</p>
-            <h1 className="title-small">{manga.title}</h1>
-            <div className="meta-row">
-              {manga.status ? <span>{manga.status}</span> : null}
-              {manga.year ? <span>{manga.year}</span> : null}
-            </div>
-
-            {manga.authors?.length ? (
-              <p className="muted">Author: {manga.authors.join(", ")}</p>
-            ) : null}
-
-            {manga.description ? (
-              <p className="description">{manga.description}</p>
-            ) : null}
-
-            {manga.tags?.length ? (
-              <div className="tag-row">
-                {manga.tags.slice(0, 12).map((tag) => (
-                  <span className="tag" key={tag}>
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            ) : null}
-
-            {manga.externalUrl ? (
-              <a
-                className="source-link"
-                href={manga.externalUrl}
-                target="_blank"
-                rel="noreferrer"
-              >
-                View on MangaDex ↗
-              </a>
-            ) : null}
-          </div>
-        </section>
-
-        <section className="panel chapters-panel">
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">English</p>
-              <h2>Recent chapters</h2>
-            </div>
-            <span>{chapters.length} loaded</span>
-          </div>
-
-          {chapterWarning ? <p className="message">{chapterWarning}</p> : null}
-
-          <div className="chapter-list">
-            {chapters.map((chapter) => (
-              <Link
-                className="chapter-row"
-                href={`/read/${chapter.id}`}
-                key={chapter.id}
-              >
-                <div>
-                  <strong>
-                    {chapter.chapter ? `Chapter ${chapter.chapter}` : chapter.title}
-                  </strong>
-                  {chapter.title &&
-                  chapter.title !== `Chapter ${chapter.chapter}` ? (
-                    <span className="chapter-title">{chapter.title}</span>
-                  ) : null}
-                </div>
-                <div className="chapter-meta">
-                  {chapter.scanlationGroups?.length
-                    ? chapter.scanlationGroups.join(", ")
-                    : "Unknown group"}
-                </div>
-              </Link>
-            ))}
-
-            {!chapterWarning && chapters.length === 0 ? (
-              <p className="message">No English chapters were returned.</p>
-            ) : null}
-          </div>
-        </section>
-      </main>
-    );
-  } catch {
-    return (
-      <main>
-        <Link className="back-link" href="/">
-          ← Search
-        </Link>
-
+        <Link className="back-link" href="/">← Search</Link>
         <section className="panel">
           <p className="eyebrow">MangaDex</p>
-          <h2>Couldn&apos;t load this manga</h2>
-          <p className="message">
-            The source request failed temporarily. Go back and try the title again.
-          </p>
+          <h2>Loading manga…</h2>
         </section>
       </main>
     );
   }
+
+  if (!manga) {
+    return (
+      <main>
+        <Link className="back-link" href="/">← Search</Link>
+        <section className="panel">
+          <p className="eyebrow">MangaDex</p>
+          <h2>Couldn't load this manga</h2>
+          <p className="message">{message || "The source request failed temporarily."}</p>
+        </section>
+      </main>
+    );
+  }
+
+  return (
+    <main>
+      <Link className="back-link" href="/">← Search</Link>
+
+      <section className="details">
+        <div className="details-cover">
+          {manga.coverUrl ? (
+            <img src={manga.coverUrl} alt="" referrerPolicy="no-referrer" />
+          ) : null}
+        </div>
+
+        <div>
+          <p className="eyebrow">MangaDex</p>
+          <h1 className="title-small">{manga.title}</h1>
+
+          <div className="meta-row">
+            {manga.status ? <span>{manga.status}</span> : null}
+            {manga.year ? <span>{manga.year}</span> : null}
+          </div>
+
+          {manga.authors?.length ? (
+            <p className="muted">Author: {manga.authors.join(", ")}</p>
+          ) : null}
+
+          {manga.description ? (
+            <p className="description">{manga.description}</p>
+          ) : null}
+
+          {manga.tags?.length ? (
+            <div className="tag-row">
+              {manga.tags.slice(0, 12).map((tag) => (
+                <span className="tag" key={tag}>{tag}</span>
+              ))}
+            </div>
+          ) : null}
+
+          {manga.externalUrl ? (
+            <a
+              className="source-link"
+              href={manga.externalUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              View on MangaDex ↗
+            </a>
+          ) : null}
+        </div>
+      </section>
+
+      <section className="panel chapters-panel">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">English</p>
+            <h2>Recent chapters</h2>
+          </div>
+          <span>{chapters.length} loaded</span>
+        </div>
+
+        {message ? <p className="message">{message}</p> : null}
+
+        <div className="chapter-list">
+          {chapters.map((chapter) => (
+            <Link
+              className="chapter-row"
+              href={`/read/${chapter.id}`}
+              key={chapter.id}
+            >
+              <div>
+                <strong>
+                  {chapter.chapter ? `Chapter ${chapter.chapter}` : chapter.title}
+                </strong>
+                {chapter.title &&
+                chapter.title !== `Chapter ${chapter.chapter}` ? (
+                  <span className="chapter-title">{chapter.title}</span>
+                ) : null}
+              </div>
+              <div className="chapter-meta">
+                {chapter.scanlationGroups?.length
+                  ? chapter.scanlationGroups.join(", ")
+                  : "Unknown group"}
+              </div>
+            </Link>
+          ))}
+
+          {!message && chapters.length === 0 ? (
+            <p className="message">No English chapters were returned.</p>
+          ) : null}
+        </div>
+      </section>
+    </main>
+  );
 }
