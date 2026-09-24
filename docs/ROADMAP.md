@@ -1,57 +1,52 @@
 # MangaFlux Roadmap
 
-## v0.7.0 — Discovery & Dashboard — complete
+## v0.7.x — Product Experience — complete
 
+### v0.7.0 — Discovery & Dashboard
 - landing page
 - signed-in dashboard
-- header autocomplete search
+- header autocomplete
 - genres
 - Hot / Popular / Top Rated / Latest Updates
 - paginated discovery
 
-## v0.7.1 — Chapter Scale & Reader Controls — complete
-
+### v0.7.1 — Chapter Scale & Reader Controls
 - chapter pagination beyond 100
-- newest/oldest sorting
-- chapter lookup
+- sorting and chapter lookup
 - tap reader chrome
 - persistent progress/page HUD
-- reader chapter navigation
+- reader navigation
 
-## v0.7.2 — Community & Profiles — current
+### v0.7.2 — Community & Profiles
+- display names and avatars
+- manga/chapter comments
+- reactions
+- verified posting
+- five-minute cooldown
+- clickable genres
+- reader audit fixes
 
-- fixed mobile genre sheet positioning
-- dedicated genre directory
-- clickable manga tags
-- reader cover + centered chapters control + centered top arrow
-- profile display names
-- profile avatar upload
-- manga comments
-- chapter comments
-- verified-account-only posting/reactions
-- one comment every five minutes server-side
-- comment pagination
-- own-comment deletion
-- manga/chapter reactions
+### v0.7.3 — Recommendations — current
+- clickable publication status
+- clickable year
+- clickable authors/artists
+- creator and year discovery filters
+- explicit related-title rail
+- More Like This metadata recommendations
+- Because You Read dashboard recommendations
+- history/bookmark exclusion
+- final v0.7 mobile recommendation polish
 
-## v0.7.3 — Recommendations — next
-
-- Because you read…
-- genre/tag similarity
-- related titles
-- author/artist similarity where useful
-- history/bookmark signals
-- personalized dashboard discovery
-- final v0.7 mobile UX pass
-
-## v0.8.x — Reliability + Source Health
+## v0.8.x — Reliability + Source Health — next
 
 - source health/status UI
 - downstream availability states
 - retry/backoff UX
-- optional Sentry monitoring
 - operational diagnostics
+- optional Sentry monitoring
+- cache/revalidation review
 - shared rate limiting if horizontally scaled
+- production performance review
 
 ## v0.9.x — V1 release candidate
 

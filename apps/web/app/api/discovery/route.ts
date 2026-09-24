@@ -14,6 +14,10 @@ export async function GET(request: NextRequest) {
   const limit = Number(request.nextUrl.searchParams.get("limit") ?? "24");
   const offset = Number(request.nextUrl.searchParams.get("offset") ?? "0");
   const tag = request.nextUrl.searchParams.get("tag")?.trim();
+  const creator = request.nextUrl.searchParams.get("creator")?.trim();
+  const status = request.nextUrl.searchParams.get("status")?.trim();
+  const yearValue = request.nextUrl.searchParams.get("year")?.trim();
+  const year = yearValue ? Number(yearValue) : undefined;
 
   if (
     !kinds.has(kind) ||
@@ -22,7 +26,9 @@ export async function GET(request: NextRequest) {
     limit > 50 ||
     !Number.isInteger(offset) ||
     offset < 0 ||
-    offset > 10_000
+    offset > 10_000 ||
+    (year !== undefined &&
+      (!Number.isInteger(year) || year < 1900 || year > 2100))
   ) {
     return NextResponse.json(
       { error: "INVALID_REQUEST", message: "Invalid discovery request" },
@@ -37,6 +43,9 @@ export async function GET(request: NextRequest) {
   });
 
   if (tag) params.set("tag", tag);
+  if (creator) params.set("creator", creator);
+  if (status) params.set("status", status);
+  if (year !== undefined) params.set("year", String(year));
 
   try {
     const upstream = await fetch(

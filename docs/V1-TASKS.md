@@ -10,51 +10,50 @@
 ## Reader
 
 - [x] MangaDex search/details/chapters/image proxy
+- [x] all chapters with pagination/sorting/lookup
 - [x] Page X / Y, progress, previous/next, Data Saver
-- [x] chapters beyond newest 100
-- [x] chapter pagination/sorting/lookup
-- [x] tap-to-show reader chrome
-- [x] persistent progress/page HUD
-- [x] scroll-to-top
-- [x] centered chapters/home reader action
-- [x] reader cover context
+- [x] tap reader chrome
+- [x] persistent reader HUD
+- [x] scroll-to-top + centered chapter-home action
 
 ## Discovery
 
-- [x] public landing page
-- [x] signed-in dashboard
-- [x] header autocomplete search
-- [x] genre browser
-- [x] dedicated genre/theme directory
-- [x] clickable manga tags
-- [x] MangaFlux Hot
-- [x] Popular / Top Rated / Latest Updates
-- [x] Show All pagination
+- [x] landing page and signed-in dashboard
+- [x] header autocomplete
+- [x] genre/theme browsing
+- [x] clickable tags
+- [x] clickable publication status
+- [x] clickable year
+- [x] clickable author/artist
+- [x] Hot / Popular / Top Rated / Latest Updates
+- [x] discovery pagination
 
 ## Community / profiles
 
-- [x] profile display name
-- [x] profile avatar upload
-- [x] manga comments
-- [x] chapter comments
-- [x] five-minute account comment cooldown
-- [x] manga/chapter reactions
+- [x] profile name/avatar
+- [x] manga/chapter comments
+- [x] five-minute comment cooldown
+- [x] reactions
 - [x] comment pagination
 - [x] own-comment deletion
 - [x] public comments hide account email
 
 ## Recommendations
 
-- [ ] Because you read…
-- [ ] tag/genre similarity
-- [ ] related-title recommendations
-- [ ] personalized dashboard discovery
+- [x] explicit related titles
+- [x] Because you read…
+- [x] tag/genre similarity
+- [x] creator similarity
+- [x] release-year signal
+- [x] personalized dashboard discovery
+- [x] exclude recent/bookmarked titles from personalized results
 
 ## Final stabilization
 
 - [ ] source health/status
 - [ ] improved retry/downstream error UX
 - [ ] optional production monitoring
+- [ ] caching/rate-limit review
 - [ ] iPhone/mobile regression QA
 - [ ] accessibility QA
 - [ ] final auth/community/security/dependency/migration audit

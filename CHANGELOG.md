@@ -7,39 +7,33 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- Personalized recommendations
-- Reliability/source-health work
+- Source health/status UI
+- Better downstream retry/degraded states
+- Production reliability and monitoring work
 
-## 0.7.2 - 2026-09-24 — Community & Profiles
+## 0.7.3 - 2026-09-24 — Recommendations
 
 ### Added
-- MangaFlux-native manga comments.
-- MangaFlux-native chapter comments.
-- Manga/chapter reaction bar with Like, Funny, Wow, Sad, and Fire.
-- Verified-account-only posting and reactions.
-- Server-side one-comment-per-five-minutes cooldown.
-- 1,000-character comment limit.
-- Comment pagination.
-- Own-comment deletion.
-- Profile display names.
-- Profile avatar upload with client-side square WebP normalization.
-- Dedicated Genres & Themes directory.
-- Browse More Genres action in the genre sheet.
+- Explicit MangaDex related-title rail where title relations exist.
+- MangaFlux "More like this" recommendations on manga details.
+- Personalized "Because you read…" dashboard recommendations.
+- Metadata recommendation scoring using creator, genre/theme, and release-year signals.
+- Creator-filtered discovery.
+- Release-year-filtered discovery.
 
-### Fixed
-- Mobile genre sheet now renders outside the sticky header via a portal.
-- Scroll-to-top icon is optically centered using SVG.
-- Reader mobile header now shows manga cover context.
-- Reader bottom controls now include a centered Chapters/Home action.
-- Manga tags/genres are now clickable discovery links.
+### Changed
+- Manga publication status is now clickable.
+- Manga release year is now clickable.
+- Manga authors are now clickable.
+- Manga artists are now clickable.
+- Personalized recommendations exclude titles already present in recent reading/bookmarks.
+- Final mobile styling pass for recommendation rails and clickable metadata.
 
-### Security / privacy
-- Community writes require authenticated, verified MangaFlux accounts.
-- Comment cooldown is enforced server-side, not only in the UI.
-- Public comments never expose account email.
-- Avatar input is restricted to a bounded WebP data URL after local normalization.
-- Community mutations remain behind the Vercel auth-proxy/CSRF boundary.
+### Architecture
+- Recommendations remain explainable metadata ranking; no embeddings or external AI service are required.
+- MangaDex relation lookup is cached and normalized through the source adapter.
 
+## 0.7.2 - 2026-09-24 — Community & Profiles
 ## 0.7.1 - 2026-09-24 — Chapter Scale & Reader Controls
 ## 0.7.0 - 2026-09-24 — Discovery & Dashboard
 ## 0.6.0 - 2026-09-24 — Mobile UX Foundation

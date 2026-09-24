@@ -9,12 +9,23 @@ export type MangaSummary = {
   contentRating?: string;
 };
 
+export type MangaCreator = {
+  id: string;
+  name: string;
+  role: "author" | "artist";
+};
+
+export type MangaRelated = MangaSummary & {
+  relation: string;
+};
+
 export type MangaDetails = MangaSummary & {
   description?: string;
   status?: string;
   originalLanguage?: string;
   authors?: string[];
   artists?: string[];
+  creators?: MangaCreator[];
   externalUrl?: string;
   tagDetails?: MangaTag[];
 };
@@ -31,6 +42,12 @@ export type MangaDiscoveryKind =
   | "latest"
   | "hot";
 
+export type MangaPublicationStatus =
+  | "ongoing"
+  | "completed"
+  | "hiatus"
+  | "cancelled";
+
 export type MangaListPage = {
   items: MangaSummary[];
   total: number;
@@ -46,6 +63,9 @@ export type DiscoveryOptions = {
   limit?: number;
   offset?: number;
   tagId?: string;
+  year?: number;
+  creatorId?: string;
+  status?: MangaPublicationStatus;
 };
 
 export type Chapter = {
@@ -110,6 +130,7 @@ export interface MangaSource {
   ): Promise<MangaListPage>;
   tags(): Promise<MangaTag[]>;
   details(id: string): Promise<MangaDetails>;
+  related(id: string): Promise<MangaRelated[]>;
   chapterPage(id: string, options?: ChapterOptions): Promise<ChapterListPage>;
   chapters(id: string, options?: ChapterOptions): Promise<Chapter[]>;
   pages(chapterId: string, options?: PageOptions): Promise<ChapterPages>;

@@ -14,7 +14,7 @@ import type {
   MangaSummary
 } from "@mangaflux/sources";
 
-const APP_VERSION = "0.7.2";
+const APP_VERSION = "0.7.3";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LANGUAGE_RE = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i;
@@ -23,6 +23,12 @@ const DISCOVERY_KINDS = new Set<MangaDiscoveryKind>([
   "top",
   "latest",
   "hot"
+]);
+const MANGA_STATUSES = new Set([
+  "ongoing",
+  "completed",
+  "hiatus",
+  "cancelled"
 ]);
 
 const app = Fastify({
@@ -348,6 +354,9 @@ app.get<{
     limit?: string;
     offset?: string;
     tag?: string;
+    year?: string;
+    creator?: string;
+    status?: string;
   };
 }>(
   "/api/discovery",
@@ -357,23 +366,41 @@ app.get<{
     const limit = parseBoundedInt(request.query.limit, 24, 1, 50);
     const offset = parseBoundedInt(request.query.offset, 0, 0, 10_000);
     const tagId = request.query.tag?.trim();
+    const creatorId = request.query.creator?.trim();
+    const status = request.query.status?.trim();
+    const year =
+      request.query.year === undefined
+        ? undefined
+        : parseBoundedInt(request.query.year, 0, 1900, 2100);
 
     if (
       !kind ||
       limit === null ||
       offset === null ||
-      (tagId && !UUID_RE.test(tagId))
+      year === null ||
+      (tagId && !UUID_RE.test(tagId)) ||
+      (creatorId && !UUID_RE.test(creatorId)) ||
+      (status && !MANGA_STATUSES.has(status))
     ) {
       return reply.code(400).send({
         error: "INVALID_REQUEST",
-        message: "Invalid discovery kind, pagination, or genre tag."
+        message:
+          "Invalid discovery kind, pagination, genre tag, year, creator, or status."
       });
     }
 
     const page = await mangaDexSource.discover(kind, {
       limit,
       offset,
-      tagId
+      tagId,
+      year,
+      creatorId,
+      status: status as
+        | "ongoing"
+        | "completed"
+        | "hiatus"
+        | "cancelled"
+        | undefined
     });
 
     reply.header(
@@ -458,6 +485,26 @@ app.get<{ Params: { id: string } }>(
 
     const item = await mangaDexSource.details(request.params.id);
     return { source: mangaDexSource.id, item };
+  }
+);
+
+app.get<{ Params: { id: string } }>(
+  "/api/manga/mangadex/:id/related",
+  { preHandler: metadataRateLimit },
+  async (request, reply) => {
+    if (!requireUuid(request.params.id, reply, "id")) return;
+
+    const items = await mangaDexSource.related(request.params.id);
+
+    reply.header(
+      "Cache-Control",
+      "public, max-age=300, stale-while-revalidate=600"
+    );
+
+    return {
+      source: mangaDexSource.id,
+      items
+    };
   }
 );
 

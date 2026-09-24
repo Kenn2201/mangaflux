@@ -1,8 +1,8 @@
 # MangaFlux
 
-> A mobile-first modular manga discovery, reading, and community platform powering manga.kenncode.me.
+> A mobile-first modular manga discovery, reading, community, and recommendation platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v0.7.2--Community_Profiles-indigo.svg)
+![Version](https://img.shields.io/badge/version-v0.7.3--Recommendations-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,66 +10,45 @@
 
 ## Current release
 
-**v0.7.2 — Community & Profiles**
+**v0.7.3 — Recommendations**
 
-MangaFlux now has account-native community identity, reactions, and comments while keeping the reader mobile-first.
+This closes the v0.7 Product Experience phase.
 
-### Community
+### Recommendations
 
-- Manga-level reactions and comments
-- Chapter-level reactions and comments
-- verified MangaFlux account required to post/react
-- one comment every 5 minutes per account
-- 1,000-character comment limit
-- paginated comments
-- users can delete their own comments
-- reaction choices: Like, Funny, Wow, Sad, Fire
-- no moderation dashboard in this milestone
+- **Related titles** from explicit MangaDex title relations when available.
+- **More like this** on manga pages.
+- **Because you read…** on the signed-in dashboard.
+- recommendation ranking combines lightweight metadata signals rather than AI:
+  - creator
+  - genre
+  - theme
+  - release year
+  - recent MangaFlux reading/library seed
+- already-read/bookmarked titles are excluded from personalized dashboard suggestions.
 
-### Profiles
+### Discovery polish
 
-- display names
-- profile avatar upload
-- client-side square crop/compression to WebP
-- public comments show display name/avatar, never account email
-- header account chip supports profile avatars
+- publication status on manga details is clickable.
+- release year on manga details is clickable.
+- authors and artists are clickable.
+- creator browsing uses the creator's MangaDex relationship ID.
+- year browsing filters discovery by release year.
+- manga tags/genres remain clickable.
 
-For this pre-V1 release, compact avatar images are stored with the user's Neon profile record after local WebP normalization. Manga pages themselves are still never mirrored into MangaFlux storage.
+MangaFlux intentionally keeps this recommendation system explainable and inexpensive for V1. Semantic/embedding recommendations remain a later v3+ idea.
 
-### v0.7.1 physical-audit fixes included
-
-- genre sheet is rendered through a document portal so iPhone Safari no longer constrains it inside the sticky header
-- genre menu includes **Browse more genres**
-- dedicated Genres & Themes directory
-- manga detail tags are clickable discovery links
-- reader header shows the manga cover
-- reader bottom controls now have a centered Chapters/Home button
-- scroll-to-top uses a centered SVG arrow instead of a text glyph
-
-## Product structure
+## Completed v0.7 Product Experience
 
 ~~~text
-/
-Landing + discovery
-
-/dashboard
-Signed-in reading dashboard
-
-/genres
-Genre and theme directory
-
-/manga/:id
-Manga details, chapters, reactions, comments
-
-/read/:chapterId
-Immersive reader + chapter community at the end
-
-/account
-Account, profile avatar/name, security
+v0.7.0  Discovery & Dashboard
+v0.7.1  Chapter Scale & Reader Controls
+v0.7.2  Community & Profiles
+v0.7.3  Recommendations
 ~~~
 
-## Roadmap
+## Next
 
-Next: **v0.7.3 Recommendations**, starting with tag/genre similarity, related titles, history/bookmark signals, and personalized dashboard discovery.
+**v0.8.x — Reliability + Source Health**
 
-Then v0.8 focuses on reliability and source health.
+The next phase focuses on downstream health, retries, diagnostics, monitoring, caching/rate-limit hardening, and production reliability before the v0.9 release-candidate audit.

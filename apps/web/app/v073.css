@@ -1,0 +1,119 @@
+/* MangaFlux v0.7.3 — Recommendations + final v0.7 mobile polish */
+
+.meta-link,
+.creator-link {
+  color: #bdbdbd;
+  text-decoration: underline;
+  text-decoration-color: #454545;
+  text-underline-offset: 4px;
+  transition:
+    color .16s ease,
+    text-decoration-color .16s ease;
+}
+
+.meta-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 9px;
+  border: 1px solid #343434;
+  border-radius: 999px;
+  background: #111;
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.meta-link:hover,
+.creator-link:hover {
+  color: #fff;
+  text-decoration-color: #aaa;
+}
+
+.meta-link:hover {
+  border-color: #555;
+  background: #171717;
+}
+
+.creator-line {
+  margin: 7px 0;
+}
+
+.creator-line > span:first-child {
+  color: #777;
+}
+
+.recommendation-stack {
+  display: grid;
+  gap: 46px;
+  margin-top: 46px;
+}
+
+.recommendation-section,
+.personal-recommendations {
+  min-width: 0;
+}
+
+.recommendation-heading {
+  margin-bottom: 16px;
+}
+
+.recommendation-card {
+  position: relative;
+}
+
+.personal-recommendations {
+  margin-top: 50px;
+  padding-top: 8px;
+}
+
+.dashboard-page .personal-recommendations + .discovery-stack {
+  margin-top: 58px;
+}
+
+@media (max-width: 700px) {
+  .meta-link {
+    min-height: 30px;
+    padding-inline: 10px;
+  }
+
+  .creator-line {
+    line-height: 1.7;
+  }
+
+  .recommendation-stack {
+    gap: 40px;
+    margin-top: 38px;
+  }
+
+  .recommendation-heading h2 {
+    font-size: 30px;
+  }
+
+  .recommendation-heading p:last-child {
+    display: block;
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  .personal-recommendations {
+    margin-top: 42px;
+  }
+
+  .personal-recommendations .discovery-heading p:last-child {
+    display: block;
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  .dashboard-page .personal-recommendations + .discovery-stack {
+    margin-top: 46px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .meta-link,
+  .creator-link {
+    transition: none;
+  }
+}

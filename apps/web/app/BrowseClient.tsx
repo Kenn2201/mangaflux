@@ -51,12 +51,20 @@ export default function BrowseClient({
   kind,
   page,
   tagId,
-  tagName
+  tagName,
+  year,
+  creatorId,
+  creatorName,
+  status
 }: {
   kind: DiscoveryKind;
   page: number;
   tagId?: string;
   tagName?: string;
+  year?: number;
+  creatorId?: string;
+  creatorName?: string;
+  status?: string;
 }) {
   const limit = 24;
   const [data, setData] = useState<PagePayload | null>(null);
@@ -79,6 +87,9 @@ export default function BrowseClient({
       });
 
       if (tagId) params.set("tag", tagId);
+      if (year) params.set("year", String(year));
+      if (creatorId) params.set("creator", creatorId);
+      if (status) params.set("status", status);
 
       try {
         const response = await fetch(
@@ -110,7 +121,7 @@ export default function BrowseClient({
 
     void load();
     return () => controller.abort();
-  }, [kind, page, tagId]);
+  }, [kind, page, tagId, year, creatorId, status]);
 
   const label = labels[kind];
   const totalPages = data
@@ -119,10 +130,33 @@ export default function BrowseClient({
 
   const baseQuery = useMemo(() => {
     const params = new URLSearchParams({ kind });
+
     if (tagId) params.set("tag", tagId);
     if (tagName) params.set("name", tagName);
+    if (year) params.set("year", String(year));
+
+    if (creatorId) {
+      params.set("creator", creatorId);
+    }
+
+    if (creatorName) {
+      params.set("creatorName", creatorName);
+    }
+
+    if (status) {
+      params.set("status", status);
+    }
+
     return params;
-  }, [kind, tagId, tagName]);
+  }, [
+    kind,
+    tagId,
+    tagName,
+    year,
+    creatorId,
+    creatorName,
+    status
+  ]);
 
   function pageHref(nextPage: number) {
     const params = new URLSearchParams(baseQuery);
@@ -130,18 +164,43 @@ export default function BrowseClient({
     return `/browse?${params.toString()}`;
   }
 
+  const customTitle = creatorName
+    ? `Manga by ${creatorName}`
+    : year
+      ? `Manga from ${year}`
+      : status
+        ? `${status.charAt(0).toUpperCase() + status.slice(1)} manga`
+        : tagName
+          ? `${tagName} manga`
+          : null;
+
+  const customDescription = creatorName
+    ? `Popular MangaDex titles connected to ${creatorName}.`
+    : year
+      ? `Popular MangaDex titles first released in ${year}.`
+      : status
+        ? `Popular MangaDex titles currently marked ${status}.`
+        : tagName
+          ? `Popular MangaDex titles tagged ${tagName}.`
+          : label.description;
+
   return (
     <>
       <section className="browse-heading">
         <p className="eyebrow">
-          {tagName ? "Genre" : label.eyebrow}
+          {creatorName
+            ? "Creator"
+            : year
+              ? "Release year"
+              : status
+                ? "Publication status"
+                : tagName
+                  ? "Genre"
+                  : label.eyebrow}
         </p>
-        <h1>{tagName ? `${tagName} manga` : label.title}</h1>
-        <p>
-          {tagName
-            ? `Popular MangaDex titles tagged ${tagName}.`
-            : label.description}
-        </p>
+
+        <h1>{customTitle ?? label.title}</h1>
+        <p>{customDescription}</p>
       </section>
 
       {loading ? <SearchSkeleton count={12} /> : null}
