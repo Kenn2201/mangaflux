@@ -12,6 +12,7 @@ import type { MangaFluxDatabase } from "@mangaflux/db";
 import { authenticateSession } from "./auth.js";
 import { isAdminEmail } from "./adminAccess.js";
 import { getDiagnosticsSnapshot } from "./diagnostics.js";
+import { getMangaDexCacheStats } from "@mangaflux/sources";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -122,7 +123,8 @@ export function registerAdminRoutes(
             heapTotalMb: Math.round(memory.heapTotal / 1024 / 1024)
           }
         },
-        traffic: getDiagnosticsSnapshot()
+        traffic: getDiagnosticsSnapshot(),
+        sourceCache: getMangaDexCacheStats()
       };
     }
   );

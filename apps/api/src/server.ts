@@ -20,7 +20,7 @@ import type {
   MangaSummary
 } from "@mangaflux/sources";
 
-const APP_VERSION = "0.8.2";
+const APP_VERSION = "0.8.3";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LANGUAGE_RE = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i;
@@ -102,6 +102,8 @@ type RateBucket = {
   resetAt: number;
 };
 
+const MAX_RATE_BUCKETS = 10_000;
+
 function makeRateLimit(name: string, limit: number, windowMs = 60_000) {
   const buckets = new Map<string, RateBucket>();
 
@@ -126,6 +128,11 @@ function makeRateLimit(name: string, limit: number, windowMs = 60_000) {
     bucket.count += 1;
     buckets.set(key, bucket);
 
+    if (!current && buckets.size >= MAX_RATE_BUCKETS) {
+      const oldestKey = buckets.keys().next().value as string | undefined;
+      if (oldestKey) buckets.delete(oldestKey);
+    }
+
     const remaining = Math.max(0, limit - bucket.count);
     const retryAfterSeconds = Math.max(
       1,
@@ -135,6 +142,10 @@ function makeRateLimit(name: string, limit: number, windowMs = 60_000) {
     reply.header("RateLimit-Limit", String(limit));
     reply.header("RateLimit-Remaining", String(remaining));
     reply.header("RateLimit-Reset", String(retryAfterSeconds));
+    reply.header(
+      "RateLimit-Policy",
+      `${limit};w=${Math.max(1, Math.ceil(windowMs / 1000))}`
+    );
 
     if (bucket.count > limit) {
       reply.header("Retry-After", String(retryAfterSeconds));
@@ -341,7 +352,7 @@ app.get(
 
     reply.header(
       "Cache-Control",
-      "public, max-age=15, stale-while-revalidate=30"
+      "public, max-age=15, s-maxage=15, stale-while-revalidate=30"
     );
 
     return {
@@ -426,6 +437,12 @@ app.get<{ Querystring: { q?: string; limit?: string } }>(
     }
 
     const items = await mangaDexSource.search(query, { limit });
+
+    reply.header(
+      "Cache-Control",
+      "public, max-age=30, s-maxage=30, stale-while-revalidate=60"
+    );
+
     return { source: mangaDexSource.id, items };
   }
 );
@@ -487,7 +504,7 @@ app.get<{
 
     reply.header(
       "Cache-Control",
-      "public, max-age=60, stale-while-revalidate=120"
+      "public, max-age=60, s-maxage=60, stale-while-revalidate=120"
     );
 
     return {
@@ -512,7 +529,7 @@ app.get(
 
     reply.header(
       "Cache-Control",
-      "public, max-age=60, stale-while-revalidate=120"
+      "public, max-age=60, s-maxage=60, stale-while-revalidate=120"
     );
 
     return {
@@ -549,7 +566,7 @@ app.get(
 
     reply.header(
       "Cache-Control",
-      "public, max-age=21600, stale-while-revalidate=43200"
+      "public, max-age=21600, s-maxage=21600, stale-while-revalidate=43200"
     );
 
     return {
@@ -566,6 +583,12 @@ app.get<{ Params: { id: string } }>(
     if (!requireUuid(request.params.id, reply, "id")) return;
 
     const item = await mangaDexSource.details(request.params.id);
+
+    reply.header(
+      "Cache-Control",
+      "public, max-age=300, s-maxage=300, stale-while-revalidate=600"
+    );
+
     return { source: mangaDexSource.id, item };
   }
 );
@@ -580,7 +603,7 @@ app.get<{ Params: { id: string } }>(
 
     reply.header(
       "Cache-Control",
-      "public, max-age=300, stale-while-revalidate=600"
+      "public, max-age=300, s-maxage=300, stale-while-revalidate=600"
     );
 
     return {
@@ -638,6 +661,11 @@ app.get<{
       order,
       chapter
     });
+
+    reply.header(
+      "Cache-Control",
+      "public, max-age=60, s-maxage=60, stale-while-revalidate=120"
+    );
 
     return {
       source: mangaDexSource.id,

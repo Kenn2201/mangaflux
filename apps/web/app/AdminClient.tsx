@@ -49,6 +49,15 @@ type Diagnostics = {
       heapTotalMb: number;
     };
   };
+  sourceCache: {
+    hits: number;
+    misses: number;
+    writes: number;
+    evictions: number;
+    dedupedRequests: number;
+    inFlightRequests: number;
+    entries: number;
+  };
   traffic: {
     windowMinutes: number;
     requests: number;
@@ -390,7 +399,10 @@ export default function AdminClient() {
                   ["Rate limited", diagnostics.traffic.rateLimited],
                   ["Average", `${diagnostics.traffic.averageLatencyMs} ms`],
                   ["P95", `${diagnostics.traffic.p95LatencyMs} ms`],
-                  ["Memory", `${diagnostics.process.memory.rssMb} MB`]
+                  ["Memory", `${diagnostics.process.memory.rssMb} MB`],
+                  ["Cache hits", diagnostics.sourceCache.hits],
+                  ["Cache entries", diagnostics.sourceCache.entries],
+                  ["Deduped", diagnostics.sourceCache.dedupedRequests]
                 ].map(([label, value]) => (
                   <article key={String(label)}>
                     <span>{label}</span>
@@ -453,6 +465,8 @@ export default function AdminClient() {
               </div>
 
               <p className="admin-diagnostic-note">
+                MangaDex cache uses bounded in-memory entries and coalesces
+                identical in-flight requests to reduce duplicate upstream work.
                 Diagnostics are in-memory and privacy-minimized: no request
                 bodies, query strings, IP addresses, authorization headers,
                 emails, passwords, or tokens are collected.

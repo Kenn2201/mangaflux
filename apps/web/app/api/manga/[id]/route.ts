@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { publicProxyHeaders } from "../../../../lib/publicProxyCache";
 
 const API_URL =
   process.env.MANGAFLUX_API_URL ??
@@ -26,10 +27,10 @@ export async function GET(
 
     return new NextResponse(body, {
       status: upstream.status,
-      headers: {
-        "content-type":
-          upstream.headers.get("content-type") ?? "application/json"
-      }
+      headers: publicProxyHeaders(
+        upstream,
+        "public, max-age=300, s-maxage=300, stale-while-revalidate=600"
+      )
     });
   } catch (error) {
     console.error("MangaFlux manga proxy failed", error);

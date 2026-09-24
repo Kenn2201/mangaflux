@@ -7,38 +7,34 @@
 - community and profiles
 - explainable recommendations
 
-## v0.8.x — Reliability + Operations — current
+## v0.8.x — Reliability + Operations — complete
 
 ### v0.8.0 — Reliability & Source Health
-- public system-status page
-- MangaDex and Neon health probes
-- safe-read retry/backoff
-- request timeouts and Retry-After handling
+- public system status
+- MangaDex/Neon health probes
+- safe-read retries, timeouts, Retry-After handling
 
 ### v0.8.1 — Admin Operations
 - server-side admin allowlist
 - protected admin console
-- operational/account/community overview
-- comment removal
-- user session revocation
+- account/community operational controls
 
 ### v0.8.2 — Diagnostics & Observability
-- privacy-minimized rolling runtime metrics
-- request/error/rate-limit counters
-- average and p95 latency
-- normalized route diagnostics
-- process uptime/memory
-- recent 429/5xx visibility
-- admin-configuration state on public status
+- privacy-minimized rolling runtime diagnostics
+- request/error/rate-limit/latency visibility
+- process uptime/memory metrics
 
-### Remaining v0.8.x
-- cache/revalidation review
-- rate-limit review
-- performance/cold-start review
-- optional external error monitoring
-- shared rate limiting only if multiple API instances are introduced
+### v0.8.3 — Cache, Rate Limits & Performance Hardening
+- bounded MangaDex caches
+- identical in-flight request coalescing
+- cache diagnostics
+- public shared-cache policy
+- Vercel cache-header propagation
+- bounded rate-limit buckets
+- RateLimit-Policy headers
+- single-instance limiter explicitly retained until scaling requires shared state
 
-## v0.9.x — V1 release candidate
+## v0.9.x — V1 release candidate — next
 
 - iPhone/tablet/desktop regression QA
 - accessibility audit
@@ -48,6 +44,7 @@
 - production smoke tests
 - branch/repository cleanup
 - release documentation
+- optional external error monitoring decision
 
 ## v1.0.0 — Stable V1
 

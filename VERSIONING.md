@@ -4,7 +4,7 @@ MangaFlux follows Semantic Versioning.
 
 ## Current version
 
-**v0.8.2 — Diagnostics & Observability**
+**v0.8.3 — Cache, Rate Limits & Performance Hardening**
 
 - `0.MINOR.0` = meaningful pre-V1 milestone
 - `0.MINOR.PATCH` = compatible focused milestone/fix during pre-V1
@@ -19,13 +19,14 @@ Before merging into `main`:
 3. Run secret scan and migration validation.
 4. Run TypeScript checks and production builds.
 5. Run dependency audit.
-6. Verify `ADMIN_EMAILS` is configured only on the trusted API service.
-7. Verify public status exposes only admin configured/disabled state.
-8. Verify admin diagnostics require a verified admin session.
-9. Verify diagnostics contain no request bodies, queries, IPs, auth headers, emails, passwords, tokens, or keys.
-10. Verify `/health` remains lightweight.
-11. Merge only after CI passes.
-12. Smoke-test `/status`, `/admin`, diagnostics, and normal reader/discovery flows.
+6. Verify only public MangaDex-derived GET data receives public cache headers.
+7. Verify errors and all authenticated/private responses remain no-store.
+8. Verify repeated identical public requests can be coalesced/cached without changing payloads.
+9. Verify cache and rate-limit maps are bounded.
+10. Verify search/discovery/chapter freshness windows are acceptable.
+11. Verify `/health` remains lightweight and `/status` remains deeper diagnostics.
+12. Merge only after CI passes.
+13. Smoke-test iPhone search, discovery, manga details, chapters, reader, account, admin, and status.
 
 ## Branch workflow
 
