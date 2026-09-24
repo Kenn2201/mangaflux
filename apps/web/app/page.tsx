@@ -93,7 +93,7 @@ export default async function Home({
       </section>
 
       <div className="landing-version">
-        v0.7.0 · Discovery & Dashboard
+        v0.8.0 · Reliability & Source Health
       </div>
     </main>
   );

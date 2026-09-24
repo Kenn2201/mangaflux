@@ -10,6 +10,7 @@ import MangaTile, {
   type MangaTileItem
 } from "./MangaTile";
 import { SearchSkeleton } from "./Skeletons";
+import { reliableFetch } from "../lib/reliableFetch";
 
 type DiscoveryKind = "hot" | "popular" | "top" | "latest";
 
@@ -92,7 +93,7 @@ export default function BrowseClient({
       if (status) params.set("status", status);
 
       try {
-        const response = await fetch(
+        const response = await reliableFetch(
           `/api/discovery?${params.toString()}`,
           {
             cache: "no-store",
@@ -204,7 +205,12 @@ export default function BrowseClient({
       </section>
 
       {loading ? <SearchSkeleton count={12} /> : null}
-      {message ? <p className="message">{message}</p> : null}
+      {message ? (
+        <div className="reliability-error">
+          <p className="message">{message}</p>
+          <Link href="/status">Check system status →</Link>
+        </div>
+      ) : null}
 
       {data?.items.length ? (
         <>

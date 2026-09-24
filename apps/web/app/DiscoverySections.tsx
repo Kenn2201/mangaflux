@@ -8,6 +8,7 @@ import {
 import MangaTile, {
   type MangaTileItem
 } from "./MangaTile";
+import { reliableFetch } from "../lib/reliableFetch";
 
 type DiscoveryPage = {
   items: MangaTileItem[];
@@ -65,9 +66,10 @@ export default function DiscoverySections({
 
     async function load() {
       try {
-        const response = await fetch("/api/discovery/home", {
-          cache: "no-store"
-        });
+        const response = await reliableFetch(
+          "/api/discovery/home",
+          { cache: "no-store" }
+        );
 
         if (!response.ok) throw new Error("Discovery unavailable");
 
@@ -89,7 +91,12 @@ export default function DiscoverySections({
       <section className="panel compact discovery-fallback">
         <p className="eyebrow">Discovery</p>
         <h2>Discovery is taking a break.</h2>
-        <p>Search and your library still work while the source catches up.</p>
+        <p>
+          Search and your library may still work while the source catches up.
+        </p>
+        <Link className="reliability-status-link" href="/status">
+          Check system status →
+        </Link>
       </section>
     );
   }

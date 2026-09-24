@@ -48,6 +48,14 @@ export type MangaPublicationStatus =
   | "hiatus"
   | "cancelled";
 
+export type SourceHealth = {
+  id: string;
+  name: string;
+  status: "operational" | "degraded" | "unavailable";
+  latencyMs: number;
+  checkedAt: string;
+};
+
 export type MangaListPage = {
   items: MangaSummary[];
   total: number;
@@ -131,6 +139,7 @@ export interface MangaSource {
   tags(): Promise<MangaTag[]>;
   details(id: string): Promise<MangaDetails>;
   related(id: string): Promise<MangaRelated[]>;
+  health(): Promise<SourceHealth>;
   chapterPage(id: string, options?: ChapterOptions): Promise<ChapterListPage>;
   chapters(id: string, options?: ChapterOptions): Promise<Chapter[]>;
   pages(chapterId: string, options?: PageOptions): Promise<ChapterPages>;

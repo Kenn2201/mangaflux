@@ -21,10 +21,7 @@
 - [x] landing page and signed-in dashboard
 - [x] header autocomplete
 - [x] genre/theme browsing
-- [x] clickable tags
-- [x] clickable publication status
-- [x] clickable year
-- [x] clickable author/artist
+- [x] clickable metadata filters
 - [x] Hot / Popular / Top Rated / Latest Updates
 - [x] discovery pagination
 
@@ -42,20 +39,29 @@
 
 - [x] explicit related titles
 - [x] Because you read…
-- [x] tag/genre similarity
-- [x] creator similarity
-- [x] release-year signal
+- [x] metadata similarity
 - [x] personalized dashboard discovery
-- [x] exclude recent/bookmarked titles from personalized results
+- [x] exclude recent/bookmarked titles
+
+## Reliability
+
+- [x] public system status
+- [x] MangaDex source-health probe
+- [x] Neon persistence-health probe
+- [x] transient safe-read retry/backoff
+- [x] request timeouts / Retry-After handling
+- [x] degraded-state status links
+- [ ] optional production monitoring
+- [ ] caching/revalidation review
+- [ ] rate-limit scaling review
+- [ ] production performance review
 
 ## Final stabilization
 
-- [ ] source health/status
-- [ ] improved retry/downstream error UX
-- [ ] optional production monitoring
-- [ ] caching/rate-limit review
 - [ ] iPhone/mobile regression QA
+- [ ] tablet/desktop regression QA
 - [ ] accessibility QA
 - [ ] final auth/community/security/dependency/migration audit
 - [ ] production smoke test
+- [ ] branch/repository cleanup
 - [ ] v1.0.0 release tag
