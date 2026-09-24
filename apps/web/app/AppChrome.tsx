@@ -79,6 +79,9 @@ export default function AppChrome({
   if (reader) {
     return (
       <>
+        <a className="skip-link" href="#reader-content">
+          Skip to reader
+        </a>
         {children}
         <ToastHost />
       </>
@@ -90,10 +93,15 @@ export default function AppChrome({
     pathname.startsWith("/search") ||
     pathname.startsWith("/genres");
   const libraryActive = pathname.startsWith("/dashboard");
-  const accountActive = pathname.startsWith("/account");
+  const accountActive =
+    pathname.startsWith("/account") ||
+    pathname.startsWith("/admin");
 
   return (
     <div className="app-frame">
+      <a className="skip-link" href="#main-content">
+        Skip to main content
+      </a>
       <header className="site-header discovery-header">
         <div className="site-header-inner discovery-header-inner">
           <Link className="site-brand" href="/" aria-label="MangaFlux home">
@@ -104,7 +112,11 @@ export default function AppChrome({
           <HeaderSearch />
 
           <div className="header-actions">
-            <Link className="header-dashboard-link" href="/dashboard">
+            <Link
+              className="header-dashboard-link"
+              href="/dashboard"
+              aria-current={libraryActive ? "page" : undefined}
+            >
               Dashboard
             </Link>
             <GenreMenu />
@@ -113,7 +125,12 @@ export default function AppChrome({
         </div>
       </header>
 
-      <div className="app-content" ref={contentRef}>
+      <div
+        className="app-content"
+        id="main-content"
+        tabIndex={-1}
+        ref={contentRef}
+      >
         {children}
       </div>
 
@@ -132,7 +149,11 @@ export default function AppChrome({
       </footer>
 
       <nav className="mobile-bottom-nav" aria-label="Mobile navigation">
-        <Link href="/" className={pathname === "/" ? "is-active" : ""}>
+        <Link
+          href="/"
+          className={pathname === "/" ? "is-active" : ""}
+          aria-current={pathname === "/" ? "page" : undefined}
+        >
           <NavIcon name="home" />
           <span>Home</span>
         </Link>
@@ -140,6 +161,7 @@ export default function AppChrome({
         <Link
           href="/browse?kind=popular"
           className={browseActive ? "is-active" : ""}
+          aria-current={browseActive ? "page" : undefined}
         >
           <NavIcon name="browse" />
           <span>Browse</span>
@@ -148,6 +170,7 @@ export default function AppChrome({
         <Link
           href="/dashboard#library"
           className={libraryActive ? "is-active" : ""}
+          aria-current={libraryActive ? "page" : undefined}
         >
           <NavIcon name="library" />
           <span>Library</span>

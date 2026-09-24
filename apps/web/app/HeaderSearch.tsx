@@ -150,7 +150,11 @@ export default function HeaderSearch() {
 
   return (
     <div className="header-search-shell" ref={shellRef}>
-      <form className="header-search" onSubmit={goToResults}>
+      <form
+        className="header-search"
+        role="search"
+        onSubmit={goToResults}
+      >
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <circle cx="11" cy="11" r="6.5" />
           <path d="m16 16 4.5 4.5" />
@@ -161,9 +165,16 @@ export default function HeaderSearch() {
           maxLength={120}
           autoComplete="off"
           enterKeyHint="search"
+          role="combobox"
           aria-label="Search manga"
+          aria-autocomplete="list"
           aria-expanded={open}
           aria-controls="mangaflux-search-suggestions"
+          aria-activedescendant={
+            activeIndex >= 0
+              ? `mangaflux-search-option-${activeIndex}`
+              : undefined
+          }
           placeholder="Search manga…"
           onChange={(event) => setQuery(event.target.value)}
           onFocus={() => {
@@ -196,6 +207,7 @@ export default function HeaderSearch() {
                 className={`search-suggestion ${
                   index === activeIndex ? "is-active" : ""
                 }`}
+                id={`mangaflux-search-option-${index}`}
                 href={`/manga/${item.id}?q=${encodeURIComponent(query.trim())}`}
                 role="option"
                 aria-selected={index === activeIndex}

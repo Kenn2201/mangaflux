@@ -1,50 +1,47 @@
 # MangaFlux V1 tasks
 
-## Infrastructure / accounts / persistence
+## Product scope
 
-- [x] Vercel + Render + Neon
-- [x] CI / secret scan / migration checks / dependency audit
-- [x] verified accounts + Resend recovery
-- [x] device/account bookmarks, history, progress, Continue Reading
-
-## Reader / discovery / product
-
-- [x] MangaDex reader + image proxy
-- [x] scalable chapter pagination/sorting/lookup
-- [x] reader HUD/navigation/Data Saver
-- [x] discovery/dashboard/search/genres
-- [x] clickable metadata filters
-- [x] comments/reactions/profiles
+- [x] mobile-first discovery/dashboard/search/genres
+- [x] scalable chapter browsing
+- [x] immersive reader + progress/resume
+- [x] verified accounts + email recovery
+- [x] account-backed bookmarks/history/progress
+- [x] profiles/comments/reactions
 - [x] recommendations
+- [x] admin operations
+- [x] system status/diagnostics
+- [x] cache/rate-limit/performance hardening
 
-## Reliability / operations
+## v0.9 automated release candidate
 
-- [x] public system status
-- [x] MangaDex + Neon health probes
-- [x] safe-read retries / timeouts / Retry-After
-- [x] protected admin console
-- [x] admin comment removal/session revocation
-- [x] privacy-minimized runtime diagnostics
-- [x] request/error/rate-limit/latency metrics
-- [x] process uptime/memory diagnostics
-- [x] bounded source caches
-- [x] in-flight MangaDex request coalescing
-- [x] public cache/revalidation policy
-- [x] bounded rate-limit buckets
-- [x] cache diagnostics
-- [x] production performance/cold-start architecture review
-- [ ] optional external monitoring decision
+- [x] synchronized version invariant
+- [x] private/public cache invariant
+- [x] public-secret-name invariant
+- [x] frontend security headers
+- [x] private page noindex
+- [x] skip navigation
+- [x] autocomplete accessibility semantics
+- [x] genre-dialog accessibility semantics
+- [x] hidden reader chrome keyboard isolation
+- [x] global not-found/error UX
+- [x] V1 production checklist
 
-## v0.9 release candidate
+## v0.9 manual release candidate
 
 - [ ] full iPhone/mobile regression QA
 - [ ] tablet/desktop regression QA
-- [ ] accessibility QA
-- [ ] auth/email/session audit
-- [ ] admin/community/avatar security audit
+- [ ] VoiceOver/keyboard accessibility QA
+- [ ] 200% zoom / narrow viewport QA
+- [ ] auth/email/session production audit
+- [ ] admin/community/avatar production audit
 - [ ] cache/rate-limit production verification
-- [ ] dependency/migration/security audit
-- [ ] production smoke test
-- [ ] branch/repository cleanup
-- [ ] final release documentation
-- [ ] v1.0.0 release tag
+- [ ] final dependency/migration/security review
+- [ ] final production smoke test
+- [ ] merged branch cleanup
+- [ ] resolve all blocking RC findings
+
+## v1.0
+
+- [ ] update release docs from RC to Stable V1
+- [ ] create v1.0.0 tag from audited production commit

@@ -46,3 +46,20 @@ Source requests use HTTPS, explicit allowlists, bounded timeouts/sizes, redirect
 ## Reporting
 
 Do not post credentials, session tokens, reset links, or working exploits in public issues.
+
+
+## Administrator access
+
+Administrator authorization is evaluated by the trusted API service after the internal proxy-secret and bearer-session checks. Admin access requires a verified MangaFlux account whose email is present in the server-side `ADMIN_EMAILS` allowlist.
+
+The admin console must never return password hashes, raw session tokens, verification/reset tokens, API keys, database credentials, or arbitrary SQL controls.
+
+## Cache boundaries
+
+Only public MangaDex-derived GET data may receive public/shared cache headers. Authentication, account state, reading state, community mutations, and administrator responses remain private/no-store.
+
+Release CI checks that known private route families do not import the public proxy-cache helper.
+
+## Frontend baseline
+
+The production frontend disables the framework signature header and emits baseline anti-framing, MIME-sniffing, referrer, permissions, and DNS-prefetch headers. These headers complement—not replace—the API security boundary.

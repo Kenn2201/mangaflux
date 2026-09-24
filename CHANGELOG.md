@@ -6,37 +6,46 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 
 ## Unreleased
 
-### Planned
-- V1 release-candidate regression and accessibility audit
-- Final security/dependency/migration review
-- Repository/branch cleanup
-- Optional external error monitoring
+### Release-candidate work
+- Physical iPhone/tablet/desktop regression results
+- Accessibility findings and fixes
+- Final production smoke-test findings
+- Branch cleanup
+- v1.0.0 release preparation
 
-## 0.8.3 - 2026-09-24 — Cache, Rate Limits & Performance Hardening
+## 0.9.0 - 2026-09-24 — V1 Release Candidate
 
 ### Added
-- MangaDex identical in-flight request coalescing.
-- Bounded MangaDex cache maps with expired/old-entry eviction.
-- Admin diagnostics for MangaDex cache hits, entry count, and deduplicated requests.
-- `RateLimit-Policy` response header.
-- Bounded in-memory rate-limit bucket storage.
-- Shared-cache directives for public source data.
-- Vercel public API proxies now preserve safe upstream cache-control headers.
+- CI release-invariant validation.
+- Canonical V1 production release checklist.
+- Frontend security-header configuration.
+- Keyboard skip-to-content links.
+- Global not-found page.
+- Recoverable global route-error page.
+- robots policy for API/private account surfaces.
 
-### Changed
-- Search responses cache for 30 seconds.
-- Discovery/home and chapter-list responses cache for 60 seconds.
-- Manga details and related titles cache for 5 minutes.
-- Genres/tags cache for 6 hours.
-- Public cache responses include `s-maxage` and stale-while-revalidate.
-- Error responses remain no-store.
-- MangaDex source adapter user-agent/version updated to v0.8.3.
+### Accessibility
+- Mobile navigation now exposes `aria-current` on active destinations.
+- Header search now uses combobox/listbox semantics with active option IDs.
+- Genre browser now exposes modal-dialog semantics.
+- Genre dialog moves focus to the close control and returns focus to its trigger.
+- Reader root is a main landmark.
+- Hidden top/bottom reader chrome is inert to keyboard interaction.
 
-### Security / privacy
-- No authenticated state, account data, admin responses, or mutations are publicly cached.
-- Cache diagnostics contain counters only and no user/request content.
-- The in-memory limiter remains bounded to reduce memory-growth risk.
+### Security / release engineering
+- Next.js `X-Powered-By` is disabled.
+- Frontend emits nosniff, DENY framing, referrer, permissions, and DNS-prefetch policy headers.
+- Account, dashboard, and admin metadata are noindex/no-follow.
+- CI rejects synchronized-version drift.
+- CI rejects known private secrets renamed under `NEXT_PUBLIC_*`.
+- CI rejects public cache helpers in known private API route families.
+- CI verifies ADMIN_EMAILS is not hardcoded in render.yaml.
 
+### Scope
+- No major new MangaFlux feature was added in this release.
+- v0.9 is a stabilization/release-candidate milestone; manual production QA is still required before v1.0.0.
+
+## 0.8.3 - 2026-09-24 — Cache, Rate Limits & Performance Hardening
 ## 0.8.2 - 2026-09-24 — Diagnostics & Observability
 ## 0.8.1 - 2026-09-24 — Admin Operations
 ## 0.8.0 - 2026-09-24 — Reliability & Source Health

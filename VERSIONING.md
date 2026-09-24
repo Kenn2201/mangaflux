@@ -4,29 +4,40 @@ MangaFlux follows Semantic Versioning.
 
 ## Current version
 
-**v0.8.3 — Cache, Rate Limits & Performance Hardening**
+**v0.9.0 — V1 Release Candidate**
 
 - `0.MINOR.0` = meaningful pre-V1 milestone
-- `0.MINOR.PATCH` = compatible focused milestone/fix during pre-V1
+- `0.MINOR.PATCH` = compatible focused pre-V1 fix
 - `1.0.0` = stable V1 finish line
 
-## Release checklist
+## v0.9 policy
+
+v0.9.x is feature-frozen for major product work. Changes should primarily be:
+
+- regression fixes
+- accessibility fixes
+- security hardening
+- reliability fixes
+- performance fixes
+- production/deployment fixes
+- documentation/release cleanup
+
+## Automated gate
 
 Before merging into `main`:
 
-1. Synchronize root/workspace versions.
-2. Update changelog/docs/app version.
-3. Run secret scan and migration validation.
-4. Run TypeScript checks and production builds.
-5. Run dependency audit.
-6. Verify only public MangaDex-derived GET data receives public cache headers.
-7. Verify errors and all authenticated/private responses remain no-store.
-8. Verify repeated identical public requests can be coalesced/cached without changing payloads.
-9. Verify cache and rate-limit maps are bounded.
-10. Verify search/discovery/chapter freshness windows are acceptable.
-11. Verify `/health` remains lightweight and `/status` remains deeper diagnostics.
-12. Merge only after CI passes.
-13. Smoke-test iPhone search, discovery, manga details, chapters, reader, account, admin, and status.
+1. Secret scan.
+2. Migration-journal validation.
+3. Release-invariant validation.
+4. TypeScript checks.
+5. Production build.
+6. Dependency audit.
+
+## Manual gate
+
+Use `docs/V1-RELEASE-CHECKLIST.md`.
+
+The final v1.0.0 tag must come from a production-tested main commit after blocking v0.9 findings are resolved.
 
 ## Branch workflow
 

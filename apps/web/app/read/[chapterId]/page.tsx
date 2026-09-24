@@ -562,7 +562,9 @@ export default function ReaderPage() {
   }
 
   return (
-    <div
+    <main
+      id="reader-content"
+      tabIndex={-1}
       className={`reader reader-immersive ${
         controlsVisible ? "controls-visible" : "controls-hidden"
       }`}
@@ -586,6 +588,7 @@ export default function ReaderPage() {
       <header
         className="reader-chrome reader-chrome-top"
         aria-hidden={!controlsVisible}
+        inert={!controlsVisible ? true : undefined}
       >
         <div className="reader-chrome-main">
           <Link className="reader-chrome-back" href={chaptersHref}>
@@ -662,6 +665,7 @@ export default function ReaderPage() {
         className="reader-chrome reader-chrome-bottom"
         aria-label="Chapter navigation"
         aria-hidden={!controlsVisible}
+        inert={!controlsVisible ? true : undefined}
       >
         {previousChapter ? (
           <Link href={chapterHref(previousChapter.id)}>
@@ -771,6 +775,6 @@ export default function ReaderPage() {
           heading="Chapter reactions & comments"
         />
       </div>
-    </div>
+    </main>
   );
 }

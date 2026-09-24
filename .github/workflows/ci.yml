@@ -35,6 +35,9 @@ jobs:
       - name: Validate migration journal
         run: npm run check:migrations
 
+      - name: Validate release invariants
+        run: npm run check:release
+
       - name: Typecheck
         run: npm run typecheck
 
