@@ -32,6 +32,7 @@ import {
   hashSessionToken,
   requireAuthProxy
 } from "./authSecurity.js";
+import { roleForEmail } from "./adminAccess.js";
 import {
   isEmailConfigured,
   sendPasswordResetEmail,
@@ -351,7 +352,10 @@ export function registerAuthRoutes(
         : false;
 
       return reply.code(201).send({
-        user,
+        user: {
+          ...user,
+          role: roleForEmail(user.email)
+        },
         verificationRequired: true,
         emailSent,
         message: emailSent
@@ -411,7 +415,8 @@ export function registerAuthRoutes(
           displayName: user.displayName,
           avatarDataUrl: user.avatarDataUrl,
           emailVerifiedAt: user.emailVerifiedAt,
-          createdAt: user.createdAt
+          createdAt: user.createdAt,
+          role: roleForEmail(user.email)
         },
         sessionToken: session.token,
         expiresAt: session.expiresAt.toISOString()
@@ -579,7 +584,8 @@ export function registerAuthRoutes(
           displayName: session.displayName,
           avatarDataUrl: session.avatarDataUrl,
           emailVerifiedAt: session.emailVerifiedAt,
-          createdAt: session.createdAt
+          createdAt: session.createdAt,
+          role: roleForEmail(session.email)
         },
         expiresAt: session.expiresAt.toISOString()
       };
@@ -625,7 +631,12 @@ export function registerAuthRoutes(
       );
 
       return {
-        user,
+        user: user
+          ? {
+              ...user,
+              role: roleForEmail(user.email)
+            }
+          : null,
         message: "Profile updated."
       };
     }

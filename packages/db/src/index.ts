@@ -1,3 +1,4 @@
+export * from "./adminRepository.js";
 export * from "./authRepository.js";
 export * from "./client.js";
 export * from "./communityRepository.js";

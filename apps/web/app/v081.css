@@ -1,0 +1,370 @@
+/* MangaFlux v0.8.1 — Admin Console */
+
+.admin-page {
+  padding-top: 42px;
+}
+
+.admin-hero {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  padding: clamp(24px, 4vw, 38px);
+  border: 1px solid #2b2b2b;
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 85% 12%, rgba(255,255,255,.045), transparent 34%),
+    #0d0d0d;
+}
+
+.admin-hero h1 {
+  margin: 7px 0 0;
+  font-size: clamp(46px, 8vw, 82px);
+  line-height: .96;
+  letter-spacing: -.055em;
+}
+
+.admin-hero p:last-child {
+  max-width: 720px;
+  margin: 16px 0 0;
+  color: #8b8b8b;
+  line-height: 1.6;
+}
+
+.admin-hero-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.admin-hero-actions a,
+.admin-hero-actions button {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 13px;
+  border: 1px solid #343434;
+  border-radius: 13px;
+  background: #141414;
+  color: #c8c8c8;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.admin-hero-actions button {
+  border-color: #ededed;
+  background: #ededed;
+  color: #080808;
+}
+
+.admin-title-skeleton {
+  width: min(640px, 86%);
+  height: 74px;
+  margin: 10px 0 16px;
+}
+
+.admin-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 18px;
+}
+
+.admin-stat-grid article {
+  min-width: 0;
+  min-height: 112px;
+  display: grid;
+  align-content: space-between;
+  gap: 12px;
+  padding: 15px;
+  border: 1px solid #292929;
+  border-radius: 17px;
+  background: #0f0f0f;
+}
+
+.admin-stat-grid span {
+  color: #777;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.admin-stat-grid strong {
+  font-size: 28px;
+  letter-spacing: -.035em;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.admin-section {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid #292929;
+  border-radius: 20px;
+  background: #0d0d0d;
+}
+
+.admin-section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-section-heading h2 {
+  margin-top: 4px;
+  font-size: 26px;
+  letter-spacing: -.035em;
+}
+
+.admin-section-heading > span {
+  color: #696969;
+  font-size: 10px;
+}
+
+.admin-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.admin-user-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid #282828;
+  border-radius: 15px;
+  background: #101010;
+}
+
+.admin-avatar {
+  width: 38px;
+  height: 38px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: #1c1c1c;
+  color: #c6c6c6;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.admin-avatar img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.admin-user-copy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.admin-user-copy strong,
+.admin-user-copy span,
+.admin-user-copy small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-user-copy strong {
+  font-size: 12px;
+}
+
+.admin-user-copy span {
+  color: #888;
+  font-size: 10px;
+}
+
+.admin-user-copy small {
+  color: #666;
+  font-size: 9px;
+}
+
+.admin-user-row button,
+.admin-comment-row button {
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid #333;
+  border-radius: 11px;
+  background: #151515;
+  color: #aaa;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.admin-user-row button:disabled,
+.admin-comment-row button:disabled {
+  opacity: .38;
+}
+
+.admin-comment-row {
+  padding: 13px;
+  border: 1px solid #282828;
+  border-radius: 15px;
+  background: #101010;
+}
+
+.admin-comment-meta {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.admin-comment-meta > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.admin-comment-meta strong,
+.admin-comment-meta span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-comment-meta strong {
+  font-size: 12px;
+}
+
+.admin-comment-meta span {
+  color: #6f6f6f;
+  font-size: 9px;
+}
+
+.admin-comment-row p {
+  margin: 9px 0 0;
+  color: #bdbdbd;
+  font-size: 12px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.admin-empty {
+  margin: 0;
+  color: #737373;
+  font-size: 11px;
+}
+
+.admin-safety-note {
+  margin-top: 18px;
+}
+
+.admin-safety-note p:last-child {
+  max-width: 860px;
+  color: #888;
+  line-height: 1.65;
+}
+
+.admin-entry-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.admin-entry-card p:last-child {
+  margin: 7px 0 0;
+  color: #828282;
+  line-height: 1.55;
+}
+
+.admin-entry-card > a {
+  flex: 0 0 auto;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 13px;
+  border: 1px solid #ededed;
+  border-radius: 13px;
+  background: #ededed;
+  color: #080808;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+@media (max-width: 1050px) {
+  .admin-stat-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 800px) {
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .admin-page {
+    padding-top: 24px;
+  }
+
+  .admin-hero {
+    display: grid;
+    align-items: start;
+    padding: 20px;
+    border-radius: 22px;
+  }
+
+  .admin-hero h1 {
+    font-size: clamp(44px, 13vw, 64px);
+  }
+
+  .admin-hero-actions {
+    width: 100%;
+  }
+
+  .admin-hero-actions a,
+  .admin-hero-actions button {
+    flex: 1 1 0;
+  }
+
+  .admin-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-stat-grid article {
+    min-height: 96px;
+  }
+
+  .admin-section {
+    padding: 15px;
+  }
+
+  .admin-user-row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .admin-user-row button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .admin-entry-card {
+    display: grid;
+  }
+
+  .admin-entry-card > a {
+    width: 100%;
+    justify-content: center;
+  }
+}

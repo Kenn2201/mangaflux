@@ -7,7 +7,7 @@
 - community and profiles
 - explainable recommendations
 
-## v0.8.x — Reliability + Source Health — current
+## v0.8.x — Reliability + Operations — current
 
 ### v0.8.0 — Reliability & Source Health
 - public system-status page
@@ -15,24 +15,30 @@
 - Neon persistence probe
 - footer status indicator
 - transient GET retry/backoff
-- Retry-After handling
-- request timeouts
-- degraded-state status links
+- request timeouts and Retry-After handling
+
+### v0.8.1 — Admin Operations
+- server-side admin allowlist
+- protected admin console
+- operational counters
+- recent account/community activity
+- administrator comment removal
+- revoke another user's active sessions
+- intentionally no password/token/secret access
 
 ### Remaining v0.8.x
-- richer operational diagnostics
 - optional Sentry production monitoring
 - cache/revalidation review
 - rate-limit review
-- performance and cold-start review
-- horizontally-scaled shared rate limiting if/when multiple API instances are introduced
+- performance/cold-start review
+- shared rate limiting only if multiple API instances are introduced
 
 ## v0.9.x — V1 release candidate
 
 - iPhone/tablet/desktop regression QA
 - accessibility audit
 - auth/email/session review
-- community/avatar security review
+- admin/community/avatar security review
 - dependency/migration/security audit
 - production smoke tests
 - release documentation
@@ -40,7 +46,7 @@
 
 ## v1.0.0 — Stable V1
 
-A stable mobile-first MangaDex reader with discovery, all chapters, verified accounts, recovery, account-backed library/progress, community features, recommendations, accessibility, and production-grade error/security handling.
+A stable mobile-first MangaDex reader with discovery, all chapters, verified accounts, recovery, account-backed library/progress, community features, recommendations, operations visibility, accessibility, and production-grade error/security handling.
 
 ## v2.0.0 — Multi-source architecture
 

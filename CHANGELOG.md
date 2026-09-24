@@ -7,32 +7,31 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- Operational diagnostics and optional production monitoring
+- Optional production monitoring
 - Cache/revalidation and rate-limit review
-- Production performance hardening
+- Performance and cold-start hardening
 
-## 0.8.0 - 2026-09-24 — Reliability & Source Health
+## 0.8.1 - 2026-09-24 — Admin Operations
 
 ### Added
-- Public MangaFlux system-status page.
-- Cached MangaDex source-health probe with latency reporting.
-- Neon persistence-health probe with latency reporting.
-- Footer system-status indicator.
-- Shared browser reliability helper for safe GET requests.
-- Bounded retry/backoff for transient 408, 425, 429, 500, 502, 503, and 504 responses.
-- Bounded Retry-After handling and per-attempt timeouts.
+- Server-side `ADMIN_EMAILS` administrator allowlist.
+- `role: admin|user` in authenticated session responses.
+- Protected `/admin` console.
+- Operational counters for users, active sessions, comments, reactions, bookmarks, and reading progress.
+- Recent-user and recent-community activity views.
+- Administrator comment removal.
+- Administrator session revocation for another user.
+- Admin entry point on the account page.
 
-### Changed
-- Discovery, search, genre, and recommendation reads now retry short transient failures.
-- Discovery/search failure states link to the system-status page.
-- The API status response distinguishes source, persistence, authentication, and email configuration.
-- MangaDex source adapter user-agent/version updated to v0.8.0.
+### Security
+- Admin authorization is enforced on the API after proxy-secret and bearer-session validation.
+- Admin access requires a verified MangaFlux account whose email is in `ADMIN_EMAILS`.
+- The console never returns password hashes, session tokens, API keys, or database credentials.
+- Admin self-session bulk revocation is blocked from the console.
+- Admin mutations keep the existing same-origin/client-header protection at the Vercel boundary.
+- Personal admin email addresses are not hardcoded into the repository.
 
-### Reliability
-- Source-health checks are cached for 30 seconds to avoid unnecessary upstream traffic.
-- Browser retries remain abort-aware so navigation/search cancellation does not create stale requests.
-- Lightweight `/health` remains separate from deeper `/api/status` diagnostics.
-
+## 0.8.0 - 2026-09-24 — Reliability & Source Health
 ## 0.7.3 - 2026-09-24 — Recommendations
 ## 0.7.2 - 2026-09-24 — Community & Profiles
 ## 0.7.1 - 2026-09-24 — Chapter Scale & Reader Controls
