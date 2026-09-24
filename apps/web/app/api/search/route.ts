@@ -9,17 +9,26 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get("q")?.trim();
+  const rawLimit = Number(
+    request.nextUrl.searchParams.get("limit") ?? "24"
+  );
+  const limit =
+    Number.isInteger(rawLimit) && rawLimit >= 1 && rawLimit <= 24
+      ? rawLimit
+      : 24;
 
-  if (!query) {
+  if (!query || query.length > 120) {
     return NextResponse.json(
-      { error: "INVALID_REQUEST", message: "Missing q query parameter" },
+      { error: "INVALID_REQUEST", message: "Missing or invalid q parameter" },
       { status: 400 }
     );
   }
 
   try {
     const upstream = await fetch(
-      `${API_URL.replace(/\/$/, "")}/api/search?q=${encodeURIComponent(query)}`,
+      `${API_URL.replace(/\/$/, "")}/api/search?q=${encodeURIComponent(
+        query
+      )}&limit=${limit}`,
       {
         cache: "no-store",
         signal: AbortSignal.timeout(15_000)

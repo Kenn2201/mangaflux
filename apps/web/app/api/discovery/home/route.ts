@@ -1,0 +1,40 @@
+import { NextResponse } from "next/server";
+
+const API_URL =
+  process.env.MANGAFLUX_API_URL ??
+  process.env.NEXT_PUBLIC_API_URL ??
+  "https://api.manga.kenncode.me";
+
+export const dynamic = "force-dynamic";
+
+export async function GET() {
+  try {
+    const upstream = await fetch(
+      `${API_URL.replace(/\/$/, "")}/api/discovery/home`,
+      {
+        cache: "no-store",
+        signal: AbortSignal.timeout(20_000)
+      }
+    );
+
+    const body = await upstream.text();
+
+    return new NextResponse(body, {
+      status: upstream.status,
+      headers: {
+        "content-type":
+          upstream.headers.get("content-type") ?? "application/json"
+      }
+    });
+  } catch (error) {
+    console.error("MangaFlux home discovery proxy failed", error);
+
+    return NextResponse.json(
+      {
+        error: "API_UNAVAILABLE",
+        message: "MangaFlux discovery is temporarily unavailable."
+      },
+      { status: 502 }
+    );
+  }
+}
