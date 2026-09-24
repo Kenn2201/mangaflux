@@ -10,6 +10,7 @@ import {
 } from "react";
 import { notify } from "../../../lib/toast";
 import { MangaDetailsSkeleton } from "../../Skeletons";
+import CommunityThread from "../../CommunityThread";
 
 type MangaDetails = {
   id: string;
@@ -19,6 +20,11 @@ type MangaDetails = {
   status?: string;
   year?: number;
   tags?: string[];
+  tagDetails?: Array<{
+    id: string;
+    name: string;
+    group?: string;
+  }>;
   authors?: string[];
   artists?: string[];
   externalUrl?: string;
@@ -341,7 +347,21 @@ export default function MangaPage() {
             <p className="description">{manga.description}</p>
           ) : null}
 
-          {manga.tags?.length ? (
+          {manga.tagDetails?.length ? (
+            <div className="tag-row">
+              {manga.tagDetails.slice(0, 12).map((tag) => (
+                <Link
+                  className="tag tag-link"
+                  key={tag.id}
+                  href={`/browse?kind=popular&tag=${encodeURIComponent(
+                    tag.id
+                  )}&name=${encodeURIComponent(tag.name)}`}
+                >
+                  {tag.name}
+                </Link>
+              ))}
+            </div>
+          ) : manga.tags?.length ? (
             <div className="tag-row">
               {manga.tags.slice(0, 12).map((tag) => (
                 <span className="tag" key={tag}>{tag}</span>
@@ -521,6 +541,12 @@ export default function MangaPage() {
           </nav>
         ) : null}
       </section>
+
+      <CommunityThread
+        targetType="manga"
+        targetId={id}
+        heading="Reader reactions & comments"
+      />
     </main>
   );
 }

@@ -23,7 +23,8 @@ import {
   markUserEmailVerified,
   replaceEmailVerificationToken,
   replacePasswordResetToken,
-  updateUserPassword
+  updateUserPassword,
+  updateUserProfile
 } from "@mangaflux/db";
 import type { MangaFluxDatabase } from "@mangaflux/db";
 import {
@@ -60,6 +61,11 @@ type AuthBody = {
   token?: string;
 };
 
+type ProfileBody = {
+  displayName?: string | null;
+  avatarDataUrl?: string | null;
+};
+
 function normalizeEmail(value: unknown) {
   if (typeof value !== "string") return null;
 
@@ -85,6 +91,37 @@ function validPassword(value: unknown): value is string {
 
 function validReaderId(value: unknown): value is string {
   return typeof value === "string" && UUID_RE.test(value);
+}
+
+function normalizeDisplayName(value: unknown) {
+  if (value === null || value === undefined) return null;
+  if (typeof value !== "string") return undefined;
+
+  const name = value.trim().replace(/\s+/g, " ");
+  if (!name) return null;
+  if (name.length < 2 || name.length > 32 || /[\u0000-\u001f\u007f]/.test(name)) {
+    return undefined;
+  }
+
+  return name;
+}
+
+function normalizeAvatarDataUrl(value: unknown) {
+  if (value === null || value === undefined || value === "") return null;
+  if (typeof value !== "string") return undefined;
+  if (!value.startsWith("data:image/webp;base64,")) return undefined;
+  if (value.length > 280_000) return undefined;
+
+  const encoded = value.slice("data:image/webp;base64,".length);
+
+  try {
+    const bytes = Buffer.from(encoded, "base64");
+    if (!bytes.length || bytes.length > 200_000) return undefined;
+  } catch {
+    return undefined;
+  }
+
+  return value;
 }
 
 function validOpaqueToken(value: unknown): value is string {
@@ -371,6 +408,8 @@ export function registerAuthRoutes(
         user: {
           id: user.id,
           email: user.email,
+          displayName: user.displayName,
+          avatarDataUrl: user.avatarDataUrl,
           emailVerifiedAt: user.emailVerifiedAt,
           createdAt: user.createdAt
         },
@@ -537,10 +576,57 @@ export function registerAuthRoutes(
         user: {
           id: session.userId,
           email: session.email,
+          displayName: session.displayName,
+          avatarDataUrl: session.avatarDataUrl,
           emailVerifiedAt: session.emailVerifiedAt,
           createdAt: session.createdAt
         },
         expiresAt: session.expiresAt.toISOString()
+      };
+    }
+  );
+
+  app.put<{ Body: ProfileBody }>(
+    "/api/auth/profile",
+    {
+      preHandler: limits.session,
+      bodyLimit: 320 * 1024
+    },
+    async (request, reply) => {
+      const session = await authenticateSession(
+        request,
+        reply,
+        database,
+        authProxySecret
+      );
+
+      if (!session || !database) return;
+
+      const displayName = normalizeDisplayName(request.body?.displayName);
+      const avatarDataUrl = normalizeAvatarDataUrl(
+        request.body?.avatarDataUrl
+      );
+
+      if (displayName === undefined || avatarDataUrl === undefined) {
+        return reply.code(400).send({
+          error: "INVALID_REQUEST",
+          message:
+            "Display name must be 2-32 characters and avatar must be a small WebP image."
+        });
+      }
+
+      const user = await updateUserProfile(
+        database,
+        session.userId,
+        {
+          displayName,
+          avatarDataUrl
+        }
+      );
+
+      return {
+        user,
+        message: "Profile updated."
       };
     }
   );

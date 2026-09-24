@@ -16,6 +16,7 @@ export type MangaDetails = MangaSummary & {
   authors?: string[];
   artists?: string[];
   externalUrl?: string;
+  tagDetails?: MangaTag[];
 };
 
 export type MangaTag = {

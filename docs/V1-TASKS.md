@@ -11,13 +11,13 @@
 
 - [x] MangaDex search/details/chapters/image proxy
 - [x] Page X / Y, progress, previous/next, Data Saver
-- [x] chapters beyond the newest 100-item feed
-- [x] chapter pagination
-- [x] newest/oldest chapter sorting
-- [x] chapter-number lookup
+- [x] chapters beyond newest 100
+- [x] chapter pagination/sorting/lookup
 - [x] tap-to-show reader chrome
-- [x] persistent reader progress/page HUD
-- [x] scroll-to-top control
+- [x] persistent progress/page HUD
+- [x] scroll-to-top
+- [x] centered chapters/home reader action
+- [x] reader cover context
 
 ## Discovery
 
@@ -25,20 +25,23 @@
 - [x] signed-in dashboard
 - [x] header autocomplete search
 - [x] genre browser
+- [x] dedicated genre/theme directory
+- [x] clickable manga tags
 - [x] MangaFlux Hot
-- [x] Popular
-- [x] Top Rated
-- [x] Latest Updates
+- [x] Popular / Top Rated / Latest Updates
 - [x] Show All pagination
 
 ## Community / profiles
 
-- [ ] profile avatar upload
-- [ ] manga comments
-- [ ] chapter comments
-- [ ] five-minute account comment cooldown
-- [ ] reactions
-- [ ] own-comment deletion
+- [x] profile display name
+- [x] profile avatar upload
+- [x] manga comments
+- [x] chapter comments
+- [x] five-minute account comment cooldown
+- [x] manga/chapter reactions
+- [x] comment pagination
+- [x] own-comment deletion
+- [x] public comments hide account email
 
 ## Recommendations
 

@@ -1,8 +1,8 @@
 # MangaFlux
 
-> A mobile-first modular manga discovery and reading platform powering manga.kenncode.me.
+> A mobile-first modular manga discovery, reading, and community platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v0.7.1--Chapter_Scale_Reader-indigo.svg)
+![Version](https://img.shields.io/badge/version-v0.7.2--Community_Profiles-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,59 +10,66 @@
 
 ## Current release
 
-**v0.7.1 — Chapter Scale & Reader Controls**
+**v0.7.2 — Community & Profiles**
 
-This release fixes the first v0.7 production bug and removes the 100-chapter product ceiling.
+MangaFlux now has account-native community identity, reactions, and comments while keeping the reader mobile-first.
 
-### Chapter scale
+### Community
 
-- chapter pages now use real MangaDex pagination
-- manga with 100+ chapters can reach older chapters instead of silently stopping at the first 100
-- 50 chapters per MangaFlux page
-- Newest / Oldest sorting
-- exact chapter-number lookup such as 1, 12, or 12.5
-- reader neighbor lookup scans paginated chapter pages so previous/next navigation is no longer limited to the newest 100 entries
+- Manga-level reactions and comments
+- Chapter-level reactions and comments
+- verified MangaFlux account required to post/react
+- one comment every 5 minutes per account
+- 1,000-character comment limit
+- paginated comments
+- users can delete their own comments
+- reaction choices: Like, Funny, Wow, Sad, Fire
+- no moderation dashboard in this milestone
 
-### Reader controls
+### Profiles
 
-- distraction-free reader chrome auto-hides
-- tap the page area to reveal reader controls again
-- persistent centered Page X / Y pill
-- persistent thin reading progress meter
-- overlay previous/next chapter controls
-- Data Saver remains available from the reader chrome
-- lower-right scroll-to-top control
-- reading progress save status remains available in the revealed chrome
+- display names
+- profile avatar upload
+- client-side square crop/compression to WebP
+- public comments show display name/avatar, never account email
+- header account chip supports profile avatars
 
-### Fixes
+For this pre-V1 release, compact avatar images are stored with the user's Neon profile record after local WebP normalization. Manga pages themselves are still never mirrored into MangaFlux storage.
 
-- fixed the v0.7.0 genre menu request loop that could leave the mobile genre sheet loading indefinitely
-- added a visible retry state if genre loading genuinely fails
+### v0.7.1 physical-audit fixes included
 
-## Existing product structure
+- genre sheet is rendered through a document portal so iPhone Safari no longer constrains it inside the sticky header
+- genre menu includes **Browse more genres**
+- dedicated Genres & Themes directory
+- manga detail tags are clickable discovery links
+- reader header shows the manga cover
+- reader bottom controls now have a centered Chapters/Home button
+- scroll-to-top uses a centered SVG arrow instead of a text glyph
+
+## Product structure
 
 ~~~text
 /
 Landing + discovery
 
 /dashboard
-Account reading dashboard
+Signed-in reading dashboard
 
-/search?q=...
-Live-search results
-
-/browse?kind=...
-Paginated discovery
+/genres
+Genre and theme directory
 
 /manga/:id
-Manga details + scalable chapter pages
+Manga details, chapters, reactions, comments
 
 /read/:chapterId
-Immersive tap-controlled reader
+Immersive reader + chapter community at the end
+
+/account
+Account, profile avatar/name, security
 ~~~
 
 ## Roadmap
 
-Next: **v0.7.2 Community & Profiles** with MangaFlux-native comments, reactions, and profile avatars.
+Next: **v0.7.3 Recommendations**, starting with tag/genre similarity, related titles, history/bookmark signals, and personalized dashboard discovery.
 
-Then v0.7.3 adds recommendations before the v0.8 reliability/source-health phase.
+Then v0.8 focuses on reliability and source health.
