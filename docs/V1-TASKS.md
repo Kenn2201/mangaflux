@@ -7,41 +7,15 @@
 - [x] verified accounts + Resend recovery
 - [x] device/account bookmarks, history, progress, Continue Reading
 
-## Reader
+## Reader / discovery / product
 
-- [x] MangaDex search/details/chapters/image proxy
-- [x] all chapters with pagination/sorting/lookup
-- [x] Page X / Y, progress, previous/next, Data Saver
-- [x] tap reader chrome
-- [x] persistent reader HUD
-- [x] scroll-to-top + centered chapter-home action
-
-## Discovery
-
-- [x] landing page and signed-in dashboard
-- [x] header autocomplete
-- [x] genre/theme browsing
+- [x] MangaDex reader + image proxy
+- [x] scalable chapter pagination/sorting/lookup
+- [x] reader HUD/navigation/Data Saver
+- [x] discovery/dashboard/search/genres
 - [x] clickable metadata filters
-- [x] Hot / Popular / Top Rated / Latest Updates
-- [x] discovery pagination
-
-## Community / profiles
-
-- [x] profile name/avatar
-- [x] manga/chapter comments
-- [x] five-minute comment cooldown
-- [x] reactions
-- [x] comment pagination
-- [x] own-comment deletion
-- [x] public comments hide account email
-
-## Recommendations
-
-- [x] explicit related titles
-- [x] Because you read…
-- [x] metadata similarity
-- [x] personalized dashboard discovery
-- [x] exclude recent/bookmarked titles
+- [x] comments/reactions/profiles
+- [x] recommendations
 
 ## Reliability / operations
 
@@ -50,15 +24,16 @@
 - [x] Neon persistence-health probe
 - [x] transient safe-read retry/backoff
 - [x] request timeout / Retry-After handling
-- [x] degraded-state status links
-- [x] server-side admin allowlist
 - [x] protected admin console
-- [x] administrator comment removal
-- [x] administrator session revocation
-- [ ] optional production monitoring
+- [x] admin comment removal/session revocation
+- [x] privacy-minimized runtime diagnostics
+- [x] request/error/rate-limit/latency metrics
+- [x] process uptime/memory diagnostics
+- [x] public admin-configuration state
 - [ ] caching/revalidation review
 - [ ] rate-limit scaling review
-- [ ] production performance review
+- [ ] production performance/cold-start review
+- [ ] optional external monitoring
 
 ## Final stabilization
 

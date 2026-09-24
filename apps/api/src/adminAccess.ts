@@ -9,6 +9,10 @@ function configuredAdminEmails() {
   );
 }
 
+export function isAdminConfigured() {
+  return configuredAdminEmails().size > 0;
+}
+
 export function isAdminEmail(email: string | null | undefined) {
   if (!email) return false;
   return configuredAdminEmails().has(email.trim().toLowerCase());

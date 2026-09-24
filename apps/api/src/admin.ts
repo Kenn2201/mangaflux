@@ -11,6 +11,7 @@ import {
 import type { MangaFluxDatabase } from "@mangaflux/db";
 import { authenticateSession } from "./auth.js";
 import { isAdminEmail } from "./adminAccess.js";
+import { getDiagnosticsSnapshot } from "./diagnostics.js";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -92,6 +93,36 @@ export function registerAdminRoutes(
           displayName: session.displayName
         },
         ...overview
+      };
+    }
+  );
+
+  app.get(
+    "/api/admin/diagnostics",
+    { preHandler: limits.read },
+    async (request, reply) => {
+      const session = await requireAdmin(
+        request,
+        reply,
+        database,
+        authProxySecret
+      );
+
+      if (!session) return;
+
+      const memory = process.memoryUsage();
+
+      return {
+        process: {
+          uptimeSeconds: Math.floor(process.uptime()),
+          nodeVersion: process.version,
+          memory: {
+            rssMb: Math.round(memory.rss / 1024 / 1024),
+            heapUsedMb: Math.round(memory.heapUsed / 1024 / 1024),
+            heapTotalMb: Math.round(memory.heapTotal / 1024 / 1024)
+          }
+        },
+        traffic: getDiagnosticsSnapshot()
       };
     }
   );

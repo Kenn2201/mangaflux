@@ -11,6 +11,7 @@ import "./v072.css";
 import "./v073.css";
 import "./v080.css";
 import "./v081.css";
+import "./v082.css";
 
 export const metadata: Metadata = {
   title: {
