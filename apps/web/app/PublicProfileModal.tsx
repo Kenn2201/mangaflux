@@ -68,6 +68,7 @@ export default function PublicProfileModal({
       return;
     }
 
+    const selectedUserId = userId;
     const previous = document.activeElement as HTMLElement | null;
     const controller = new AbortController();
 
@@ -78,7 +79,7 @@ export default function PublicProfileModal({
     async function load() {
       try {
         const response = await fetch(
-          `/api/community/users/${encodeURIComponent(userId)}/profile`,
+          `/api/community/users/${encodeURIComponent(selectedUserId)}/profile`,
           {
             cache: "no-store",
             signal: controller.signal
