@@ -80,10 +80,12 @@ export default function PersonalRecommendations() {
         const summary =
           (await summaryResponse.json()) as Summary;
 
-        const seed =
+        const historySeed =
           summary.continueReading ??
-          summary.history[0] ??
-          summary.bookmarks[0];
+          (summary.history.length ? summary.history[0] : null);
+        const bookmarkSeed =
+          summary.bookmarks.length ? summary.bookmarks[0] : null;
+        const seed = historySeed ?? bookmarkSeed;
 
         if (!seed) return;
 
