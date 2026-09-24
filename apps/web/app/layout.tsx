@@ -6,6 +6,7 @@ import AppChrome from "./AppChrome";
 import "./styles.css";
 import "./v060.css";
 import "./v070.css";
+import "./v071.css";
 
 export const metadata: Metadata = {
   title: {

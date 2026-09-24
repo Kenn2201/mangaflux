@@ -17,12 +17,15 @@ export default function GenreMenu() {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<MangaTag[]>([]);
   const [loading, setLoading] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const [requestKey, setRequestKey] = useState(0);
 
   useEffect(() => {
-    if (!open || items.length || loading) return;
+    if (!open || items.length) return;
 
     let cancelled = false;
     setLoading(true);
+    setFailed(false);
 
     async function load() {
       try {
@@ -30,23 +33,30 @@ export default function GenreMenu() {
           cache: "no-store"
         });
 
-        if (!response.ok) return;
+        if (!response.ok) {
+          throw new Error("Genres unavailable");
+        }
 
         const payload = (await response.json()) as {
           items: MangaTag[];
         };
 
-        if (!cancelled) setItems(payload.items);
+        if (!cancelled) {
+          setItems(payload.items);
+        }
+      } catch {
+        if (!cancelled) setFailed(true);
       } finally {
         if (!cancelled) setLoading(false);
       }
     }
 
     void load();
+
     return () => {
       cancelled = true;
     };
-  }, [open, items.length, loading]);
+  }, [open, items.length, requestKey]);
 
   useEffect(() => {
     if (!open) return;
@@ -106,10 +116,21 @@ export default function GenreMenu() {
             </div>
 
             {loading ? (
-              <div className="genre-loading">
+              <div className="genre-loading" aria-busy="true">
                 {Array.from({ length: 14 }).map((_, index) => (
                   <span className="skeleton" key={index} />
                 ))}
+              </div>
+            ) : failed ? (
+              <div className="genre-error">
+                <strong>Genres did not load.</strong>
+                <span>Search and discovery still work.</span>
+                <button
+                  type="button"
+                  onClick={() => setRequestKey((value) => value + 1)}
+                >
+                  Retry
+                </button>
               </div>
             ) : (
               <div className="genre-menu-grid">

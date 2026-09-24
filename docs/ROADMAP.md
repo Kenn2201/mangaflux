@@ -1,34 +1,30 @@
 # MangaFlux Roadmap
 
-## v0.7.0 — Discovery & Dashboard — current
+## v0.7.0 — Discovery & Dashboard — complete
 
-- real public landing page
+- landing page
 - signed-in dashboard
-- header search
-- live autocomplete with cover/title/year/tag context
+- header autocomplete search
 - genre browser
-- MangaFlux Hot
-- Popular
-- Top Rated
-- Latest Updates
-- Show All pages
-- discovery pagination
+- MangaFlux Hot / Popular / Top Rated / Latest Updates
+- paginated discovery
 
-## v0.7.1 — Chapter Scale & Reader Controls — next
+## v0.7.1 — Chapter Scale & Reader Controls — current
 
-- remove the current 100-chapter ceiling
-- chapter pagination / incremental loading
+- fixed genre-menu indefinite loading loop
+- chapter pagination beyond 100 items
 - newest / oldest chapter sorting
-- chapter jump/search
-- tap reader to reveal chrome
+- exact chapter-number lookup
+- reader navigation across paginated chapter feeds
+- tap-to-show reader chrome
 - persistent centered Page X / Y
-- persistent thin reading-progress meter
+- persistent thin progress meter
 - auto-hide large reader controls
-- scroll-to-top reader button
-- previous/next chapter controls in revealed chrome
-- reader settings / quality interaction polish
+- lower-right scroll-to-top
+- previous/next chapter overlay controls
+- Data Saver in revealed reader chrome
 
-## v0.7.2 — Community & Profiles
+## v0.7.2 — Community & Profiles — next
 
 - profile avatar upload
 - display-name/profile polish

@@ -4,10 +4,10 @@ MangaFlux follows Semantic Versioning.
 
 ## Current version
 
-**v0.7.0 — Discovery & Dashboard**
+**v0.7.1 — Chapter Scale & Reader Controls**
 
 - `0.MINOR.0` = meaningful pre-V1 milestone
-- `0.MINOR.PATCH` = compatible fix or focused improvement
+- `0.MINOR.PATCH` = compatible focused milestone/fix during pre-V1
 - `1.0.0` = stable V1 finish line
 
 ## Release checklist
@@ -21,11 +21,11 @@ Before merging into `main`:
 5. Run dependency audit.
 6. Keep database/auth/Resend secrets out of `NEXT_PUBLIC_*`.
 7. Verify source attribution and permitted-source behavior.
-8. Verify discovery/search request pacing and rate limits.
-9. Merge only after CI passes.
-10. Verify Render health and Vercel production deployment.
-11. Smoke test discovery on iPhone Safari before the next milestone.
-12. Stable releases receive a matching Git tag.
+8. Verify search/discovery/chapter request pacing and rate limits.
+9. Test at least one series with more than 100 chapters.
+10. Test reader controls on iPhone Safari.
+11. Merge only after CI passes.
+12. Verify Render health and Vercel deployment.
 
 ## Branch workflow
 

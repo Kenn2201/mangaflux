@@ -60,6 +60,24 @@ export type Chapter = {
   externalUrl?: string;
 };
 
+export type ChapterOrder = "asc" | "desc";
+
+export type ChapterOptions = {
+  language?: string;
+  limit?: number;
+  offset?: number;
+  order?: ChapterOrder;
+  chapter?: string;
+};
+
+export type ChapterListPage = {
+  items: Chapter[];
+  total: number;
+  limit: number;
+  offset: number;
+  order: ChapterOrder;
+};
+
 export type Page = {
   index: number;
   imageUrl: string;
@@ -77,10 +95,6 @@ export type ChapterPages = {
   };
 };
 
-export type ChapterOptions = {
-  language?: string;
-};
-
 export type PageOptions = {
   dataSaver?: boolean;
 };
@@ -95,6 +109,7 @@ export interface MangaSource {
   ): Promise<MangaListPage>;
   tags(): Promise<MangaTag[]>;
   details(id: string): Promise<MangaDetails>;
+  chapterPage(id: string, options?: ChapterOptions): Promise<ChapterListPage>;
   chapters(id: string, options?: ChapterOptions): Promise<Chapter[]>;
   pages(chapterId: string, options?: PageOptions): Promise<ChapterPages>;
 }

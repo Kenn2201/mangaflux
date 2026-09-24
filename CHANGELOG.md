@@ -7,37 +7,33 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- All-chapter pagination and chapter navigation at scale
-- Tap-to-show reader controls
 - Community comments/reactions and profile avatars
 - Personalized recommendations
 
-## 0.7.0 - 2026-09-24 — Discovery & Dashboard
+## 0.7.1 - 2026-09-24 — Chapter Scale & Reader Controls
+
+### Fixed
+- Genre menu no longer repeatedly restarts its request while the loading state changes.
+- Genre menu now exposes an explicit retry state instead of an indefinite spinner.
 
 ### Added
-- Dedicated public MangaFlux landing page.
-- Dedicated signed-in Dashboard.
-- Header search with debounced live suggestions, covers, year, and tag context.
-- Keyboard navigation for search suggestions.
-- Dedicated search-results page.
-- Header genre browser with mobile bottom-sheet behavior.
-- MangaFlux Hot discovery ranking blending recent updates and popularity.
-- Popular, Top Rated, and Latest Updates discovery rails.
-- Genre discovery shelf.
-- Paginated Show All browse pages.
-- Public discovery API and genre API with short-lived caching.
+- Paginated MangaDex chapter feed with total/limit/offset metadata.
+- Newest and Oldest chapter sorting.
+- Exact chapter-number lookup.
+- Reader previous/next lookup across paginated chapter feeds.
+- Tap-to-show reader chrome.
+- Auto-hide reader controls.
+- Persistent Page X / Y HUD.
+- Persistent reading progress meter.
+- Reader overlay chapter navigation.
+- Lower-right scroll-to-top control.
 
 ### Changed
-- Search is now a first-class header interaction instead of a homepage-only form.
-- Mobile bottom navigation now routes Browse and Library to dedicated product surfaces.
-- Old `/?q=` search URLs redirect into the new search page.
-- Search result summaries now include year/tag metadata when available.
+- Manga chapter lists now display 50 items per page rather than silently exposing only the newest 100.
+- Reader navigation can traverse series whose current chapter is outside the newest 100 feed items.
+- Reader source/save/quality controls move into temporary chrome while page/progress indicators stay visible.
 
-### Security / reliability
-- Discovery endpoints have a dedicated per-IP rate limit.
-- Discovery query kinds, pagination values, and genre UUIDs are validated.
-- MangaDex requests remain paced and cached.
-
+## 0.7.0 - 2026-09-24 — Discovery & Dashboard
 ## 0.6.0 - 2026-09-24 — Mobile UX Foundation
 ## 0.5.1 - 2026-09-24 — Transactional Email
 ## 0.5.0 - 2026-09-24 — Authentication
