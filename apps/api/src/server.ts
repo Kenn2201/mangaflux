@@ -4,6 +4,7 @@ import {
   createDatabase,
   probeDatabase
 } from "@mangaflux/db";
+import { registerAdminRoutes } from "./admin.js";
 import { registerAuthRoutes } from "./auth.js";
 import { registerCommunityRoutes } from "./community.js";
 import { isEmailConfigured } from "./email.js";
@@ -17,7 +18,7 @@ import type {
   MangaSummary
 } from "@mangaflux/sources";
 
-const APP_VERSION = "0.8.0";
+const APP_VERSION = "0.8.1";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LANGUAGE_RE = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i;
@@ -157,6 +158,12 @@ const communityReadRateLimit = makeRateLimit("community-read", 120);
 const communityWriteRateLimit = makeRateLimit(
   "community-write",
   30,
+  5 * 60_000
+);
+const adminReadRateLimit = makeRateLimit("admin-read", 60);
+const adminWriteRateLimit = makeRateLimit(
+  "admin-write",
+  20,
   5 * 60_000
 );
 
@@ -376,6 +383,11 @@ registerStateRoutes(app, database, authProxySecret, {
 registerCommunityRoutes(app, database, authProxySecret, {
   read: communityReadRateLimit,
   write: communityWriteRateLimit
+});
+
+registerAdminRoutes(app, database, authProxySecret, {
+  read: adminReadRateLimit,
+  write: adminWriteRateLimit
 });
 
 app.get(

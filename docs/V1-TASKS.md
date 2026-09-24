@@ -43,14 +43,18 @@
 - [x] personalized dashboard discovery
 - [x] exclude recent/bookmarked titles
 
-## Reliability
+## Reliability / operations
 
 - [x] public system status
 - [x] MangaDex source-health probe
 - [x] Neon persistence-health probe
 - [x] transient safe-read retry/backoff
-- [x] request timeouts / Retry-After handling
+- [x] request timeout / Retry-After handling
 - [x] degraded-state status links
+- [x] server-side admin allowlist
+- [x] protected admin console
+- [x] administrator comment removal
+- [x] administrator session revocation
 - [ ] optional production monitoring
 - [ ] caching/revalidation review
 - [ ] rate-limit scaling review
@@ -61,7 +65,7 @@
 - [ ] iPhone/mobile regression QA
 - [ ] tablet/desktop regression QA
 - [ ] accessibility QA
-- [ ] final auth/community/security/dependency/migration audit
+- [ ] final auth/admin/community/security/dependency/migration audit
 - [ ] production smoke test
 - [ ] branch/repository cleanup
 - [ ] v1.0.0 release tag

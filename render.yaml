@@ -22,3 +22,5 @@ services:
         value: MangaFlux <noreply@manga.kenncode.me>
       - key: MANGADEX_BASE_URL
         value: https://api.mangadex.org
+      - key: ADMIN_EMAILS
+        sync: false

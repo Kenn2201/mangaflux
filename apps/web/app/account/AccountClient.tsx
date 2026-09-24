@@ -19,6 +19,7 @@ type Session = {
     avatarDataUrl?: string | null;
     emailVerifiedAt?: string | null;
     createdAt: string;
+    role?: "user" | "admin";
   } | null;
 };
 
@@ -638,6 +639,20 @@ export default function AccountClient() {
               </button>
             ) : null}
           </section>
+
+          {user.role === "admin" ? (
+            <section className="panel account-panel admin-entry-card">
+              <div>
+                <p className="eyebrow">Administrator</p>
+                <h2>MangaFlux operations</h2>
+                <p>
+                  Review system activity, recent accounts/community activity,
+                  and limited safety controls.
+                </p>
+              </div>
+              <Link href="/admin">Open admin console →</Link>
+            </section>
+          ) : null}
 
           <div className="account-actions profile-actions">
             <Link className="account-primary-link" href="/dashboard#library">
