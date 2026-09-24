@@ -443,8 +443,15 @@ async function fetchOrderedManga(
   return page;
 }
 
-async function buildHotPool(tagId?: string) {
-  const cacheKey = tagId?.trim() || "all";
+async function buildHotPool(
+  options: DiscoveryOptions = {}
+) {
+  const cacheKey = [
+    options.tagId?.trim() || "all",
+    options.year ?? "any-year",
+    options.creatorId?.trim() || "any-creator",
+    options.status ?? "any-status"
+  ].join(":");
   const cached = readCache(hotPoolCache, cacheKey);
   if (cached) return cached;
 
@@ -452,12 +459,18 @@ async function buildHotPool(tagId?: string) {
     fetchOrderedManga("latest", {
       limit: 100,
       offset: 0,
-      tagId
+      tagId: options.tagId,
+      year: options.year,
+      creatorId: options.creatorId,
+      status: options.status
     }),
     fetchOrderedManga("popular", {
       limit: 100,
       offset: 0,
-      tagId
+      tagId: options.tagId,
+      year: options.year,
+      creatorId: options.creatorId,
+      status: options.status
     })
   ]);
 
@@ -501,7 +514,7 @@ async function discoverManga(
 
   const limit = boundedLimit(options.limit, 24);
   const offset = boundedOffset(options.offset);
-  const pool = await buildHotPool(options.tagId);
+  const pool = await buildHotPool(options);
 
   return {
     items: pool.slice(offset, offset + limit),
