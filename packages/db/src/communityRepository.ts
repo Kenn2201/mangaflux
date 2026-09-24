@@ -57,6 +57,56 @@ export async function listCommunityComments(
   };
 }
 
+export async function getCommunityProfile(
+  db: MangaFluxDatabase,
+  userId: string
+) {
+  const [profile, commentCountRows, reactionCountRows, recentComments] =
+    await Promise.all([
+      db
+        .select({
+          id: users.id,
+          displayName: users.displayName,
+          avatarDataUrl: users.avatarDataUrl,
+          createdAt: users.createdAt
+        })
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1),
+      db
+        .select({ value: count() })
+        .from(communityComments)
+        .where(eq(communityComments.userId, userId)),
+      db
+        .select({ value: count() })
+        .from(communityReactions)
+        .where(eq(communityReactions.userId, userId)),
+      db
+        .select({
+          id: communityComments.id,
+          targetType: communityComments.targetType,
+          targetId: communityComments.targetId,
+          body: communityComments.body,
+          createdAt: communityComments.createdAt
+        })
+        .from(communityComments)
+        .where(eq(communityComments.userId, userId))
+        .orderBy(desc(communityComments.createdAt))
+        .limit(8)
+    ]);
+
+  if (!profile[0]) return null;
+
+  return {
+    user: profile[0],
+    stats: {
+      comments: Number(commentCountRows[0]?.value ?? 0),
+      reactions: Number(reactionCountRows[0]?.value ?? 0)
+    },
+    recentComments
+  };
+}
+
 export async function getLastUserComment(
   db: MangaFluxDatabase,
   userId: string

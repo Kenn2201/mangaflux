@@ -6,6 +6,7 @@ import {
   useState
 } from "react";
 import { notify } from "../../../lib/toast";
+import ConfirmDialog from "../../ConfirmDialog";
 
 export default function ResetPasswordClient({
   token
@@ -17,8 +18,9 @@ export default function ResetPasswordClient({
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const [message, setMessage] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
-  async function submit(event: FormEvent<HTMLFormElement>) {
+  function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (busy) return;
 
@@ -29,6 +31,13 @@ export default function ResetPasswordClient({
       return;
     }
 
+    if (password.length < 12 || password.length > 128) {
+      const text = "Use a password between 12 and 128 characters.";
+      setMessage(text);
+      notify({ tone: "error", title: "Password not accepted", message: text });
+      return;
+    }
+
     if (password !== confirm) {
       const text = "The passwords do not match.";
       setMessage(text);
@@ -36,6 +45,14 @@ export default function ResetPasswordClient({
       return;
     }
 
+    setMessage("");
+    setConfirmOpen(true);
+  }
+
+  async function performReset() {
+    if (busy) return;
+
+    setConfirmOpen(false);
     setBusy(true);
     setMessage("");
 
@@ -66,15 +83,18 @@ export default function ResetPasswordClient({
       setConfirm("");
       setMessage(text);
       window.history.replaceState({}, "", "/account/reset");
+
       notify({
         tone: "success",
         title: "Password updated",
-        message: "Old account sessions were signed out for your security."
+        message: "All previous account sessions were signed out."
       });
     } catch (error) {
       const text =
         error instanceof Error ? error.message : "Could not reset password.";
+
       setMessage(text);
+
       notify({
         tone: "error",
         title: "Password reset failed",
@@ -92,6 +112,9 @@ export default function ResetPasswordClient({
       <div className="panel account-panel recovery-card">
         <p className="eyebrow">Secure reset</p>
         <h1 className="account-title">Choose a new password.</h1>
+        <p className="account-lede">
+          Confirming this change signs out every existing MangaFlux session.
+        </p>
 
         {!done ? (
           <form className="auth-form" onSubmit={submit}>
@@ -130,7 +153,7 @@ export default function ResetPasswordClient({
                   Updating
                 </span>
               ) : (
-                "Update password"
+                "Review password reset"
               )}
             </button>
           </form>
@@ -142,6 +165,17 @@ export default function ResetPasswordClient({
 
         {message ? <p className="account-message">{message}</p> : null}
       </div>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Reset your password?"
+        description="Your password will change immediately and every existing MangaFlux session will be signed out. You will need to sign in again."
+        confirmLabel="Reset password"
+        danger
+        busy={busy}
+        onCancel={() => setConfirmOpen(false)}
+        onConfirm={() => void performReset()}
+      />
     </section>
   );
 }

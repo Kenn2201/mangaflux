@@ -2,7 +2,7 @@
 
 > A mobile-first modular manga discovery, reading, community, recommendation, and reliability-focused platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v0.9.0--V1_Release_Candidate-indigo.svg)
+![Version](https://img.shields.io/badge/version-v0.9.1--RC_UX_Account_Hardening-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,54 +10,79 @@
 
 ## Current release
 
-**v0.9.0 — V1 Release Candidate**
+**v0.9.1 — RC UX & Account Hardening**
 
-MangaFlux has entered stabilization. v0.9 is intentionally focused on release quality rather than another major feature set.
+This release addresses findings from the first v0.9 physical audit without reopening the V1 feature scope.
 
-### Release-candidate hardening
+### Discovery filtering
 
-- synchronized-version/release-invariant CI check
-- browser-facing security-header baseline
-- Next.js framework signature header disabled
-- private account/dashboard/admin pages marked noindex
-- robots rules exclude API/private product surfaces
-- global not-found and recoverable route-error experiences
-- keyboard skip links
-- mobile navigation exposes current-page state
-- autocomplete upgraded to combobox/listbox semantics
-- genre browser upgraded to modal-dialog semantics with focus return
-- hidden reader chrome becomes inert to keyboard interaction
-- dedicated V1 production test checklist
+Browse now has visible filters for:
 
-### Automated release invariants
+- ranking: Popular / Top Rated / Latest / MangaFlux Hot
+- genre
+- publication status
+- release year
+- existing creator filters remain preserved when applying the other filters
 
-CI now verifies:
+Filters reset pagination to page 1 and work with the existing server-validated discovery parameters.
 
-- all workspace versions match
-- API version matches package version
-- MangaDex User-Agent matches release version
-- admin email is not hardcoded in the Render blueprint
-- known secrets are never renamed into NEXT_PUBLIC variables
-- private API routes do not use MangaFlux public-proxy cache helpers
-- required frontend security headers remain configured
+### Reader chapter jump
 
-The existing secret scan, migration validation, TypeScript checks, production build, and dependency audit still run on every release PR.
+The immersive reader now includes **Jump chapter** while reader controls are visible.
 
-### Manual release gate
+Readers can enter a chapter number such as `20` or `20.5` and jump directly to that chapter in the English MangaDex feed without returning to the full chapter list.
 
-CI cannot replace real device QA. The canonical production checklist is:
+Previous / Chapters / Next navigation remains unchanged.
 
-`docs/V1-RELEASE-CHECKLIST.md`
+### One active account session
 
-v1.0.0 should be tagged only after the v0.9 production checklist is completed and blocking findings are resolved.
+MangaFlux now keeps one active session per account during normal login.
 
-## Completed phases
+You can still sign in from any phone, browser, or computer. A successful new login replaces the previous active session, so the older device/browser becomes signed out on its next authenticated request.
+
+Password resets continue to revoke all sessions.
+
+### Community profiles
+
+Reader names and avatars in comments are now interactive.
+
+The public profile modal exposes only community-safe information:
+
+- display name
+- avatar
+- join month/year
+- total public comments
+- total reactions
+- recent public comments with links back to their manga/chapter discussion
+
+Account email is never returned by the public profile endpoint.
+
+Admins also gain a safe **View profile** option next to session revocation.
+
+### Account / profile UX
+
+- refreshed sign-in/create-account presentation
+- clearer explanation of account benefits and the one-active-session policy
+- profile preview directly from Account
+- stronger session-status copy
+- iPhone avatar processing now progressively reduces WebP dimensions/quality before rejecting an image
+- avatar source files up to 10 MB may be processed locally; the uploaded result remains small and bounded
+
+### Confirmation UX
+
+MangaFlux now asks for confirmation before:
+
+- signing out
+- deleting your own community comment
+- resetting your password
+- administrator comment removal
+- administrator session revocation
+
+## V1 release-candidate state
 
 ~~~text
-v0.6.x  Mobile UX Foundation
-v0.7.x  Product Experience
-v0.8.x  Reliability + Operations
-v0.9.0  V1 Release Candidate
+v0.9.0  RC foundation / accessibility / release engineering
+v0.9.1  RC UX & account hardening
 ~~~
 
-Next: resolve any v0.9 physical/regression findings, then prepare **v1.0.0 Stable V1**.
+Continue using `docs/V1-RELEASE-CHECKLIST.md` for production testing. Major new V1 scope remains frozen.

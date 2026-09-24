@@ -23,6 +23,7 @@ import {
   markUserEmailVerified,
   replaceEmailVerificationToken,
   replacePasswordResetToken,
+  replaceUserSession,
   updateUserPassword,
   updateUserProfile
 } from "@mangaflux/db";
@@ -210,13 +211,18 @@ function newOpaqueToken() {
 
 async function issueSession(
   db: MangaFluxDatabase,
-  userId: string
+  userId: string,
+  replaceExisting = false
 ) {
   const token = newOpaqueToken();
   const tokenHash = hashSessionToken(token);
   const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
 
-  await createSession(db, userId, tokenHash, expiresAt);
+  if (replaceExisting) {
+    await replaceUserSession(db, userId, tokenHash, expiresAt);
+  } else {
+    await createSession(db, userId, tokenHash, expiresAt);
+  }
 
   return { token, expiresAt };
 }
@@ -406,7 +412,7 @@ export function registerAuthRoutes(
         await importReaderState(database, user.id, readerId);
       }
 
-      const session = await issueSession(database, user.id);
+      const session = await issueSession(database, user.id, true);
 
       return {
         user: {

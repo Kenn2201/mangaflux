@@ -9,6 +9,8 @@ import {
 } from "react";
 import { notify } from "../../lib/toast";
 import { AccountSkeleton } from "../Skeletons";
+import ConfirmDialog from "../ConfirmDialog";
+import PublicProfileModal from "../PublicProfileModal";
 
 type Session = {
   authenticated: boolean;
@@ -40,13 +42,26 @@ type ReaderSummary = {
 
 type Mode = "login" | "signup";
 
+async function blobToDataUrl(blob: Blob) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () =>
+      typeof reader.result === "string"
+        ? resolve(reader.result)
+        : reject(new Error("Could not prepare that image."));
+    reader.onerror = () =>
+      reject(new Error("Could not prepare that image."));
+    reader.readAsDataURL(blob);
+  });
+}
+
 async function imageToAvatar(file: File) {
   if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
     throw new Error("Use a JPEG, PNG, or WebP image.");
   }
 
-  if (file.size > 5 * 1024 * 1024) {
-    throw new Error("Choose an image smaller than 5 MB.");
+  if (file.size > 10 * 1024 * 1024) {
+    throw new Error("Choose an image smaller than 10 MB.");
   }
 
   const objectUrl = URL.createObjectURL(file);
@@ -62,38 +77,58 @@ async function imageToAvatar(file: File) {
     const side = Math.min(image.naturalWidth, image.naturalHeight);
     const sx = Math.floor((image.naturalWidth - side) / 2);
     const sy = Math.floor((image.naturalHeight - side) / 2);
-    const canvas = document.createElement("canvas");
-    canvas.width = 256;
-    canvas.height = 256;
+    const sizes = [224, 192, 160, 128, 112];
+    const qualities = [0.82, 0.7, 0.58, 0.46, 0.34];
+    const targetBytes = 145_000;
 
-    const context = canvas.getContext("2d");
-    if (!context) throw new Error("Image processing is unavailable.");
+    for (const size of sizes) {
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
 
-    context.drawImage(
-      image,
-      sx,
-      sy,
-      side,
-      side,
-      0,
-      0,
-      256,
-      256
+      const context = canvas.getContext("2d");
+      if (!context) {
+        throw new Error("Image processing is unavailable.");
+      }
+
+      context.drawImage(
+        image,
+        sx,
+        sy,
+        side,
+        side,
+        0,
+        0,
+        size,
+        size
+      );
+
+      for (const quality of qualities) {
+        const blob = await new Promise<Blob | null>((resolve) =>
+          canvas.toBlob(resolve, "image/webp", quality)
+        );
+
+        if (
+          blob &&
+          blob.type === "image/webp" &&
+          blob.size > 0 &&
+          blob.size <= targetBytes
+        ) {
+          const data = await blobToDataUrl(blob);
+
+          if (
+            data.startsWith("data:image/webp;base64,") &&
+            data.length <= 220_000
+          ) {
+            return data;
+          }
+        }
+      }
+    }
+
+    throw new Error(
+      "This photo is unusually complex. Try a tighter crop or a different image."
     );
-
-    let quality = 0.82;
-    let data = canvas.toDataURL("image/webp", quality);
-
-    while (data.length > 260_000 && quality > 0.42) {
-      quality -= 0.08;
-      data = canvas.toDataURL("image/webp", quality);
-    }
-
-    if (!data.startsWith("data:image/webp;base64,") || data.length > 280_000) {
-      throw new Error("That image could not be compressed enough.");
-    }
-
-    return data;
   } finally {
     URL.revokeObjectURL(objectUrl);
   }
@@ -112,6 +147,8 @@ export default function AccountClient() {
   const [avatarDraft, setAvatarDraft] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [needsVerification, setNeedsVerification] = useState(false);
+  const [signOutConfirm, setSignOutConfirm] = useState(false);
+  const [profilePreviewOpen, setProfilePreviewOpen] = useState(false);
 
   async function refreshSession() {
     const response = await fetch("/api/auth/session", {
@@ -530,6 +567,14 @@ export default function AccountClient() {
                 <p className="eyebrow">Community profile</p>
                 <h2>Name & avatar</h2>
               </div>
+
+              <button
+                className="profile-preview-button"
+                type="button"
+                onClick={() => setProfilePreviewOpen(true)}
+              >
+                Preview profile
+              </button>
             </div>
 
             <form className="profile-editor" onSubmit={saveProfile}>
@@ -578,8 +623,9 @@ export default function AccountClient() {
               </label>
 
               <p className="device-note">
-                Images are cropped to a small square WebP before upload. Your
-                email is never shown in public comments.
+                Images are cropped and progressively compressed into a small
+                WebP for mobile upload. Your email is never shown in public
+                comments.
               </p>
 
               <button
@@ -622,9 +668,12 @@ export default function AccountClient() {
               <div className="security-row">
                 <div>
                   <strong>Session</strong>
-                  <span>This browser is signed in</span>
+                  <span>
+                    One active session per account. Signing in on another
+                    device or browser signs this session out.
+                  </span>
                 </div>
-                <span className="security-state">Active</span>
+                <span className="security-state">Newest login</span>
               </div>
             </div>
 
@@ -662,7 +711,7 @@ export default function AccountClient() {
             <button
               className="secondary-button account-button"
               type="button"
-              onClick={logout}
+              onClick={() => setSignOutConfirm(true)}
               disabled={busy}
             >
               {busy ? "Signing out…" : "Sign out"}
@@ -670,7 +719,27 @@ export default function AccountClient() {
           </div>
         </div>
       ) : (
-        <div className="panel account-panel auth-card">
+        <div className="panel account-panel auth-card auth-card-v2">
+          <div className="auth-card-intro">
+            <div className="auth-mark" aria-hidden="true">M</div>
+            <div>
+              <p className="eyebrow">Your MangaFlux identity</p>
+              <h2>
+                {mode === "login" ? "Welcome back." : "Create your reader account."}
+              </h2>
+              <p>
+                Sync reading progress, keep your library, and use one public
+                community profile across MangaFlux.
+              </p>
+            </div>
+          </div>
+
+          <div className="auth-benefits" aria-label="Account benefits">
+            <span>✓ Synced progress</span>
+            <span>✓ Verified recovery</span>
+            <span>✓ One active session</span>
+          </div>
+
           <div className="auth-tabs">
             <button
               type="button"
@@ -759,7 +828,8 @@ export default function AccountClient() {
 
           <p className="device-note">
             New accounts receive a verification email from MangaFlux
-            &lt;noreply@manga.kenncode.me&gt;.
+            &lt;noreply@manga.kenncode.me&gt;. Signing in on another device is
+            allowed, but it replaces your previous active session.
           </p>
         </div>
       )}
@@ -767,6 +837,25 @@ export default function AccountClient() {
       {message ? (
         <p className="account-message" role="status">{message}</p>
       ) : null}
+
+      <PublicProfileModal
+        userId={profilePreviewOpen && user ? user.id : null}
+        onClose={() => setProfilePreviewOpen(false)}
+      />
+
+      <ConfirmDialog
+        open={signOutConfirm}
+        title="Sign out of MangaFlux?"
+        description="This browser will lose its active account session. Your bookmarks, reading progress, profile, and comments stay saved to your account."
+        confirmLabel="Sign out"
+        danger
+        busy={busy}
+        onCancel={() => setSignOutConfirm(false)}
+        onConfirm={() => {
+          setSignOutConfirm(false);
+          void logout();
+        }}
+      />
     </section>
   );
 }

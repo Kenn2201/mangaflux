@@ -63,3 +63,12 @@ Release CI checks that known private route families do not import the public pro
 ## Frontend baseline
 
 The production frontend disables the framework signature header and emits baseline anti-framing, MIME-sniffing, referrer, permissions, and DNS-prefetch headers. These headers complement—not replace—the API security boundary.
+
+
+## Session concurrency
+
+Normal login keeps one active MangaFlux session per account. A new successful verified login replaces older sessions for that account. Users may sign in from any device/browser, but the newest login becomes the active session. Password reset continues to revoke sessions.
+
+## Public community profiles
+
+Public profile endpoints expose only community-safe fields: user id, display name, avatar, join timestamp, public comment/reaction counts, and recent public comments. Account email, password data, sessions, tokens, and account-state records are not included.

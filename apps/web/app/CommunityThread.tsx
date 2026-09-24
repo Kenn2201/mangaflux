@@ -9,6 +9,8 @@ import {
   useState
 } from "react";
 import { notify } from "../lib/toast";
+import ConfirmDialog from "./ConfirmDialog";
+import PublicProfileModal from "./PublicProfileModal";
 
 type CommunityComment = {
   id: string;
@@ -72,6 +74,8 @@ export default function CommunityThread({
   const [body, setBody] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [profileUserId, setProfileUserId] = useState<string | null>(null);
+  const [deletePendingId, setDeletePendingId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -381,18 +385,29 @@ export default function CommunityThread({
         <div className="comment-list">
           {data?.items.map((comment) => (
             <article className="comment-card" key={comment.id}>
-              <div className="comment-avatar">
+              <button
+                type="button"
+                className="comment-avatar comment-profile-trigger"
+                aria-label={`View ${comment.displayName || "reader"} profile`}
+                onClick={() => setProfileUserId(comment.userId)}
+              >
                 {comment.avatarDataUrl ? (
                   <img src={comment.avatarDataUrl} alt="" />
                 ) : (
                   <span>{avatarInitial(comment)}</span>
                 )}
-              </div>
+              </button>
 
               <div className="comment-content">
                 <div className="comment-meta">
                   <div>
-                    <strong>{comment.displayName || "MangaFlux Reader"}</strong>
+                    <button
+                      type="button"
+                      className="comment-name-button"
+                      onClick={() => setProfileUserId(comment.userId)}
+                    >
+                      {comment.displayName || "MangaFlux Reader"}
+                    </button>
                     <span>{formatDate(comment.createdAt)}</span>
                   </div>
 
@@ -400,7 +415,7 @@ export default function CommunityThread({
                     <button
                       type="button"
                       disabled={busy}
-                      onClick={() => void removeComment(comment.id)}
+                      onClick={() => setDeletePendingId(comment.id)}
                     >
                       Delete
                     </button>
@@ -444,6 +459,25 @@ export default function CommunityThread({
           </button>
         </nav>
       ) : null}
+      <PublicProfileModal
+        userId={profileUserId}
+        onClose={() => setProfileUserId(null)}
+      />
+
+      <ConfirmDialog
+        open={Boolean(deletePendingId)}
+        title="Delete this comment?"
+        description="This removes the comment from MangaFlux community. This action cannot be undone."
+        confirmLabel="Delete comment"
+        danger
+        busy={busy}
+        onCancel={() => setDeletePendingId(null)}
+        onConfirm={() => {
+          const id = deletePendingId;
+          setDeletePendingId(null);
+          if (id) void removeComment(id);
+        }}
+      />
     </section>
   );
 }

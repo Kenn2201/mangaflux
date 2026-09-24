@@ -11,6 +11,7 @@ import {
 } from "react";
 import { ReaderSkeleton } from "../../Skeletons";
 import CommunityThread from "../../CommunityThread";
+import ReaderChapterJump from "../../ReaderChapterJump";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "https://api.manga.kenncode.me";
@@ -627,6 +628,12 @@ export default function ReaderPage() {
         </div>
 
         <div className="reader-chrome-meta">
+          <ReaderChapterJump
+            mangaId={data.chapter.mangaId}
+            currentChapter={data.chapter.chapter}
+            querySuffix={querySuffix}
+          />
+
           <span
             className={`reader-save-state reader-save-${saveState}`}
             aria-live="polite"

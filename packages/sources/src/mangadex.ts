@@ -22,7 +22,7 @@ import type {
 const BASE = process.env.MANGADEX_BASE_URL ?? "https://api.mangadex.org";
 const HOSTS = ["api.mangadex.org"];
 const COVER_BASE = "https://uploads.mangadex.org/covers";
-const USER_AGENT = "MangaFlux/0.9.0 (+https://manga.kenncode.me)";
+const USER_AGENT = "MangaFlux/0.9.1 (+https://manga.kenncode.me)";
 const MANIFEST_TTL_MS = 60_000;
 const SEARCH_TTL_MS = 30_000;
 const DETAILS_TTL_MS = 5 * 60_000;
@@ -443,8 +443,15 @@ async function fetchOrderedManga(
   return page;
 }
 
-async function buildHotPool(tagId?: string) {
-  const cacheKey = tagId?.trim() || "all";
+async function buildHotPool(
+  options: DiscoveryOptions = {}
+) {
+  const cacheKey = [
+    options.tagId?.trim() || "all",
+    options.year ?? "any-year",
+    options.creatorId?.trim() || "any-creator",
+    options.status ?? "any-status"
+  ].join(":");
   const cached = readCache(hotPoolCache, cacheKey);
   if (cached) return cached;
 
@@ -452,12 +459,18 @@ async function buildHotPool(tagId?: string) {
     fetchOrderedManga("latest", {
       limit: 100,
       offset: 0,
-      tagId
+      tagId: options.tagId,
+      year: options.year,
+      creatorId: options.creatorId,
+      status: options.status
     }),
     fetchOrderedManga("popular", {
       limit: 100,
       offset: 0,
-      tagId
+      tagId: options.tagId,
+      year: options.year,
+      creatorId: options.creatorId,
+      status: options.status
     })
   ]);
 
@@ -501,7 +514,7 @@ async function discoverManga(
 
   const limit = boundedLimit(options.limit, 24);
   const offset = boundedOffset(options.offset);
-  const pool = await buildHotPool(options.tagId);
+  const pool = await buildHotPool(options);
 
   return {
     items: pool.slice(offset, offset + limit),

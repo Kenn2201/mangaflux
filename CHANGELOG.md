@@ -7,44 +7,46 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Release-candidate work
-- Physical iPhone/tablet/desktop regression results
+- Remaining physical iPhone/tablet/desktop findings
 - Accessibility findings and fixes
 - Final production smoke-test findings
 - Branch cleanup
 - v1.0.0 release preparation
 
-## 0.9.0 - 2026-09-24 — V1 Release Candidate
+## 0.9.1 - 2026-09-24 — RC UX & Account Hardening
 
 ### Added
-- CI release-invariant validation.
-- Canonical V1 production release checklist.
-- Frontend security-header configuration.
-- Keyboard skip-to-content links.
-- Global not-found page.
-- Recoverable global route-error page.
-- robots policy for API/private account surfaces.
+- Visible Browse filter bar for ranking, genre, status, and release year.
+- Reader Jump Chapter dialog for direct chapter-number navigation.
+- Public MangaFlux community profile endpoint and profile modal.
+- Public community stats for comments and reactions.
+- Recent public-comment activity links inside profile modal.
+- Account-page public-profile preview.
+- Admin View Profile action.
+- Confirmation dialog component for destructive/session-changing actions.
 
-### Accessibility
-- Mobile navigation now exposes `aria-current` on active destinations.
-- Header search now uses combobox/listbox semantics with active option IDs.
-- Genre browser now exposes modal-dialog semantics.
-- Genre dialog moves focus to the close control and returns focus to its trigger.
-- Reader root is a main landmark.
-- Hidden top/bottom reader chrome is inert to keyboard interaction.
+### Changed
+- Successful login now replaces the account's previous active session.
+- Signing in on another device/browser remains allowed, but the newest login becomes the sole active session.
+- Sign-in/create-account UI now explains sync, verification, community identity, and session behavior.
+- Session row now explains the one-active-session rule.
+- iPhone/mobile avatar normalization progressively reduces dimensions and WebP quality before failing.
+- Local avatar source limit raised to 10 MB while the final uploaded WebP remains bounded.
+- Browse filters preserve an active creator filter.
 
-### Security / release engineering
-- Next.js `X-Powered-By` is disabled.
-- Frontend emits nosniff, DENY framing, referrer, permissions, and DNS-prefetch policy headers.
-- Account, dashboard, and admin metadata are noindex/no-follow.
-- CI rejects synchronized-version drift.
-- CI rejects known private secrets renamed under `NEXT_PUBLIC_*`.
-- CI rejects public cache helpers in known private API route families.
-- CI verifies ADMIN_EMAILS is not hardcoded in render.yaml.
+### Confirmations
+- Sign out requires confirmation.
+- Own-comment deletion requires confirmation.
+- Password reset requires confirmation and explains session revocation.
+- Admin comment removal requires confirmation.
+- Admin user-session revocation requires confirmation.
 
-### Scope
-- No major new MangaFlux feature was added in this release.
-- v0.9 is a stabilization/release-candidate milestone; manual production QA is still required before v1.0.0.
+### Privacy / security
+- Public community profile data never includes account email.
+- Existing comment/reaction authentication and cooldown rules are unchanged.
+- Single-session replacement happens server-side during verified login.
 
+## 0.9.0 - 2026-09-24 — V1 Release Candidate
 ## 0.8.3 - 2026-09-24 — Cache, Rate Limits & Performance Hardening
 ## 0.8.2 - 2026-09-24 — Diagnostics & Observability
 ## 0.8.1 - 2026-09-24 — Admin Operations

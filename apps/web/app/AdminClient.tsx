@@ -7,6 +7,8 @@ import {
   useState
 } from "react";
 import { notify } from "../lib/toast";
+import ConfirmDialog from "./ConfirmDialog";
+import PublicProfileModal from "./PublicProfileModal";
 
 type Session = {
   authenticated: boolean;
@@ -84,6 +86,11 @@ type Diagnostics = {
   };
 };
 
+type PendingAdminAction =
+  | { type: "remove-comment"; id: string }
+  | { type: "revoke-sessions"; id: string }
+  | null;
+
 type Overview = {
   admin: {
     id: string;
@@ -129,6 +136,9 @@ export default function AdminClient() {
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState("");
   const [message, setMessage] = useState("");
+  const [pendingAction, setPendingAction] =
+    useState<PendingAdminAction>(null);
+  const [profileUserId, setProfileUserId] = useState<string | null>(null);
 
   const loadOverview = useCallback(async () => {
     setLoading(true);
@@ -504,20 +514,35 @@ export default function AdminClient() {
                       </small>
                     </div>
 
-                    <button
-                      type="button"
-                      disabled={
-                        busyId !== "" ||
-                        user.id === overview.admin.id
-                      }
-                      onClick={() => void revokeSessions(user.id)}
-                    >
-                      {user.id === overview.admin.id
-                        ? "Current admin"
-                        : busyId === user.id
-                          ? "Revoking…"
-                          : "Revoke sessions"}
-                    </button>
+                    <div className="admin-user-actions">
+                      <button
+                        type="button"
+                        disabled={busyId !== ""}
+                        onClick={() => setProfileUserId(user.id)}
+                      >
+                        View profile
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={
+                          busyId !== "" ||
+                          user.id === overview.admin.id
+                        }
+                        onClick={() =>
+                          setPendingAction({
+                            type: "revoke-sessions",
+                            id: user.id
+                          })
+                        }
+                      >
+                        {user.id === overview.admin.id
+                          ? "Current admin"
+                          : busyId === user.id
+                            ? "Revoking…"
+                            : "Revoke sessions"}
+                      </button>
+                    </div>
                   </article>
                 ))}
               </div>
@@ -549,7 +574,12 @@ export default function AdminClient() {
                         <button
                           type="button"
                           disabled={busyId !== ""}
-                          onClick={() => void deleteComment(comment.id)}
+                          onClick={() =>
+                            setPendingAction({
+                              type: "remove-comment",
+                              id: comment.id
+                            })
+                          }
                         >
                           {busyId === comment.id ? "Removing…" : "Remove"}
                         </button>
@@ -578,6 +608,43 @@ export default function AdminClient() {
           </section>
         </>
       ) : null}
+
+      <PublicProfileModal
+        userId={profileUserId}
+        onClose={() => setProfileUserId(null)}
+      />
+
+      <ConfirmDialog
+        open={Boolean(pendingAction)}
+        title={
+          pendingAction?.type === "remove-comment"
+            ? "Remove this community comment?"
+            : "Revoke this user's sessions?"
+        }
+        description={
+          pendingAction?.type === "remove-comment"
+            ? "The comment will be removed from MangaFlux community. The user's account remains intact."
+            : "Every active session for this user will be invalidated. They can sign in again afterward."
+        }
+        confirmLabel={
+          pendingAction?.type === "remove-comment"
+            ? "Remove comment"
+            : "Revoke sessions"
+        }
+        danger
+        busy={busyId !== ""}
+        onCancel={() => setPendingAction(null)}
+        onConfirm={() => {
+          const action = pendingAction;
+          setPendingAction(null);
+
+          if (action?.type === "remove-comment") {
+            void deleteComment(action.id);
+          } else if (action?.type === "revoke-sessions") {
+            void revokeSessions(action.id);
+          }
+        }}
+      />
     </main>
   );
 }
