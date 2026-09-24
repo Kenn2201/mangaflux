@@ -19,7 +19,9 @@ This is the manual production checklist for v0.9.x. CI verifies code/build/secur
 - [ ] Genres bottom sheet opens/closes and Browse More Genres works.
 - [ ] Hot / Popular / Top Rated / Latest Updates load.
 - [ ] Show All pagination works.
-- [ ] year/status/author/artist/tag filters work.
+- [ ] visible ranking/genre/status/year Browse filters work.
+- [ ] creator filters remain active when applying compatible Browse filters.
+- [ ] year/status/author/artist/tag links work.
 - [ ] manga details and related/recommendation rails load.
 
 ## 3. Chapter / reader
@@ -32,6 +34,8 @@ This is the manual production checklist for v0.9.x. CI verifies code/build/secur
 - [ ] tap-to-show/hide chrome works.
 - [ ] hidden reader chrome is not keyboard-focusable.
 - [ ] Previous / Chapters / Next controls work.
+- [ ] Jump Chapter can move directly from an early chapter to a much later chapter (for example 5 → 20).
+- [ ] chapter jump reports a useful message for a missing chapter.
 - [ ] scroll-to-top works.
 - [ ] Data Saver persists.
 - [ ] failed image retry works.
@@ -43,7 +47,9 @@ This is the manual production checklist for v0.9.x. CI verifies code/build/secur
 - [ ] unverified login is blocked.
 - [ ] verification link succeeds once.
 - [ ] verified login succeeds.
-- [ ] logout clears session.
+- [ ] logging in on a second browser/device invalidates the previous active session.
+- [ ] the newest browser/device remains signed in.
+- [ ] logout shows confirmation and clears the active session.
 - [ ] forgot-password response remains generic.
 - [ ] reset link succeeds once and revokes old sessions.
 - [ ] account page never flashes signed-out UI before session resolution.
@@ -52,13 +58,19 @@ This is the manual production checklist for v0.9.x. CI verifies code/build/secur
 
 - [ ] display-name update persists.
 - [ ] JPEG/PNG/WebP avatar upload persists.
+- [ ] a normal iPhone camera-roll photo can be processed without the previous compression error.
+- [ ] Account Preview Profile opens the same public profile view used by comments.
+- [ ] clicking another reader's avatar/name opens a public profile modal.
+- [ ] public profile shows comment/reaction stats and recent public comments.
+- [ ] public profile never exposes account email.
 - [ ] public comments do not show email.
 - [ ] manga reactions work.
 - [ ] chapter reactions work.
 - [ ] comments require a verified account.
 - [ ] one-comment-per-five-minutes cooldown is enforced by the API.
-- [ ] own-comment delete works.
+- [ ] own-comment delete requires confirmation and works.
 - [ ] comment pagination works.
+- [ ] password reset requires confirmation and still revokes previous sessions.
 
 ## 6. Admin
 
@@ -67,8 +79,9 @@ This is the manual production checklist for v0.9.x. CI verifies code/build/secur
 - [ ] configured verified admin sees Admin Console.
 - [ ] overview counters load.
 - [ ] diagnostics load.
-- [ ] comment removal works.
-- [ ] revoke another user's sessions works.
+- [ ] View Profile opens a user's public community profile.
+- [ ] comment removal requires confirmation and works.
+- [ ] revoke another user's sessions requires confirmation and works.
 - [ ] current admin self-revoke remains blocked.
 - [ ] no passwords, password hashes, raw tokens, secrets, or SQL controls are exposed.
 

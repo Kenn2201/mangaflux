@@ -8,6 +8,7 @@ import {
   deleteOwnCommunityComment,
   getCommunityReactionSummary,
   getLastUserComment,
+  getCommunityProfile,
   getSessionUser,
   getUserCommunityReaction,
   listCommunityComments,
@@ -100,6 +101,36 @@ export function registerCommunityRoutes(
     write: LimitHandler;
   }
 ) {
+  app.get<{ Params: { userId: string } }>(
+    "/api/community/users/:userId/profile",
+    { preHandler: limits.read },
+    async (request, reply) => {
+      if (!requireAuthProxy(request, reply, authProxySecret)) return;
+      if (!databaseRequired(database, reply)) return;
+
+      if (!UUID_RE.test(request.params.userId)) {
+        return reply.code(400).send({
+          error: "INVALID_REQUEST",
+          message: "Invalid community profile."
+        });
+      }
+
+      const profile = await getCommunityProfile(
+        database,
+        request.params.userId
+      );
+
+      if (!profile) {
+        return reply.code(404).send({
+          error: "NOT_FOUND",
+          message: "Community profile not found."
+        });
+      }
+
+      return profile;
+    }
+  );
+
   app.get<{
     Params: { targetType: string; targetId: string };
     Querystring: { limit?: string; offset?: string };

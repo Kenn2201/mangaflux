@@ -4,7 +4,7 @@ MangaFlux follows Semantic Versioning.
 
 ## Current version
 
-**v0.9.0 — V1 Release Candidate**
+**v0.9.1 — RC UX & Account Hardening**
 
 - `0.MINOR.0` = meaningful pre-V1 milestone
 - `0.MINOR.PATCH` = compatible focused pre-V1 fix
@@ -12,15 +12,7 @@ MangaFlux follows Semantic Versioning.
 
 ## v0.9 policy
 
-v0.9.x is feature-frozen for major product work. Changes should primarily be:
-
-- regression fixes
-- accessibility fixes
-- security hardening
-- reliability fixes
-- performance fixes
-- production/deployment fixes
-- documentation/release cleanup
+v0.9.x is feature-frozen for major product work. Changes should primarily be regression fixes, accessibility/security/reliability hardening, and small UX gaps discovered by production testing.
 
 ## Automated gate
 

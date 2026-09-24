@@ -11,6 +11,7 @@ import MangaTile, {
 } from "./MangaTile";
 import { SearchSkeleton } from "./Skeletons";
 import { reliableFetch } from "../lib/reliableFetch";
+import BrowseFilters from "./BrowseFilters";
 
 type DiscoveryKind = "hot" | "popular" | "top" | "latest";
 
@@ -203,6 +204,16 @@ export default function BrowseClient({
         <h1>{customTitle ?? label.title}</h1>
         <p>{customDescription}</p>
       </section>
+
+      <BrowseFilters
+        kind={kind}
+        tagId={tagId}
+        tagName={tagName}
+        year={year}
+        status={status}
+        creatorId={creatorId}
+        creatorName={creatorName}
+      />
 
       {loading ? <SearchSkeleton count={12} /> : null}
       {message ? (

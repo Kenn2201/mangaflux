@@ -98,6 +98,16 @@ export async function createSession(
   await db.insert(sessions).values({ tokenHash, userId, expiresAt });
 }
 
+export async function replaceUserSession(
+  db: MangaFluxDatabase,
+  userId: string,
+  tokenHash: string,
+  expiresAt: Date
+) {
+  await db.delete(sessions).where(eq(sessions.userId, userId));
+  await db.insert(sessions).values({ tokenHash, userId, expiresAt });
+}
+
 export async function getSessionUser(
   db: MangaFluxDatabase,
   tokenHash: string
