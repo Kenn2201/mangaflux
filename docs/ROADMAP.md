@@ -1,56 +1,83 @@
 # MangaFlux Roadmap
 
-## v0.6.0 — Mobile UX Foundation — current
+## v0.7.0 — Discovery & Dashboard — current
 
-- mobile-first app shell
-- sticky header and mobile bottom navigation
-- safe-area support
-- skeleton loading system
-- global toast/feedback system
-- account/profile redesign
-- Anime.js micro-interactions
-- reduced-motion support
-- responsive/touch-target/iOS autofill pass
+- real public landing page
+- signed-in dashboard
+- header search
+- live autocomplete with cover/title/year/tag context
+- genre browser
+- MangaFlux Hot
+- Popular
+- Top Rated
+- Latest Updates
+- Show All pages
+- discovery pagination
 
-## v0.7.x — Reader + Library polish — next
+## v0.7.1 — Chapter Scale & Reader Controls — next
 
-- large-series chapter pagination / incremental loading
-- language preference controls
-- reader quality/settings sheet
-- richer library sorting/filtering
-- chapter-list usability improvements
-- better empty states
-- Continue Reading/library interaction polish
-- reader error/retry improvements
+- remove the current 100-chapter ceiling
+- chapter pagination / incremental loading
+- newest / oldest chapter sorting
+- chapter jump/search
+- tap reader to reveal chrome
+- persistent centered Page X / Y
+- persistent thin reading-progress meter
+- auto-hide large reader controls
+- scroll-to-top reader button
+- previous/next chapter controls in revealed chrome
+- reader settings / quality interaction polish
+
+## v0.7.2 — Community & Profiles
+
+- profile avatar upload
+- display-name/profile polish
+- MangaFlux-native manga comments
+- chapter comments
+- verified-account-only posting
+- comment pagination
+- one comment per five minutes server-side cooldown
+- bounded comment length
+- own-comment deletion
+- reactions
+
+## v0.7.3 — Recommendations
+
+- Because you read…
+- genre/tag similarity
+- related titles
+- author/artist similarity where useful
+- history/bookmark signals
+- personalized dashboard discovery
+- final v0.7 mobile UX pass
 
 ## v0.8.x — Reliability + Source Health
 
-- source health/status panel
+- source health/status UI
 - downstream availability states
 - retry/backoff UX
-- optional Sentry production monitoring
-- shared rate limits if deployment scales horizontally
-- operational diagnostics without leaking internal details
+- optional Sentry monitoring
+- operational diagnostics
+- shared rate limiting if horizontally scaled
 
 ## v0.9.x — V1 release candidate
 
-- iPhone/mobile regression QA
-- tablet/desktop QA
+- iPhone/tablet/desktop regression QA
 - accessibility audit
 - auth/email/session review
-- migration/backward-compatibility review
-- dependency/security audit
+- community/avatar security review
+- dependency/migration/security audit
 - production smoke tests
-- documentation/screenshots/release checklist
+- release documentation
 
-## v1.0.0 — Stable single-source reader
+## v1.0.0 — Stable V1
 
-Stable MangaDex reader with verified accounts, recovery, account-backed library/progress, reliable mobile UX, accessibility, and production-grade error/security handling.
+A stable mobile-first MangaDex reader with discovery, all chapters, verified accounts, recovery, account-backed library/progress, community features, recommendations, accessibility, and production-grade error/security handling.
 
 ## v2.0.0 — Multi-source architecture
 
-Source registry, capability manifests, health checks, unified search, metadata normalization, deduplication, permitted-source fallback, and per-source policies.
+Source registry, capabilities, unified search, normalized metadata, deduplication, permitted-source fallback, and per-source policies.
 
 ## v3.0.0+
 
-Semantic search, recommendations, richer reading lists, notifications, PWA/native clients, accessibility presets, and adapter tooling.
+Semantic search, smarter recommendations, richer social profiles, PWA/native clients, push/release notifications, and adapter tooling.

@@ -7,40 +7,39 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- Reader and library polish
-- Large-series chapter pagination
-- Language preferences
-- Source health and production monitoring
+- All-chapter pagination and chapter navigation at scale
+- Tap-to-show reader controls
+- Community comments/reactions and profile avatars
+- Personalized recommendations
 
-## 0.6.0 - 2026-09-24 — Mobile UX Foundation
+## 0.7.0 - 2026-09-24 — Discovery & Dashboard
 
 ### Added
-- Sticky responsive MangaFlux app header.
-- iPhone-safe mobile bottom navigation for Home, Search, Library, and Account.
-- Shared desktop/mobile site footer outside reader mode.
-- Reusable skeleton system for account, library, search, manga details, and reader loading states.
-- Global success/error/info toast system.
-- Anime.js micro-interactions for route and toast entrances.
-- Redesigned account profile with avatar, library statistics, Continue Reading, and security controls.
-- Reduced-motion support.
+- Dedicated public MangaFlux landing page.
+- Dedicated signed-in Dashboard.
+- Header search with debounced live suggestions, covers, year, and tag context.
+- Keyboard navigation for search suggestions.
+- Dedicated search-results page.
+- Header genre browser with mobile bottom-sheet behavior.
+- MangaFlux Hot discovery ranking blending recent updates and popularity.
+- Popular, Top Rated, and Latest Updates discovery rails.
+- Genre discovery shelf.
+- Paginated Show All browse pages.
+- Public discovery API and genre API with short-lived caching.
 
-### Improved
-- Account session resolution now displays a skeleton instead of briefly flashing the signed-out form.
-- Auth success/error actions now provide clear animated feedback.
-- Email verification, password recovery, reset, sign-in/out, and bookmark actions have richer status feedback.
-- Mobile touch targets, spacing, card sizing, navigation, and typography.
-- Safari/iOS autofill styling no longer breaks the dark input design.
-- Search now displays manga-card skeletons during requests.
-- Library and reader startup states avoid abrupt layout shifts.
+### Changed
+- Search is now a first-class header interaction instead of a homepage-only form.
+- Mobile bottom navigation now routes Browse and Library to dedicated product surfaces.
+- Old `/?q=` search URLs redirect into the new search page.
+- Search result summaries now include year/tag metadata when available.
 
-### Dependency
-- Added Anime.js 4.5.0 for lightweight UI motion.
+### Security / reliability
+- Discovery endpoints have a dedicated per-IP rate limit.
+- Discovery query kinds, pagination values, and genre UUIDs are validated.
+- MangaDex requests remain paced and cached.
 
+## 0.6.0 - 2026-09-24 — Mobile UX Foundation
 ## 0.5.1 - 2026-09-24 — Transactional Email
-
-- Resend email verification and password recovery.
-- Hashed one-time email tokens and branded email templates.
-
 ## 0.5.0 - 2026-09-24 — Authentication
 ## 0.4.0 - 2026-09-24 — Neon Persistence
 ## 0.3.0 - 2026-09-24 — Reader UX

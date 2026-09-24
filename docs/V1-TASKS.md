@@ -1,48 +1,55 @@
 # MangaFlux V1 tasks
 
-## Infrastructure / reader / persistence
+## Infrastructure / accounts / persistence
 
 - [x] Vercel + Render + Neon
 - [x] CI / secret scan / migration checks / dependency audit
+- [x] verified accounts + Resend recovery
+- [x] device/account bookmarks, history, progress, Continue Reading
+
+## Reader
+
 - [x] MangaDex search/details/chapters/image proxy
-- [x] Page X / Y, progress, navigation, data saver
-- [x] bookmarks/history/Continue Reading/device persistence
+- [x] Page X / Y, progress, previous/next, Data Saver
+- [ ] all chapters beyond the current 100-item feed
+- [ ] chapter pagination/sorting/jump controls
+- [ ] tap-to-show reader chrome and scroll-to-top control
 
-## Accounts and email
+## Discovery
 
-- [x] signup/login/logout
-- [x] secure password hashes and HttpOnly sessions
-- [x] account-backed library/progress
-- [x] device-state import
-- [x] email verification
-- [x] resend verification
-- [x] forgot/reset password
-- [x] one-time expiring email tokens
-- [x] reset revokes old sessions
+- [x] public landing page
+- [x] signed-in dashboard
+- [x] header autocomplete search
+- [x] genre browser
+- [x] MangaFlux Hot
+- [x] Popular
+- [x] Top Rated
+- [x] Latest Updates
+- [x] Show All pagination
 
-## Mobile UX foundation
+## Community / profiles
 
-- [x] app header
-- [x] iPhone-safe bottom navigation
-- [x] account/session skeleton instead of auth flash
-- [x] library/search/details/reader skeletons
-- [x] global toast notifications
-- [x] account/profile dashboard
-- [x] Anime.js micro-interactions
-- [x] reduced-motion support
-- [x] iOS autofill dark-theme fix
-- [x] minimum touch-target pass
+- [ ] profile avatar upload
+- [ ] manga comments
+- [ ] chapter comments
+- [ ] five-minute account comment cooldown
+- [ ] reactions
+- [ ] own-comment deletion
 
-## V1 stabilization
+## Recommendations
 
-- [ ] large-series chapter pagination
-- [ ] language preferences
-- [ ] reader/library settings polish
-- [ ] source health/status panel
-- [ ] improved retry/downstream error UI
-- [ ] optional production error monitoring
+- [ ] Because you read…
+- [ ] tag/genre similarity
+- [ ] related-title recommendations
+- [ ] personalized dashboard discovery
+
+## Final stabilization
+
+- [ ] source health/status
+- [ ] improved retry/downstream error UX
+- [ ] optional production monitoring
 - [ ] iPhone/mobile regression QA
 - [ ] accessibility QA
-- [ ] final auth/email/security/dependency/migration audit
+- [ ] final auth/community/security/dependency/migration audit
 - [ ] production smoke test
 - [ ] v1.0.0 release tag

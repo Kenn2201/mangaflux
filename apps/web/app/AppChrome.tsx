@@ -9,12 +9,14 @@ import {
   useRef
 } from "react";
 import AccountStatus from "./AccountStatus";
+import GenreMenu from "./GenreMenu";
+import HeaderSearch from "./HeaderSearch";
 import ToastHost from "./ToastHost";
 
 function NavIcon({
   name
 }: {
-  name: "home" | "search" | "library" | "account";
+  name: "home" | "browse" | "library" | "account";
 }) {
   if (name === "home") {
     return (
@@ -25,7 +27,7 @@ function NavIcon({
     );
   }
 
-  if (name === "search") {
+  if (name === "browse") {
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <circle cx="11" cy="11" r="6.5" />
@@ -82,24 +84,30 @@ export default function AppChrome({
     );
   }
 
+  const browseActive =
+    pathname.startsWith("/browse") ||
+    pathname.startsWith("/search");
+  const libraryActive = pathname.startsWith("/dashboard");
   const accountActive = pathname.startsWith("/account");
 
   return (
     <div className="app-frame">
-      <header className="site-header">
-        <div className="site-header-inner">
+      <header className="site-header discovery-header">
+        <div className="site-header-inner discovery-header-inner">
           <Link className="site-brand" href="/" aria-label="MangaFlux home">
             <span className="site-brand-mark">M</span>
             <span className="site-brand-word">MangaFlux</span>
           </Link>
 
-          <nav className="site-desktop-nav" aria-label="Primary navigation">
-            <Link href="/">Home</Link>
-            <Link href="/#library">Library</Link>
-            <Link href="/#search">Search</Link>
-          </nav>
+          <HeaderSearch />
 
-          <AccountStatus />
+          <div className="header-actions">
+            <Link className="header-dashboard-link" href="/dashboard">
+              Dashboard
+            </Link>
+            <GenreMenu />
+            <AccountStatus />
+          </div>
         </div>
       </header>
 
@@ -110,11 +118,11 @@ export default function AppChrome({
       <footer className="site-footer">
         <div>
           <strong>MangaFlux</strong>
-          <span>Mobile-first manga reading.</span>
+          <span>Discover. Read. Continue anywhere.</span>
         </div>
         <p>
           Manga metadata and chapter attribution are provided by MangaDex and
-          credited in the reader.
+          credited throughout the reader.
         </p>
       </footer>
 
@@ -123,14 +131,23 @@ export default function AppChrome({
           <NavIcon name="home" />
           <span>Home</span>
         </Link>
-        <Link href="/#search">
-          <NavIcon name="search" />
-          <span>Search</span>
+
+        <Link
+          href="/browse?kind=popular"
+          className={browseActive ? "is-active" : ""}
+        >
+          <NavIcon name="browse" />
+          <span>Browse</span>
         </Link>
-        <Link href="/#library">
+
+        <Link
+          href="/dashboard#library"
+          className={libraryActive ? "is-active" : ""}
+        >
           <NavIcon name="library" />
           <span>Library</span>
         </Link>
+
         <Link
           href="/account"
           className={accountActive ? "is-active" : ""}

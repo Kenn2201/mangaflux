@@ -8,11 +8,21 @@ import {
   fetchMangaDexPageImage,
   mangaDexSource
 } from "@mangaflux/sources";
+import type {
+  MangaDiscoveryKind,
+  MangaSummary
+} from "@mangaflux/sources";
 
-const APP_VERSION = "0.6.0";
+const APP_VERSION = "0.7.0";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LANGUAGE_RE = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i;
+const DISCOVERY_KINDS = new Set<MangaDiscoveryKind>([
+  "popular",
+  "top",
+  "latest",
+  "hot"
+]);
 
 const app = Fastify({
   logger: true,
@@ -123,6 +133,7 @@ function makeRateLimit(name: string, limit: number, windowMs = 60_000) {
 }
 
 const searchRateLimit = makeRateLimit("search", 30);
+const discoveryRateLimit = makeRateLimit("discovery", 60);
 const metadataRateLimit = makeRateLimit("metadata", 90);
 const imageRateLimit = makeRateLimit("images", 240);
 const stateReadRateLimit = makeRateLimit("state-read", 120);
@@ -152,6 +163,66 @@ function parseDataSaver(value: string | undefined, reply: any) {
     message: "dataSaver must be true or false"
   });
   return null;
+}
+
+function parseBoundedInt(
+  value: string | undefined,
+  fallback: number,
+  min: number,
+  max: number
+) {
+  if (value === undefined) return fallback;
+  const parsed = Number(value);
+
+  if (!Number.isInteger(parsed) || parsed < min || parsed > max) {
+    return null;
+  }
+
+  return parsed;
+}
+
+function parseDiscoveryKind(
+  value: string | undefined
+): MangaDiscoveryKind | null {
+  if (!value || !DISCOVERY_KINDS.has(value as MangaDiscoveryKind)) {
+    return null;
+  }
+
+  return value as MangaDiscoveryKind;
+}
+
+function buildHomeHot(
+  popular: MangaSummary[],
+  latest: MangaSummary[],
+  limit = 10
+) {
+  const ranked = new Map<
+    string,
+    { item: MangaSummary; score: number }
+  >();
+
+  latest.forEach((item, index) => {
+    ranked.set(item.id, {
+      item,
+      score: ((latest.length - index) / latest.length) * 0.62
+    });
+  });
+
+  popular.forEach((item, index) => {
+    const current = ranked.get(item.id);
+    const score =
+      ((popular.length - index) / popular.length) * 0.38;
+
+    ranked.set(item.id, {
+      item: current?.item ?? item,
+      score: (current?.score ?? 0) + score
+    });
+  });
+
+  return [...ranked.values()]
+    .sort((left, right) => right.score - left.score)
+    .slice(0, limit)
+    .map((entry) => entry.item);
 }
 
 const database = process.env.DATABASE_URL?.trim()
@@ -239,21 +310,131 @@ app.get(
   })
 );
 
-app.get<{ Querystring: { q?: string } }>(
+app.get<{ Querystring: { q?: string; limit?: string } }>(
   "/api/search",
   { preHandler: searchRateLimit },
   async (request, reply) => {
     const query = request.query.q?.trim();
+    const limit = parseBoundedInt(request.query.limit, 24, 1, 24);
 
-    if (!query || query.length > 120) {
+    if (!query || query.length > 120 || limit === null) {
       return reply.code(400).send({
         error: "INVALID_REQUEST",
-        message: "q must contain between 1 and 120 characters"
+        message:
+          "q must contain between 1 and 120 characters and limit must be 1-24"
       });
     }
 
-    const items = await mangaDexSource.search(query);
+    const items = await mangaDexSource.search(query, { limit });
     return { source: mangaDexSource.id, items };
+  }
+);
+
+app.get<{
+  Querystring: {
+    kind?: string;
+    limit?: string;
+    offset?: string;
+    tag?: string;
+  };
+}>(
+  "/api/discovery",
+  { preHandler: discoveryRateLimit },
+  async (request, reply) => {
+    const kind = parseDiscoveryKind(request.query.kind);
+    const limit = parseBoundedInt(request.query.limit, 24, 1, 50);
+    const offset = parseBoundedInt(request.query.offset, 0, 0, 10_000);
+    const tagId = request.query.tag?.trim();
+
+    if (
+      !kind ||
+      limit === null ||
+      offset === null ||
+      (tagId && !UUID_RE.test(tagId))
+    ) {
+      return reply.code(400).send({
+        error: "INVALID_REQUEST",
+        message: "Invalid discovery kind, pagination, or genre tag."
+      });
+    }
+
+    const page = await mangaDexSource.discover(kind, {
+      limit,
+      offset,
+      tagId
+    });
+
+    reply.header(
+      "Cache-Control",
+      "public, max-age=60, stale-while-revalidate=120"
+    );
+
+    return {
+      source: mangaDexSource.id,
+      kind,
+      ...page
+    };
+  }
+);
+
+app.get(
+  "/api/discovery/home",
+  { preHandler: discoveryRateLimit },
+  async (_request, reply) => {
+    const [popular, top, latest] = await Promise.all([
+      mangaDexSource.discover("popular", { limit: 16 }),
+      mangaDexSource.discover("top", { limit: 16 }),
+      mangaDexSource.discover("latest", { limit: 16 })
+    ]);
+
+    const hot = buildHomeHot(popular.items, latest.items, 10);
+
+    reply.header(
+      "Cache-Control",
+      "public, max-age=60, stale-while-revalidate=120"
+    );
+
+    return {
+      source: mangaDexSource.id,
+      sections: {
+        hot: {
+          items: hot,
+          total: hot.length,
+          limit: hot.length,
+          offset: 0
+        },
+        popular: {
+          ...popular,
+          items: popular.items.slice(0, 10)
+        },
+        top: {
+          ...top,
+          items: top.items.slice(0, 10)
+        },
+        latest: {
+          ...latest,
+          items: latest.items.slice(0, 10)
+        }
+      }
+    };
+  }
+);
+
+app.get(
+  "/api/genres",
+  { preHandler: discoveryRateLimit },
+  async (_request, reply) => {
+    const tags = await mangaDexSource.tags();
+
+    reply.header(
+      "Cache-Control",
+      "public, max-age=21600, stale-while-revalidate=43200"
+    );
+
+    return {
+      source: mangaDexSource.id,
+      items: tags
+    };
   }
 );
 
@@ -285,8 +466,15 @@ app.get<{
       });
     }
 
-    const items = await mangaDexSource.chapters(request.params.id, { language });
-    return { source: mangaDexSource.id, language, items };
+    const items = await mangaDexSource.chapters(request.params.id, {
+      language
+    });
+
+    return {
+      source: mangaDexSource.id,
+      language,
+      items
+    };
   }
 );
 

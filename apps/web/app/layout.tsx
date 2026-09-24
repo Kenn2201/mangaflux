@@ -5,13 +5,15 @@ import type {
 import AppChrome from "./AppChrome";
 import "./styles.css";
 import "./v060.css";
+import "./v070.css";
 
 export const metadata: Metadata = {
   title: {
     default: "MangaFlux",
     template: "%s · MangaFlux"
   },
-  description: "A mobile-first modular manga reader and source-adapter platform."
+  description:
+    "A mobile-first manga discovery and reading platform powered by source adapters."
 };
 
 export const viewport: Viewport = {

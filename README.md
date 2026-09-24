@@ -1,8 +1,8 @@
 # MangaFlux
 
-> A mobile-first modular manga reader and source-adapter platform powering manga.kenncode.me.
+> A mobile-first modular manga discovery and reading platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v0.6.0--Mobile_UX-indigo.svg)
+![Version](https://img.shields.io/badge/version-v0.7.0--Discovery_Dashboard-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,49 +10,66 @@
 
 ## Current release
 
-**v0.6.0 — Mobile UX Foundation**
+**v0.7.0 — Discovery & Dashboard**
 
-The v0.6 milestone turns the working v0.5 reader/account stack into a more coherent mobile product.
+MangaFlux now separates public discovery from the signed-in reading dashboard and moves search into the application header.
 
-### UX foundation
+### Discovery
 
-- sticky MangaFlux app header
-- iPhone-safe mobile bottom navigation
-- skeleton states for account, library, search, manga details, and reader
-- account session loading no longer flashes the signed-out form
-- redesigned account/profile dashboard with library stats and security controls
-- global success/error/info toast system
-- Anime.js route/toast micro-interactions
-- reduced-motion support
-- improved touch targets and responsive spacing
-- iOS autofill styling that stays inside the dark MangaFlux visual system
-- shared site footer outside the distraction-free reader
+- YouTube-style live manga search suggestions with cover/title/year/tag context
+- dedicated search-results page
+- MangaFlux Hot
+- Popular / most-followed manga
+- Top Rated
+- Latest Updates
+- genre browser in the header
+- genre discovery shelves
+- Show All discovery pages with pagination
+- dedicated signed-in Dashboard
 
-Anime.js is used selectively for short, non-essential motion. The product remains fully usable with reduced motion enabled.
+MangaFlux Hot is intentionally labeled as a MangaFlux ranking. It blends recent chapter activity and popularity rather than presenting itself as an official MangaDex trending chart.
 
-## Current capabilities
+## Current product structure
+
+~~~text
+/
+Public landing + discovery
+  |- MangaFlux Hot
+  |- Popular
+  |- Top Rated
+  |- Latest Updates
+  '- Genres
+
+/dashboard
+Signed-in reading dashboard
+  |- Continue Reading
+  |- Bookmarks
+  |- Recent reading
+  '- Discovery
+
+/search?q=...
+Header-driven search results
+
+/browse?kind=popular&page=...
+Paginated discovery
+~~~
+
+## Existing reader/account stack
 
 - MangaDex search/details/chapters
-- bounded MangaDex image proxy
-- responsive vertical reader
-- Page X / Y + live progress
-- previous/next chapter navigation
-- data saver
+- bounded image proxy
+- vertical mobile reader
+- Page X / Y and saved reading progress
+- previous/next chapter controls
+- Data Saver
 - bookmarks/history/Continue Reading
-- device persistence
-- account signup/login/logout
-- verified email + password recovery through Resend
-- account-backed library/progress
-- mobile-first shell, skeletons, notifications, and profile UI
-
-## Deployment
-
-- Vercel: `manga.kenncode.me`
-- Render: `api.manga.kenncode.me`
-- Neon: persistence/auth
-- Resend: transactional email
-- MangaDex: current V1 source
+- Neon persistence
+- verified MangaFlux accounts
+- Resend verification/password recovery
+- mobile app shell, skeleton states, and toast feedback
 
 ## Roadmap
 
-Next: v0.7 Reader + Library polish, followed by v0.8 reliability/source health and v0.9 final accessibility/security/production QA before v1.0.0.
+Next: **v0.7.1 Chapter Scale & Reader Controls**, including the current 100-chapter ceiling, chapter pagination, and tap-to-show reader chrome.
+
+Then v0.7.2 adds community/profile features and v0.7.3 adds recommendations before the v0.8 reliability phase.

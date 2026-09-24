@@ -4,17 +4,47 @@ export type MangaSummary = {
   title: string;
   coverUrl?: string;
   altTitles?: string[];
+  year?: number;
+  tags?: string[];
+  contentRating?: string;
 };
 
 export type MangaDetails = MangaSummary & {
   description?: string;
   status?: string;
-  year?: number;
   originalLanguage?: string;
-  tags?: string[];
   authors?: string[];
   artists?: string[];
   externalUrl?: string;
+};
+
+export type MangaTag = {
+  id: string;
+  name: string;
+  group?: string;
+};
+
+export type MangaDiscoveryKind =
+  | "popular"
+  | "top"
+  | "latest"
+  | "hot";
+
+export type MangaListPage = {
+  items: MangaSummary[];
+  total: number;
+  limit: number;
+  offset: number;
+};
+
+export type SearchOptions = {
+  limit?: number;
+};
+
+export type DiscoveryOptions = {
+  limit?: number;
+  offset?: number;
+  tagId?: string;
 };
 
 export type Chapter = {
@@ -58,7 +88,12 @@ export type PageOptions = {
 export interface MangaSource {
   id: string;
   name: string;
-  search(query: string): Promise<MangaSummary[]>;
+  search(query: string, options?: SearchOptions): Promise<MangaSummary[]>;
+  discover(
+    kind: MangaDiscoveryKind,
+    options?: DiscoveryOptions
+  ): Promise<MangaListPage>;
+  tags(): Promise<MangaTag[]>;
   details(id: string): Promise<MangaDetails>;
   chapters(id: string, options?: ChapterOptions): Promise<Chapter[]>;
   pages(chapterId: string, options?: PageOptions): Promise<ChapterPages>;
