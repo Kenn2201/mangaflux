@@ -4,6 +4,8 @@ import {
 } from "@mangaflux/runtime";
 import type {
   Chapter,
+  ChapterListPage,
+  ChapterOptions,
   ChapterPages,
   DiscoveryOptions,
   MangaDetails,
@@ -18,7 +20,7 @@ import type {
 const BASE = process.env.MANGADEX_BASE_URL ?? "https://api.mangadex.org";
 const HOSTS = ["api.mangadex.org"];
 const COVER_BASE = "https://uploads.mangadex.org/covers";
-const USER_AGENT = "MangaFlux/0.7.0 (+https://manga.kenncode.me)";
+const USER_AGENT = "MangaFlux/0.7.1 (+https://manga.kenncode.me)";
 const MANIFEST_TTL_MS = 60_000;
 const SEARCH_TTL_MS = 30_000;
 const DETAILS_TTL_MS = 5 * 60_000;
@@ -101,7 +103,7 @@ type CacheEntry<T> = {
 const atHomeCache = new Map<string, CacheEntry<AtHomeResponse>>();
 const searchCache = new Map<string, CacheEntry<MangaSummary[]>>();
 const detailsCache = new Map<string, CacheEntry<MangaDetails>>();
-const chaptersCache = new Map<string, CacheEntry<Chapter[]>>();
+const chapterPageCache = new Map<string, CacheEntry<ChapterListPage>>();
 const discoveryCache = new Map<string, CacheEntry<MangaListPage>>();
 const hotPoolCache = new Map<string, CacheEntry<MangaSummary[]>>();
 let tagsCache: CacheEntry<MangaTag[]> | undefined;
@@ -588,19 +590,43 @@ export const mangaDexSource: MangaSource = {
     return details;
   },
 
-  async chapters(id, options): Promise<Chapter[]> {
-    const language = options?.language?.trim() || "en";
-    const cacheKey = `${id}:${language.toLowerCase()}`;
-    const cached = readCache(chaptersCache, cacheKey);
+  async chapterPage(
+    id: string,
+    options: ChapterOptions = {}
+  ): Promise<ChapterListPage> {
+    const language = options.language?.trim() || "en";
+    const limit = boundedLimit(options.limit, 50, 100);
+    const offset = boundedOffset(options.offset);
+    const order = options.order === "asc" ? "asc" : "desc";
+    const chapter = options.chapter?.trim() || undefined;
+    const cacheKey = [
+      id,
+      language.toLowerCase(),
+      limit,
+      offset,
+      order,
+      chapter ?? "all"
+    ].join(":");
+
+    const cached = readCache(chapterPageCache, cacheKey);
     if (cached) return cached;
 
-    const url = new URL(`/manga/${encodeURIComponent(id)}/feed`, BASE);
+    const url = chapter
+      ? new URL("/chapter", BASE)
+      : new URL(`/manga/${encodeURIComponent(id)}/feed`, BASE);
 
-    url.searchParams.set("limit", "100");
-    url.searchParams.set("offset", "0");
+    url.searchParams.set("limit", String(limit));
+    url.searchParams.set("offset", String(offset));
     url.searchParams.append("translatedLanguage[]", language);
     url.searchParams.append("includes[]", "scanlation_group");
-    url.searchParams.set("order[chapter]", "desc");
+
+    if (chapter) {
+      url.searchParams.set("manga", id);
+      url.searchParams.append("chapter[]", chapter);
+      url.searchParams.set("order[createdAt]", order);
+    } else {
+      url.searchParams.set("order[chapter]", order);
+    }
 
     const response = await mangaDexFetch(url.toString());
     if (!response.ok) {
@@ -608,9 +634,26 @@ export const mangaDexSource: MangaSource = {
     }
 
     const payload = response.json<MangaDexCollection<ChapterEntity>>();
-    const items = payload.data.map((chapter) => chapterFromEntity(chapter, id));
-    writeCache(chaptersCache, cacheKey, items, CHAPTERS_TTL_MS);
-    return items;
+    const page: ChapterListPage = {
+      items: payload.data.map((item) => chapterFromEntity(item, id)),
+      total: payload.total ?? payload.data.length,
+      limit: payload.limit ?? limit,
+      offset: payload.offset ?? offset,
+      order
+    };
+
+    writeCache(chapterPageCache, cacheKey, page, CHAPTERS_TTL_MS);
+    return page;
+  },
+
+  async chapters(id, options): Promise<Chapter[]> {
+    const page = await this.chapterPage(id, {
+      ...options,
+      limit: options?.limit ?? 100,
+      offset: options?.offset ?? 0
+    });
+
+    return page.items;
   },
 
   async pages(chapterId, options): Promise<ChapterPages> {

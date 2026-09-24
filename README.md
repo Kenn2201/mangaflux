@@ -2,7 +2,7 @@
 
 > A mobile-first modular manga discovery and reading platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v0.7.0--Discovery_Dashboard-indigo.svg)
+![Version](https://img.shields.io/badge/version-v0.7.1--Chapter_Scale_Reader-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,66 +10,59 @@
 
 ## Current release
 
-**v0.7.0 — Discovery & Dashboard**
+**v0.7.1 — Chapter Scale & Reader Controls**
 
-MangaFlux now separates public discovery from the signed-in reading dashboard and moves search into the application header.
+This release fixes the first v0.7 production bug and removes the 100-chapter product ceiling.
 
-### Discovery
+### Chapter scale
 
-- YouTube-style live manga search suggestions with cover/title/year/tag context
-- dedicated search-results page
-- MangaFlux Hot
-- Popular / most-followed manga
-- Top Rated
-- Latest Updates
-- genre browser in the header
-- genre discovery shelves
-- Show All discovery pages with pagination
-- dedicated signed-in Dashboard
+- chapter pages now use real MangaDex pagination
+- manga with 100+ chapters can reach older chapters instead of silently stopping at the first 100
+- 50 chapters per MangaFlux page
+- Newest / Oldest sorting
+- exact chapter-number lookup such as 1, 12, or 12.5
+- reader neighbor lookup scans paginated chapter pages so previous/next navigation is no longer limited to the newest 100 entries
 
-MangaFlux Hot is intentionally labeled as a MangaFlux ranking. It blends recent chapter activity and popularity rather than presenting itself as an official MangaDex trending chart.
+### Reader controls
 
-## Current product structure
+- distraction-free reader chrome auto-hides
+- tap the page area to reveal reader controls again
+- persistent centered Page X / Y pill
+- persistent thin reading progress meter
+- overlay previous/next chapter controls
+- Data Saver remains available from the reader chrome
+- lower-right scroll-to-top control
+- reading progress save status remains available in the revealed chrome
+
+### Fixes
+
+- fixed the v0.7.0 genre menu request loop that could leave the mobile genre sheet loading indefinitely
+- added a visible retry state if genre loading genuinely fails
+
+## Existing product structure
 
 ~~~text
 /
-Public landing + discovery
-  |- MangaFlux Hot
-  |- Popular
-  |- Top Rated
-  |- Latest Updates
-  '- Genres
+Landing + discovery
 
 /dashboard
-Signed-in reading dashboard
-  |- Continue Reading
-  |- Bookmarks
-  |- Recent reading
-  '- Discovery
+Account reading dashboard
 
 /search?q=...
-Header-driven search results
+Live-search results
 
-/browse?kind=popular&page=...
+/browse?kind=...
 Paginated discovery
+
+/manga/:id
+Manga details + scalable chapter pages
+
+/read/:chapterId
+Immersive tap-controlled reader
 ~~~
-
-## Existing reader/account stack
-
-- MangaDex search/details/chapters
-- bounded image proxy
-- vertical mobile reader
-- Page X / Y and saved reading progress
-- previous/next chapter controls
-- Data Saver
-- bookmarks/history/Continue Reading
-- Neon persistence
-- verified MangaFlux accounts
-- Resend verification/password recovery
-- mobile app shell, skeleton states, and toast feedback
 
 ## Roadmap
 
-Next: **v0.7.1 Chapter Scale & Reader Controls**, including the current 100-chapter ceiling, chapter pagination, and tap-to-show reader chrome.
+Next: **v0.7.2 Community & Profiles** with MangaFlux-native comments, reactions, and profile avatars.
 
-Then v0.7.2 adds community/profile features and v0.7.3 adds recommendations before the v0.8 reliability phase.
+Then v0.7.3 adds recommendations before the v0.8 reliability/source-health phase.

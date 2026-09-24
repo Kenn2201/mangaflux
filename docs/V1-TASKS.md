@@ -11,9 +11,13 @@
 
 - [x] MangaDex search/details/chapters/image proxy
 - [x] Page X / Y, progress, previous/next, Data Saver
-- [ ] all chapters beyond the current 100-item feed
-- [ ] chapter pagination/sorting/jump controls
-- [ ] tap-to-show reader chrome and scroll-to-top control
+- [x] chapters beyond the newest 100-item feed
+- [x] chapter pagination
+- [x] newest/oldest chapter sorting
+- [x] chapter-number lookup
+- [x] tap-to-show reader chrome
+- [x] persistent reader progress/page HUD
+- [x] scroll-to-top control
 
 ## Discovery
 

@@ -2,7 +2,12 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import {
+  FormEvent,
+  useEffect,
+  useMemo,
+  useState
+} from "react";
 import { notify } from "../../../lib/toast";
 import { MangaDetailsSkeleton } from "../../Skeletons";
 
@@ -29,14 +34,31 @@ type Chapter = {
   scanlationGroups?: string[];
 };
 
+type ChapterPayload = {
+  items: Chapter[];
+  total: number;
+  limit: number;
+  offset: number;
+  order: "asc" | "desc";
+};
+
+const CHAPTER_LIMIT = 50;
+
 export default function MangaPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
 
   const [manga, setManga] = useState<MangaDetails | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [chapterTotal, setChapterTotal] = useState(0);
+  const [chapterPage, setChapterPage] = useState(1);
+  const [chapterOrder, setChapterOrder] = useState<"asc" | "desc">("desc");
+  const [chapterLoading, setChapterLoading] = useState(false);
+  const [chapterInput, setChapterInput] = useState("");
+  const [chapterFilter, setChapterFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [chapterMessage, setChapterMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [bookmarked, setBookmarked] = useState<boolean | null>(null);
   const [bookmarkBusy, setBookmarkBusy] = useState(false);
@@ -50,44 +72,27 @@ export default function MangaPage() {
   useEffect(() => {
     let cancelled = false;
 
-    async function load() {
+    async function loadDetails() {
       setLoading(true);
       setMessage("");
 
       try {
-        const [detailsResponse, chaptersResponse] = await Promise.all([
-          fetch(`/api/manga/${encodeURIComponent(id)}`, {
-            cache: "no-store"
-          }),
-          fetch(
-            `/api/manga/${encodeURIComponent(id)}/chapters?language=en`,
-            { cache: "no-store" }
-          )
-        ]);
+        const response = await fetch(
+          `/api/manga/${encodeURIComponent(id)}`,
+          { cache: "no-store" }
+        );
 
-        if (!detailsResponse.ok) {
+        if (!response.ok) {
           throw new Error(
-            `Manga details failed (${detailsResponse.status}). Try again shortly.`
+            `Manga details failed (${response.status}). Try again shortly.`
           );
         }
 
-        const detailsPayload = (await detailsResponse.json()) as {
+        const payload = (await response.json()) as {
           item: MangaDetails;
         };
 
-        if (cancelled) return;
-        setManga(detailsPayload.item);
-
-        if (chaptersResponse.ok) {
-          const chapterPayload = (await chaptersResponse.json()) as {
-            items: Chapter[];
-          };
-          if (!cancelled) setChapters(chapterPayload.items);
-        } else if (!cancelled) {
-          setMessage(
-            `Manga loaded, but chapters failed (${chaptersResponse.status}).`
-          );
-        }
+        if (!cancelled) setManga(payload.item);
       } catch (error) {
         if (!cancelled) {
           setMessage(
@@ -101,11 +106,71 @@ export default function MangaPage() {
       }
     }
 
-    void load();
+    void loadDetails();
+
     return () => {
       cancelled = true;
     };
   }, [id]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadChapters() {
+      setChapterLoading(true);
+      setChapterMessage("");
+
+      const query = new URLSearchParams({
+        language: "en",
+        limit: String(CHAPTER_LIMIT),
+        offset: String((chapterPage - 1) * CHAPTER_LIMIT),
+        order: chapterOrder
+      });
+
+      if (chapterFilter) query.set("chapter", chapterFilter);
+
+      try {
+        const response = await fetch(
+          `/api/manga/${encodeURIComponent(id)}/chapters?${query.toString()}`,
+          { cache: "no-store" }
+        );
+
+        const body = await response.json().catch(() => null) as
+          | (ChapterPayload & { message?: string })
+          | null;
+
+        if (!response.ok || !body) {
+          throw new Error(
+            body?.message ??
+              `Chapters failed (${response.status}). Try again shortly.`
+          );
+        }
+
+        if (!cancelled) {
+          setChapters(body.items);
+          setChapterTotal(body.total);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setChapters([]);
+          setChapterTotal(0);
+          setChapterMessage(
+            error instanceof Error
+              ? error.message
+              : "Chapters are temporarily unavailable."
+          );
+        }
+      } finally {
+        if (!cancelled) setChapterLoading(false);
+      }
+    }
+
+    void loadChapters();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id, chapterPage, chapterOrder, chapterFilter]);
 
   useEffect(() => {
     if (!manga) return;
@@ -132,6 +197,7 @@ export default function MangaPage() {
     }
 
     void loadBookmark();
+
     return () => {
       cancelled = true;
     };
@@ -165,6 +231,7 @@ export default function MangaPage() {
 
       const nextBookmarked = !bookmarked;
       setBookmarked(nextBookmarked);
+
       notify({
         tone: "success",
         title: nextBookmarked ? "Added to library" : "Removed from library",
@@ -175,6 +242,7 @@ export default function MangaPage() {
     } catch {
       const text = "Bookmark storage is temporarily unavailable.";
       setMessage(text);
+
       notify({
         tone: "error",
         title: "Bookmark failed",
@@ -185,11 +253,43 @@ export default function MangaPage() {
     }
   }
 
+  function submitChapterSearch(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const value = chapterInput.trim();
+
+    if (!value) {
+      setChapterFilter("");
+      setChapterPage(1);
+      return;
+    }
+
+    if (!/^[0-9]+(?:\.[0-9]+)?$/.test(value)) {
+      setChapterMessage("Enter a chapter number like 1, 12, or 12.5.");
+      return;
+    }
+
+    setChapterFilter(value);
+    setChapterPage(1);
+  }
+
+  function clearChapterSearch() {
+    setChapterInput("");
+    setChapterFilter("");
+    setChapterPage(1);
+    setChapterMessage("");
+  }
+
+  const totalPages = useMemo(
+    () => Math.max(1, Math.ceil(chapterTotal / CHAPTER_LIMIT)),
+    [chapterTotal]
+  );
+
   const querySuffix = searchQuery
     ? `?q=${encodeURIComponent(searchQuery)}`
     : "";
+
   const searchHref = searchQuery
-    ? `/?q=${encodeURIComponent(searchQuery)}`
+    ? `/search?q=${encodeURIComponent(searchQuery)}`
     : "/";
 
   if (loading) {
@@ -214,7 +314,7 @@ export default function MangaPage() {
   return (
     <main>
       <Link className="back-link" href={searchHref}>
-        ← {searchQuery ? `Back to “${searchQuery}”` : "Search"}
+        ← {searchQuery ? `Back to “${searchQuery}”` : "Discover"}
       </Link>
 
       <section className="details">
@@ -279,44 +379,147 @@ export default function MangaPage() {
       </section>
 
       <section className="panel chapters-panel">
-        <div className="section-heading">
+        <div className="chapter-panel-heading">
           <div>
-            <p className="eyebrow">English</p>
-            <h2>Recent chapters</h2>
+            <p className="eyebrow">English chapters</p>
+            <h2>
+              {chapterFilter
+                ? `Chapter ${chapterFilter}`
+                : chapterOrder === "desc"
+                  ? "Newest first"
+                  : "Oldest first"}
+            </h2>
           </div>
-          <span>{chapters.length} loaded</span>
+
+          <span>
+            {chapterLoading
+              ? "Loading…"
+              : chapterFilter
+                ? `${chapterTotal} match${chapterTotal === 1 ? "" : "es"}`
+                : `${chapterTotal} chapters`}
+          </span>
         </div>
 
-        {message ? <p className="message">{message}</p> : null}
+        <div className="chapter-toolbar">
+          <form
+            className="chapter-search-form"
+            onSubmit={submitChapterSearch}
+          >
+            <input
+              inputMode="decimal"
+              value={chapterInput}
+              onChange={(event) => setChapterInput(event.target.value)}
+              placeholder="Jump to chapter…"
+              aria-label="Find chapter number"
+            />
+            <button type="submit">Find</button>
+            {chapterFilter ? (
+              <button
+                className="secondary-button"
+                type="button"
+                onClick={clearChapterSearch}
+              >
+                Clear
+              </button>
+            ) : null}
+          </form>
 
-        <div className="chapter-list">
-          {chapters.map((chapter) => (
-            <Link
-              className="chapter-row"
-              href={`/read/${chapter.id}${querySuffix}`}
-              key={chapter.id}
+          <div className="chapter-sort" aria-label="Chapter sort order">
+            <button
+              type="button"
+              className={chapterOrder === "desc" ? "is-active" : ""}
+              onClick={() => {
+                setChapterOrder("desc");
+                setChapterPage(1);
+              }}
             >
-              <div>
-                <strong>
-                  {chapter.chapter ? `Chapter ${chapter.chapter}` : chapter.title}
-                </strong>
-                {chapter.title &&
-                chapter.title !== `Chapter ${chapter.chapter}` ? (
-                  <span className="chapter-title">{chapter.title}</span>
-                ) : null}
-              </div>
-              <div className="chapter-meta">
-                {chapter.scanlationGroups?.length
-                  ? chapter.scanlationGroups.join(", ")
-                  : "Unknown group"}
-              </div>
-            </Link>
-          ))}
-
-          {!message && chapters.length === 0 ? (
-            <p className="message">No English chapters were returned.</p>
-          ) : null}
+              Newest
+            </button>
+            <button
+              type="button"
+              className={chapterOrder === "asc" ? "is-active" : ""}
+              onClick={() => {
+                setChapterOrder("asc");
+                setChapterPage(1);
+              }}
+            >
+              Oldest
+            </button>
+          </div>
         </div>
+
+        {chapterMessage ? (
+          <p className="message">{chapterMessage}</p>
+        ) : null}
+
+        {chapterLoading ? (
+          <div className="chapter-list chapter-list-loading" aria-busy="true">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <span className="skeleton skeleton-chapter" key={index} />
+            ))}
+          </div>
+        ) : (
+          <div className="chapter-list">
+            {chapters.map((chapter) => (
+              <Link
+                className="chapter-row"
+                href={`/read/${chapter.id}${querySuffix}`}
+                key={chapter.id}
+              >
+                <div>
+                  <strong>
+                    {chapter.chapter
+                      ? `Chapter ${chapter.chapter}`
+                      : chapter.title}
+                  </strong>
+                  {chapter.title &&
+                  chapter.title !== `Chapter ${chapter.chapter}` ? (
+                    <span className="chapter-title">{chapter.title}</span>
+                  ) : null}
+                </div>
+
+                <div className="chapter-meta">
+                  {chapter.scanlationGroups?.length
+                    ? chapter.scanlationGroups.join(", ")
+                    : "Unknown group"}
+                </div>
+              </Link>
+            ))}
+
+            {!chapterMessage && chapters.length === 0 ? (
+              <p className="message">No matching English chapters were returned.</p>
+            ) : null}
+          </div>
+        )}
+
+        {!chapterFilter && chapterTotal > CHAPTER_LIMIT ? (
+          <nav
+            className="chapter-pagination"
+            aria-label="Chapter pages"
+          >
+            <button
+              type="button"
+              disabled={chapterPage <= 1 || chapterLoading}
+              onClick={() => setChapterPage((page) => Math.max(1, page - 1))}
+            >
+              ← Newer
+            </button>
+
+            <span>
+              Page {chapterPage} / {totalPages}
+            </span>
+
+            <button
+              type="button"
+              disabled={chapterPage >= totalPages || chapterLoading}
+              onClick={() =>
+                setChapterPage((page) => Math.min(totalPages, page + 1))
+              }
+            >
+              Older →
+            </button>
+          </nav>
+        ) : null}
       </section>
     </main>
   );

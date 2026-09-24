@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
+  MouseEvent,
   useEffect,
   useMemo,
   useRef,
@@ -36,6 +37,13 @@ type Chapter = {
   id: string;
   title: string;
   chapter?: string;
+};
+
+type ChapterPage = {
+  items: Chapter[];
+  total: number;
+  limit: number;
+  offset: number;
 };
 
 type MangaMeta = {
@@ -149,6 +157,8 @@ export default function ReaderPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [previousChapter, setPreviousChapter] = useState<Chapter>();
   const [nextChapter, setNextChapter] = useState<Chapter>();
+  const [controlsVisible, setControlsVisible] = useState(true);
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const [saveState, setSaveState] = useState<
     "idle" | "saving" | "saved" | "error"
   >("idle");
@@ -177,6 +187,7 @@ export default function ReaderPage() {
       setPreviousChapter(undefined);
       setNextChapter(undefined);
       setCurrentPage(1);
+      setControlsVisible(true);
       setSaveState("idle");
       lastSavedRef.current = "";
 
@@ -212,6 +223,7 @@ export default function ReaderPage() {
     }
 
     void load();
+
     return () => {
       cancelled = true;
     };
@@ -226,50 +238,109 @@ export default function ReaderPage() {
       const mangaId = data!.chapter.mangaId;
 
       try {
-        const [chaptersResponse, detailsResponse] = await Promise.all([
-          fetch(
-            `/api/manga/${encodeURIComponent(mangaId)}/chapters?language=en`,
-            { cache: "no-store" }
-          ),
-          fetch(
-            `/api/manga/${encodeURIComponent(mangaId)}`,
-            { cache: "no-store" }
-          )
-        ]);
-
-        if (chaptersResponse.ok) {
-          const payload = (await chaptersResponse.json()) as {
-            items: Chapter[];
-          };
-          const currentIndex = payload.items.findIndex(
-            (chapter) => chapter.id === chapterId
-          );
-
-          if (!cancelled && currentIndex >= 0) {
-            setPreviousChapter(
-              findDistinctNeighbor(payload.items, currentIndex, 1)
-            );
-            setNextChapter(
-              findDistinctNeighbor(payload.items, currentIndex, -1)
-            );
-          }
-        }
+        const detailsResponse = await fetch(
+          `/api/manga/${encodeURIComponent(mangaId)}`,
+          { cache: "no-store" }
+        );
 
         if (detailsResponse.ok) {
           const payload = (await detailsResponse.json()) as {
             item: MangaMeta;
           };
 
-          if (!cancelled) {
-            setMangaMeta(payload.item);
-          }
+          if (!cancelled) setMangaMeta(payload.item);
         }
       } catch {
-        // Reader remains usable even if supplemental context fails.
+        // Reader stays usable without the supplemental title context.
+      }
+
+      try {
+        const collected: Chapter[] = [];
+        let offset = 0;
+        let total = Number.POSITIVE_INFINITY;
+        let foundIndex = -1;
+        let pagesScanned = 0;
+
+        while (
+          !cancelled &&
+          offset < total &&
+          offset <= 10_000 &&
+          pagesScanned < 20
+        ) {
+          const response = await fetch(
+            `/api/manga/${encodeURIComponent(
+              mangaId
+            )}/chapters?language=en&limit=100&offset=${offset}&order=desc`,
+            { cache: "no-store" }
+          );
+
+          if (!response.ok) break;
+
+          const payload = (await response.json()) as ChapterPage;
+          collected.push(...payload.items);
+          total = payload.total;
+          pagesScanned += 1;
+
+          foundIndex = collected.findIndex(
+            (chapter) => chapter.id === chapterId
+          );
+
+          if (foundIndex >= 0) {
+            let previous = findDistinctNeighbor(
+              collected,
+              foundIndex,
+              1
+            );
+            const next = findDistinctNeighbor(
+              collected,
+              foundIndex,
+              -1
+            );
+
+            const nextOffset = offset + payload.limit;
+
+            if (
+              !previous &&
+              nextOffset < total &&
+              nextOffset <= 10_000 &&
+              pagesScanned < 20
+            ) {
+              const nextPageResponse = await fetch(
+                `/api/manga/${encodeURIComponent(
+                  mangaId
+                )}/chapters?language=en&limit=100&offset=${nextOffset}&order=desc`,
+                { cache: "no-store" }
+              );
+
+              if (nextPageResponse.ok) {
+                const nextPage = (await nextPageResponse.json()) as ChapterPage;
+                collected.push(...nextPage.items);
+                previous = findDistinctNeighbor(
+                  collected,
+                  foundIndex,
+                  1
+                );
+              }
+            }
+
+            if (!cancelled) {
+              setPreviousChapter(previous);
+              setNextChapter(next);
+            }
+
+            break;
+          }
+
+          if (!payload.items.length || payload.limit <= 0) break;
+          offset += payload.limit;
+        }
+      } catch {
+        // Chapter navigation is supplemental; the reader still works.
       }
     }
 
     void loadMangaContext();
+
     return () => {
       cancelled = true;
     };
@@ -290,6 +361,7 @@ export default function ReaderPage() {
           const page = Number(
             (entry.target as HTMLElement).dataset.pageIndex ?? "0"
           );
+
           if (!page) continue;
 
           visibility.set(
@@ -308,9 +380,7 @@ export default function ReaderPage() {
           }
         }
 
-        if (bestPage > 0) {
-          setCurrentPage(bestPage);
-        }
+        if (bestPage > 0) setCurrentPage(bestPage);
       },
       {
         root: null,
@@ -353,6 +423,27 @@ export default function ReaderPage() {
 
     return () => window.clearTimeout(timer);
   }, [chapterId, data?.pages.length]);
+
+  useEffect(() => {
+    function onScroll() {
+      setShowScrollTop(window.scrollY > 650);
+    }
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    if (!controlsVisible || loading) return;
+
+    const timer = window.setTimeout(() => {
+      setControlsVisible(false);
+    }, 3200);
+
+    return () => window.clearTimeout(timer);
+  }, [controlsVisible, loading, chapterId]);
 
   const totalPages = data?.pages.length ?? 0;
 
@@ -426,7 +517,7 @@ export default function ReaderPage() {
   const chaptersHref = data?.chapter.mangaId
     ? `/manga/${data.chapter.mangaId}${querySuffix}`
     : searchQuery
-      ? `/?q=${encodeURIComponent(searchQuery)}`
+      ? `/search?q=${encodeURIComponent(searchQuery)}`
       : "/";
 
   const pageLabel = useMemo(
@@ -440,6 +531,14 @@ export default function ReaderPage() {
       window.localStorage.setItem("mangaflux:data-saver", String(next));
       return next;
     });
+  }
+
+  function toggleControls(event: MouseEvent<HTMLDivElement>) {
+    const target = event.target as HTMLElement;
+
+    if (target.closest("a, button, input, label")) return;
+
+    setControlsVisible((visible) => !visible);
   }
 
   if (loading) {
@@ -462,36 +561,44 @@ export default function ReaderPage() {
   }
 
   return (
-    <div className="reader">
-      <header className="reader-header">
-        <div className="reader-heading">
-          <Link className="back-link" href={chaptersHref}>
+    <div
+      className={`reader reader-immersive ${
+        controlsVisible ? "controls-visible" : "controls-hidden"
+      }`}
+      onClick={toggleControls}
+    >
+      <div
+        className="reader-progress reader-progress-persistent"
+        role="progressbar"
+        aria-label="Chapter reading progress"
+        aria-valuemin={1}
+        aria-valuemax={Math.max(1, totalPages)}
+        aria-valuenow={Math.min(currentPage, Math.max(1, totalPages))}
+      >
+        <span style={{ width: `${progress}%` }} />
+      </div>
+
+      <div className="reader-page-hud" aria-live="polite">
+        {pageLabel}
+      </div>
+
+      <header
+        className="reader-chrome reader-chrome-top"
+        aria-hidden={!controlsVisible}
+      >
+        <div className="reader-chrome-main">
+          <Link className="reader-chrome-back" href={chaptersHref}>
             ← Chapters
           </Link>
 
-          <h1 className="reader-title">
-            {data.chapter.chapter
-              ? `Chapter ${data.chapter.chapter}`
-              : data.chapter.title}
-          </h1>
-        </div>
-
-        <div className="reader-tools">
-          <div className="reader-progress-state">
-            <strong className="reader-page-count" aria-live="polite">
-              {pageLabel}
+          <div className="reader-chrome-title">
+            <strong>
+              {data.chapter.chapter
+                ? `Chapter ${data.chapter.chapter}`
+                : data.chapter.title}
             </strong>
-            <span
-              className={`reader-save-state reader-save-${saveState}`}
-              aria-live="polite"
-            >
-              {saveState === "saving"
-                ? "Saving…"
-                : saveState === "saved"
-                  ? "Saved"
-                  : saveState === "error"
-                    ? "Save unavailable"
-                    : "Device progress"}
+            <span>
+              {mangaMeta?.title ?? "MangaFlux Reader"}
             </span>
           </div>
 
@@ -503,61 +610,31 @@ export default function ReaderPage() {
           >
             Data saver {dataSaver ? "On" : "Off"}
           </button>
-
-          <div className="reader-credit">
-            <a href={data.attribution.sourceUrl} target="_blank" rel="noreferrer">
-              Read via {data.attribution.sourceName} ↗
-            </a>
-            <span>
-              {data.attribution.scanlationGroups.length
-                ? `Scanlation: ${data.attribution.scanlationGroups.join(", ")}`
-                : "Scanlation group not provided"}
-            </span>
-          </div>
         </div>
 
-        <div
-          className="reader-progress"
-          role="progressbar"
-          aria-label="Chapter reading progress"
-          aria-valuemin={1}
-          aria-valuemax={Math.max(1, totalPages)}
-          aria-valuenow={Math.min(currentPage, Math.max(1, totalPages))}
-        >
-          <span style={{ width: `${progress}%` }} />
+        <div className="reader-chrome-meta">
+          <span
+            className={`reader-save-state reader-save-${saveState}`}
+            aria-live="polite"
+          >
+            {saveState === "saving"
+              ? "Saving progress…"
+              : saveState === "saved"
+                ? "Progress saved"
+                : saveState === "error"
+                  ? "Save unavailable"
+                  : "Reading progress"}
+          </span>
+
+          <a
+            href={data.attribution.sourceUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {data.attribution.sourceName} ↗
+          </a>
         </div>
       </header>
-
-      <nav
-        className="reader-chapter-nav reader-chapter-nav-top"
-        aria-label="Chapter navigation"
-      >
-        {previousChapter ? (
-          <Link href={chapterHref(previousChapter.id)}>
-            ← Previous
-            <small>
-              {previousChapter.chapter
-                ? `Ch. ${previousChapter.chapter}`
-                : previousChapter.title}
-            </small>
-          </Link>
-        ) : (
-          <span className="reader-nav-disabled">← Previous</span>
-        )}
-
-        {nextChapter ? (
-          <Link href={chapterHref(nextChapter.id)}>
-            Next →
-            <small>
-              {nextChapter.chapter
-                ? `Ch. ${nextChapter.chapter}`
-                : nextChapter.title}
-            </small>
-          </Link>
-        ) : (
-          <span className="reader-nav-disabled">Next →</span>
-        )}
-      </nav>
 
       <div className="reader-pages" ref={pagesRef}>
         {data.pages.map((page) => (
@@ -570,39 +647,90 @@ export default function ReaderPage() {
         ))}
       </div>
 
-      <nav className="reader-chapter-nav" aria-label="Chapter navigation">
+      <nav
+        className="reader-chrome reader-chrome-bottom"
+        aria-label="Chapter navigation"
+        aria-hidden={!controlsVisible}
+      >
         {previousChapter ? (
           <Link href={chapterHref(previousChapter.id)}>
-            ← Previous chapter
+            <span>← Previous</span>
             <small>
               {previousChapter.chapter
-                ? `Chapter ${previousChapter.chapter}`
+                ? `Ch. ${previousChapter.chapter}`
                 : previousChapter.title}
             </small>
           </Link>
         ) : (
-          <span className="reader-nav-disabled">← Previous chapter</span>
+          <span className="reader-overlay-disabled">
+            <span>← Previous</span>
+            <small>No older chapter</small>
+          </span>
         )}
+
+        <button
+          className="reader-controls-center"
+          type="button"
+          onClick={() => setControlsVisible(false)}
+        >
+          Hide controls
+        </button>
 
         {nextChapter ? (
           <Link href={chapterHref(nextChapter.id)}>
-            Next chapter →
+            <span>Next →</span>
             <small>
               {nextChapter.chapter
-                ? `Chapter ${nextChapter.chapter}`
+                ? `Ch. ${nextChapter.chapter}`
                 : nextChapter.title}
             </small>
           </Link>
         ) : (
-          <span className="reader-nav-disabled">Next chapter →</span>
+          <span className="reader-overlay-disabled">
+            <span>Next →</span>
+            <small>No newer chapter</small>
+          </span>
         )}
       </nav>
 
-      <footer className="reader-footer">
+      {showScrollTop ? (
+        <button
+          className="reader-scroll-top"
+          type="button"
+          aria-label="Scroll to top"
+          onClick={() =>
+            window.scrollTo({
+              top: 0,
+              behavior: window.matchMedia(
+                "(prefers-reduced-motion: reduce)"
+              ).matches
+                ? "auto"
+                : "smooth"
+            })
+          }
+        >
+          ↑
+        </button>
+      ) : null}
+
+      <footer className="reader-footer reader-end-card">
         <span>{pageLabel}</span>
         <a href={data.attribution.sourceUrl} target="_blank" rel="noreferrer">
           MangaDex source / chapter attribution
         </a>
+
+        <nav aria-label="End of chapter navigation">
+          {previousChapter ? (
+            <Link href={chapterHref(previousChapter.id)}>
+              ← Previous chapter
+            </Link>
+          ) : null}
+          {nextChapter ? (
+            <Link href={chapterHref(nextChapter.id)}>
+              Next chapter →
+            </Link>
+          ) : null}
+        </nav>
       </footer>
     </div>
   );

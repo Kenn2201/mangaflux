@@ -13,7 +13,7 @@ import type {
   MangaSummary
 } from "@mangaflux/sources";
 
-const APP_VERSION = "0.7.0";
+const APP_VERSION = "0.7.1";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LANGUAGE_RE = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i;
@@ -451,7 +451,13 @@ app.get<{ Params: { id: string } }>(
 
 app.get<{
   Params: { id: string };
-  Querystring: { language?: string };
+  Querystring: {
+    language?: string;
+    limit?: string;
+    offset?: string;
+    order?: string;
+    chapter?: string;
+  };
 }>(
   "/api/manga/mangadex/:id/chapters",
   { preHandler: metadataRateLimit },
@@ -459,21 +465,43 @@ app.get<{
     if (!requireUuid(request.params.id, reply, "id")) return;
 
     const language = request.query.language?.trim() || "en";
-    if (!LANGUAGE_RE.test(language)) {
+    const limit = parseBoundedInt(request.query.limit, 50, 1, 100);
+    const offset = parseBoundedInt(request.query.offset, 0, 0, 10_000);
+    const order =
+      request.query.order === "asc"
+        ? "asc"
+        : request.query.order === undefined ||
+            request.query.order === "desc"
+          ? "desc"
+          : null;
+    const chapter = request.query.chapter?.trim();
+
+    if (
+      !LANGUAGE_RE.test(language) ||
+      limit === null ||
+      offset === null ||
+      order === null ||
+      (chapter && !/^[0-9]+(?:\.[0-9]+)?$/.test(chapter))
+    ) {
       return reply.code(400).send({
         error: "INVALID_REQUEST",
-        message: "language is invalid"
+        message:
+          "Invalid language, chapter pagination, sort order, or chapter number."
       });
     }
 
-    const items = await mangaDexSource.chapters(request.params.id, {
-      language
+    const page = await mangaDexSource.chapterPage(request.params.id, {
+      language,
+      limit,
+      offset,
+      order,
+      chapter
     });
 
     return {
       source: mangaDexSource.id,
       language,
-      items
+      ...page
     };
   }
 );
