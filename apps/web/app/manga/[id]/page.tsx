@@ -11,6 +11,7 @@ import {
 import { notify } from "../../../lib/toast";
 import { MangaDetailsSkeleton } from "../../Skeletons";
 import CommunityThread from "../../CommunityThread";
+import MangaRecommendations from "../../MangaRecommendations";
 
 type MangaDetails = {
   id: string;
@@ -27,6 +28,11 @@ type MangaDetails = {
   }>;
   authors?: string[];
   artists?: string[];
+  creators?: Array<{
+    id: string;
+    name: string;
+    role: "author" | "artist";
+  }>;
   externalUrl?: string;
 };
 
@@ -335,12 +341,73 @@ export default function MangaPage() {
           <h1 className="title-small">{manga.title}</h1>
 
           <div className="meta-row">
-            {manga.status ? <span>{manga.status}</span> : null}
-            {manga.year ? <span>{manga.year}</span> : null}
+            {manga.status ? (
+              <Link
+                className="meta-link"
+                href={`/browse?kind=popular&status=${encodeURIComponent(
+                  manga.status
+                )}`}
+              >
+                {manga.status}
+              </Link>
+            ) : null}
+
+            {manga.year ? (
+              <Link
+                className="meta-link"
+                href={`/browse?kind=popular&year=${manga.year}`}
+              >
+                {manga.year}
+              </Link>
+            ) : null}
           </div>
 
-          {manga.authors?.length ? (
+          {manga.creators?.some(
+            (creator) => creator.role === "author"
+          ) ? (
+            <p className="muted creator-line">
+              <span>Author:</span>{" "}
+              {manga.creators
+                .filter((creator) => creator.role === "author")
+                .map((creator, index, authors) => (
+                  <span key={creator.id}>
+                    <Link
+                      className="creator-link"
+                      href={`/browse?kind=popular&creator=${encodeURIComponent(
+                        creator.id
+                      )}&creatorName=${encodeURIComponent(creator.name)}`}
+                    >
+                      {creator.name}
+                    </Link>
+                    {index < authors.length - 1 ? ", " : ""}
+                  </span>
+                ))}
+            </p>
+          ) : manga.authors?.length ? (
             <p className="muted">Author: {manga.authors.join(", ")}</p>
+          ) : null}
+
+          {manga.creators?.some(
+            (creator) => creator.role === "artist"
+          ) ? (
+            <p className="muted creator-line">
+              <span>Artist:</span>{" "}
+              {manga.creators
+                .filter((creator) => creator.role === "artist")
+                .map((creator, index, artists) => (
+                  <span key={creator.id}>
+                    <Link
+                      className="creator-link"
+                      href={`/browse?kind=popular&creator=${encodeURIComponent(
+                        creator.id
+                      )}&creatorName=${encodeURIComponent(creator.name)}`}
+                    >
+                      {creator.name}
+                    </Link>
+                    {index < artists.length - 1 ? ", " : ""}
+                  </span>
+                ))}
+            </p>
           ) : null}
 
           {manga.description ? (
@@ -541,6 +608,14 @@ export default function MangaPage() {
           </nav>
         ) : null}
       </section>
+
+      <MangaRecommendations
+        mangaId={id}
+        title={manga.title}
+        year={manga.year}
+        tags={manga.tagDetails ?? []}
+        creators={manga.creators ?? []}
+      />
 
       <CommunityThread
         targetType="manga"

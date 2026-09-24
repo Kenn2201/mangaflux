@@ -11,6 +11,7 @@ import type {
   MangaDetails,
   MangaDiscoveryKind,
   MangaListPage,
+  MangaRelated,
   MangaSource,
   MangaSummary,
   MangaTag,
@@ -20,10 +21,11 @@ import type {
 const BASE = process.env.MANGADEX_BASE_URL ?? "https://api.mangadex.org";
 const HOSTS = ["api.mangadex.org"];
 const COVER_BASE = "https://uploads.mangadex.org/covers";
-const USER_AGENT = "MangaFlux/0.7.2 (+https://manga.kenncode.me)";
+const USER_AGENT = "MangaFlux/0.7.3 (+https://manga.kenncode.me)";
 const MANIFEST_TTL_MS = 60_000;
 const SEARCH_TTL_MS = 30_000;
 const DETAILS_TTL_MS = 5 * 60_000;
+const RELATED_TTL_MS = 10 * 60_000;
 const CHAPTERS_TTL_MS = 60_000;
 const DISCOVERY_TTL_MS = 90_000;
 const TAGS_TTL_MS = 6 * 60 * 60_000;
@@ -103,6 +105,7 @@ type CacheEntry<T> = {
 const atHomeCache = new Map<string, CacheEntry<AtHomeResponse>>();
 const searchCache = new Map<string, CacheEntry<MangaSummary[]>>();
 const detailsCache = new Map<string, CacheEntry<MangaDetails>>();
+const relatedCache = new Map<string, CacheEntry<MangaRelated[]>>();
 const chapterPageCache = new Map<string, CacheEntry<ChapterListPage>>();
 const discoveryCache = new Map<string, CacheEntry<MangaListPage>>();
 const hotPoolCache = new Map<string, CacheEntry<MangaSummary[]>>();
@@ -202,6 +205,20 @@ function relationshipNames(
     .filter((name): name is string => Boolean(name));
 }
 
+function creatorDetails(item: { relationships?: Relationship[] }) {
+  return (item.relationships ?? [])
+    .filter(
+      (relationship) =>
+        relationship.type === "author" ||
+        relationship.type === "artist"
+    )
+    .map((relationship) => ({
+      id: relationship.id,
+      name: relationship.attributes?.name ?? "Unknown creator",
+      role: relationship.type as "author" | "artist"
+    }));
+}
+
 function mangaSummary(item: MangaEntity): MangaSummary {
   const altTitles = (item.attributes.altTitles ?? [])
     .map((entry) => pickText(entry))
@@ -253,14 +270,32 @@ function boundedOffset(value: number | undefined) {
   return Math.max(0, Math.min(10_000, Math.floor(value!)));
 }
 
-function appendCommonMangaFilters(url: URL, tagId?: string) {
+function appendCommonMangaFilters(
+  url: URL,
+  options: Pick<
+    DiscoveryOptions,
+    "tagId" | "year" | "creatorId" | "status"
+  > = {}
+) {
   url.searchParams.append("includes[]", "cover_art");
   url.searchParams.append("availableTranslatedLanguage[]", "en");
   url.searchParams.set("hasAvailableChapters", "true");
 
-  if (tagId) {
-    url.searchParams.append("includedTags[]", tagId);
+  if (options.tagId) {
+    url.searchParams.append("includedTags[]", options.tagId);
     url.searchParams.set("includedTagsMode", "AND");
+  }
+
+  if (options.year) {
+    url.searchParams.set("year", String(options.year));
+  }
+
+  if (options.creatorId) {
+    url.searchParams.set("authorOrArtist", options.creatorId);
+  }
+
+  if (options.status) {
+    url.searchParams.append("status[]", options.status);
   }
 }
 
@@ -271,11 +306,22 @@ async function fetchOrderedManga(
   const limit = boundedLimit(options.limit, 24);
   const offset = boundedOffset(options.offset);
   const tagId = options.tagId?.trim() || undefined;
+  const year =
+    Number.isInteger(options.year) &&
+    Number(options.year) >= 1900 &&
+    Number(options.year) <= 2100
+      ? Number(options.year)
+      : undefined;
+  const creatorId = options.creatorId?.trim() || undefined;
+  const status = options.status;
   const cacheKey = [
     kind,
     limit,
     offset,
-    tagId ?? "all"
+    tagId ?? "all",
+    year ?? "any-year",
+    creatorId ?? "any-creator",
+    status ?? "any-status"
   ].join(":");
 
   const cached = readCache(discoveryCache, cacheKey);
@@ -292,7 +338,12 @@ async function fetchOrderedManga(
   url.searchParams.set("limit", String(limit));
   url.searchParams.set("offset", String(offset));
   url.searchParams.set(`order[${orderField}]`, "desc");
-  appendCommonMangaFilters(url, tagId);
+  appendCommonMangaFilters(url, {
+    tagId,
+    year,
+    creatorId,
+    status
+  });
 
   const response = await mangaDexFetch(url.toString());
   if (!response.ok) {
@@ -583,6 +634,7 @@ export const mangaDexSource: MangaSource = {
       originalLanguage: item.attributes.originalLanguage,
       authors: relationshipNames(item, "author"),
       artists: relationshipNames(item, "artist"),
+      creators: creatorDetails(item),
       tagDetails: (item.attributes.tags ?? []).map((tag) => ({
         id: tag.id,
         name: pickText(tag.attributes.name) ?? "Unnamed",
@@ -593,6 +645,86 @@ export const mangaDexSource: MangaSource = {
 
     writeCache(detailsCache, id, details, DETAILS_TTL_MS);
     return details;
+  },
+
+  async related(id: string): Promise<MangaRelated[]> {
+    const cached = readCache(relatedCache, id);
+    if (cached) return cached;
+
+    type RelationEntity = {
+      attributes?: {
+        relation?: string;
+      };
+      relationships?: Relationship[];
+    };
+
+    const relationUrl = new URL(
+      `/manga/${encodeURIComponent(id)}/relation`,
+      BASE
+    );
+
+    const relationResponse = await mangaDexFetch(
+      relationUrl.toString()
+    );
+
+    if (!relationResponse.ok) {
+      throw new Error(
+        `MangaDex relations failed with ${relationResponse.status}`
+      );
+    }
+
+    const relationPayload =
+      relationResponse.json<MangaDexCollection<RelationEntity>>();
+
+    const relationByManga = new Map<string, string>();
+
+    for (const relation of relationPayload.data) {
+      const label =
+        relation.attributes?.relation?.replaceAll("_", " ") ??
+        "related";
+
+      for (const relationship of relation.relationships ?? []) {
+        if (relationship.type === "manga") {
+          relationByManga.set(relationship.id, label);
+        }
+      }
+    }
+
+    const ids = [...relationByManga.keys()].slice(0, 24);
+
+    if (!ids.length) {
+      writeCache(relatedCache, id, [], RELATED_TTL_MS);
+      return [];
+    }
+
+    const mangaUrl = new URL("/manga", BASE);
+    mangaUrl.searchParams.set("limit", String(ids.length));
+    mangaUrl.searchParams.append("includes[]", "cover_art");
+
+    for (const relatedId of ids) {
+      mangaUrl.searchParams.append("ids[]", relatedId);
+    }
+
+    const mangaResponse = await mangaDexFetch(
+      mangaUrl.toString()
+    );
+
+    if (!mangaResponse.ok) {
+      throw new Error(
+        `MangaDex related titles failed with ${mangaResponse.status}`
+      );
+    }
+
+    const mangaPayload =
+      mangaResponse.json<MangaDexCollection<MangaEntity>>();
+
+    const items = mangaPayload.data.map((item) => ({
+      ...mangaSummary(item),
+      relation: relationByManga.get(item.id) ?? "related"
+    }));
+
+    writeCache(relatedCache, id, items, RELATED_TTL_MS);
+    return items;
   },
 
   async chapterPage(

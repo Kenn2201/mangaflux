@@ -8,6 +8,7 @@ import {
 import DiscoverySections from "./DiscoverySections";
 import GenreShelf from "./GenreShelf";
 import LibraryClient from "./LibraryClient";
+import PersonalRecommendations from "./PersonalRecommendations";
 
 type Session = {
   authenticated: boolean;
@@ -98,6 +99,7 @@ export default function DashboardGate() {
       </section>
 
       <LibraryClient />
+      <PersonalRecommendations />
       <DiscoverySections compact />
       <GenreShelf />
     </>

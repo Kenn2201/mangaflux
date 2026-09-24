@@ -20,6 +20,10 @@ export default async function BrowsePage({
     page?: string | string[];
     tag?: string | string[];
     name?: string | string[];
+    year?: string | string[];
+    creator?: string | string[];
+    creatorName?: string | string[];
+    status?: string | string[];
   }>;
 }) {
   const params = await searchParams;
@@ -46,6 +50,38 @@ export default async function BrowsePage({
     Array.isArray(params.name) ? params.name[0] : params.name
   )?.slice(0, 80);
 
+  const rawYear = Number(
+    Array.isArray(params.year) ? params.year[0] : params.year
+  );
+  const year =
+    Number.isInteger(rawYear) && rawYear >= 1900 && rawYear <= 2100
+      ? rawYear
+      : undefined;
+
+  const creatorId = (
+    Array.isArray(params.creator)
+      ? params.creator[0]
+      : params.creator
+  )?.slice(0, 80);
+
+  const creatorName = (
+    Array.isArray(params.creatorName)
+      ? params.creatorName[0]
+      : params.creatorName
+  )?.slice(0, 100);
+
+  const rawStatus = Array.isArray(params.status)
+    ? params.status[0]
+    : params.status;
+  const status = [
+    "ongoing",
+    "completed",
+    "hiatus",
+    "cancelled"
+  ].includes(rawStatus ?? "")
+    ? rawStatus
+    : undefined;
+
   return (
     <main className="browse-page">
       <BrowseClient
@@ -53,6 +89,10 @@ export default async function BrowsePage({
         page={page}
         tagId={tagId}
         tagName={tagName}
+        year={year}
+        creatorId={creatorId}
+        creatorName={creatorName}
+        status={status}
       />
     </main>
   );

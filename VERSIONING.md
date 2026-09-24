@@ -4,7 +4,7 @@ MangaFlux follows Semantic Versioning.
 
 ## Current version
 
-**v0.7.2 — Community & Profiles**
+**v0.7.3 — Recommendations**
 
 - `0.MINOR.0` = meaningful pre-V1 milestone
 - `0.MINOR.PATCH` = compatible focused milestone/fix during pre-V1
@@ -21,12 +21,12 @@ Before merging into `main`:
 5. Run dependency audit.
 6. Keep database/auth/Resend secrets out of `NEXT_PUBLIC_*`.
 7. Verify source attribution and permitted-source behavior.
-8. Verify community writes require verified sessions.
-9. Verify comment cooldown and own-comment deletion.
-10. Verify avatar size/type validation.
-11. Test manga + chapter community on iPhone Safari.
+8. Verify recommendation filters are validated and bounded.
+9. Verify recommendations exclude the seed/current title.
+10. Verify creator/year links on iPhone Safari.
+11. Verify signed-in dashboard personalization and signed-out fallback.
 12. Merge only after CI passes.
-13. Verify Render migration/health and Vercel deployment.
+13. Verify Render health and Vercel deployment.
 
 ## Branch workflow
 
