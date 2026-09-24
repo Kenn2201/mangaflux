@@ -1,0 +1,146 @@
+/* MangaFlux v0.8.2 — Runtime Diagnostics */
+
+.admin-diagnostics {
+  margin-top: 18px;
+  padding: 20px;
+  border: 1px solid #292929;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 88% 8%, rgba(255,255,255,.035), transparent 30%),
+    #0d0d0d;
+}
+
+.admin-diagnostic-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.admin-diagnostic-grid article {
+  min-width: 0;
+  min-height: 92px;
+  display: grid;
+  align-content: space-between;
+  gap: 10px;
+  padding: 13px;
+  border: 1px solid #292929;
+  border-radius: 15px;
+  background: #101010;
+}
+
+.admin-diagnostic-grid span {
+  color: #777;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.admin-diagnostic-grid strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 21px;
+  letter-spacing: -.03em;
+}
+
+.admin-diagnostic-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.admin-diagnostic-columns > div {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid #272727;
+  border-radius: 16px;
+  background: #0f0f0f;
+}
+
+.admin-route-list {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.admin-route-row {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 9px 10px;
+  border: 1px solid #242424;
+  border-radius: 12px;
+  background: #0c0c0c;
+}
+
+.admin-route-row > div {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-route-row strong {
+  flex: 0 0 auto;
+  color: #d1d1d1;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.admin-route-row span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #8a8a8a;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 9px;
+}
+
+.admin-route-row small {
+  flex: 0 0 auto;
+  color: #666;
+  font-size: 8px;
+}
+
+.admin-diagnostic-note {
+  margin: 14px 0 0;
+  color: #6f6f6f;
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+@media (max-width: 1050px) {
+  .admin-diagnostic-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 800px) {
+  .admin-diagnostic-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .admin-diagnostics {
+    padding: 15px;
+  }
+
+  .admin-diagnostic-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-route-row {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-route-row small {
+    justify-self: start;
+  }
+}

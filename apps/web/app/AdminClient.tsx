@@ -39,6 +39,42 @@ type AdminComment = {
   createdAt: string;
 };
 
+type Diagnostics = {
+  process: {
+    uptimeSeconds: number;
+    nodeVersion: string;
+    memory: {
+      rssMb: number;
+      heapUsedMb: number;
+      heapTotalMb: number;
+    };
+  };
+  traffic: {
+    windowMinutes: number;
+    requests: number;
+    clientErrors: number;
+    rateLimited: number;
+    serverErrors: number;
+    averageLatencyMs: number;
+    p95LatencyMs: number;
+    routes: Array<{
+      route: string;
+      method: string;
+      requests: number;
+      errors: number;
+      averageLatencyMs: number;
+      maxLatencyMs: number;
+    }>;
+    recentFailures: Array<{
+      at: number;
+      route: string;
+      method: string;
+      statusCode: number;
+      durationMs: number;
+    }>;
+  };
+};
+
 type Overview = {
   admin: {
     id: string;
@@ -80,6 +116,7 @@ function initialFor(
 export default function AdminClient() {
   const [session, setSession] = useState<Session | null>(null);
   const [overview, setOverview] = useState<Overview | null>(null);
+  const [diagnostics, setDiagnostics] = useState<Diagnostics | null>(null);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState("");
   const [message, setMessage] = useState("");
@@ -108,24 +145,41 @@ export default function AdminClient() {
         sessionPayload.user?.role !== "admin"
       ) {
         setOverview(null);
+        setDiagnostics(null);
         return;
       }
 
-      const response = await fetch("/api/admin/overview", {
-        cache: "no-store"
-      });
+      const [overviewResponse, diagnosticsResponse] = await Promise.all([
+        fetch("/api/admin/overview", {
+          cache: "no-store"
+        }),
+        fetch("/api/admin/diagnostics", {
+          cache: "no-store"
+        })
+      ]);
 
-      const payload = (await response.json().catch(() => null)) as
+      const payload = (await overviewResponse.json().catch(() => null)) as
         | (Overview & { message?: string })
         | null;
+      const diagnosticsPayload = (await diagnosticsResponse
+        .json()
+        .catch(() => null)) as
+        | (Diagnostics & { message?: string })
+        | null;
 
-      if (!response.ok || !payload) {
+      if (!overviewResponse.ok || !payload) {
         throw new Error(
           payload?.message ?? "Admin console is temporarily unavailable."
         );
       }
 
       setOverview(payload);
+
+      if (diagnosticsResponse.ok && diagnosticsPayload) {
+        setDiagnostics(diagnosticsPayload);
+      } else {
+        setDiagnostics(null);
+      }
     } catch (error) {
       setMessage(
         error instanceof Error
@@ -315,6 +369,96 @@ export default function AdminClient() {
               </article>
             ))}
           </section>
+
+          {diagnostics ? (
+            <section className="admin-diagnostics">
+              <div className="admin-section-heading">
+                <div>
+                  <p className="eyebrow">Last {diagnostics.traffic.windowMinutes} minutes</p>
+                  <h2>Runtime diagnostics</h2>
+                </div>
+                <span>
+                  Node {diagnostics.process.nodeVersion} · uptime{" "}
+                  {Math.floor(diagnostics.process.uptimeSeconds / 60)}m
+                </span>
+              </div>
+
+              <div className="admin-diagnostic-grid">
+                {[
+                  ["Requests", diagnostics.traffic.requests],
+                  ["5xx errors", diagnostics.traffic.serverErrors],
+                  ["Rate limited", diagnostics.traffic.rateLimited],
+                  ["Average", `${diagnostics.traffic.averageLatencyMs} ms`],
+                  ["P95", `${diagnostics.traffic.p95LatencyMs} ms`],
+                  ["Memory", `${diagnostics.process.memory.rssMb} MB`]
+                ].map(([label, value]) => (
+                  <article key={String(label)}>
+                    <span>{label}</span>
+                    <strong>{value}</strong>
+                  </article>
+                ))}
+              </div>
+
+              <div className="admin-diagnostic-columns">
+                <div>
+                  <p className="eyebrow">Top routes</p>
+                  <div className="admin-route-list">
+                    {diagnostics.traffic.routes.length ? (
+                      diagnostics.traffic.routes.map((route) => (
+                        <div
+                          key={`${route.method}:${route.route}`}
+                          className="admin-route-row"
+                        >
+                          <div>
+                            <strong>{route.method}</strong>
+                            <span>{route.route}</span>
+                          </div>
+                          <small>
+                            {route.requests} req · {route.averageLatencyMs} ms avg
+                            {route.errors ? ` · ${route.errors} errors` : ""}
+                          </small>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="admin-empty">No request samples yet.</p>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <p className="eyebrow">Recent failures</p>
+                  <div className="admin-route-list">
+                    {diagnostics.traffic.recentFailures.length ? (
+                      diagnostics.traffic.recentFailures.map((failure, index) => (
+                        <div
+                          key={`${failure.at}:${failure.route}:${index}`}
+                          className="admin-route-row"
+                        >
+                          <div>
+                            <strong>{failure.statusCode}</strong>
+                            <span>
+                              {failure.method} {failure.route}
+                            </span>
+                          </div>
+                          <small>{failure.durationMs} ms</small>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="admin-empty">
+                        No 429/5xx failures in this runtime window.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <p className="admin-diagnostic-note">
+                Diagnostics are in-memory and privacy-minimized: no request
+                bodies, query strings, IP addresses, authorization headers,
+                emails, passwords, or tokens are collected.
+              </p>
+            </section>
+          ) : null}
 
           <section className="admin-grid">
             <div className="admin-section">

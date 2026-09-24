@@ -5,10 +5,12 @@ import {
   probeDatabase
 } from "@mangaflux/db";
 import { registerAdminRoutes } from "./admin.js";
+import { isAdminConfigured } from "./adminAccess.js";
 import { registerAuthRoutes } from "./auth.js";
 import { registerCommunityRoutes } from "./community.js";
 import { isEmailConfigured } from "./email.js";
 import { registerStateRoutes } from "./state.js";
+import { attachDiagnostics } from "./diagnostics.js";
 import {
   fetchMangaDexPageImage,
   mangaDexSource
@@ -18,7 +20,7 @@ import type {
   MangaSummary
 } from "@mangaflux/sources";
 
-const APP_VERSION = "0.8.1";
+const APP_VERSION = "0.8.2";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LANGUAGE_RE = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i;
@@ -51,6 +53,8 @@ const allowedOrigins = new Set(
       .filter(Boolean)
   ].map((origin) => origin.replace(/\/$/, ""))
 );
+
+attachDiagnostics(app);
 
 await app.register(cors, {
   origin(origin, callback) {
@@ -309,7 +313,8 @@ app.get("/health", async () => ({
     database && authProxySecret
       ? "configured"
       : "disabled",
-  email: isEmailConfigured() ? "configured" : "disabled"
+  email: isEmailConfigured() ? "configured" : "disabled",
+  admin: isAdminConfigured() ? "configured" : "disabled"
 }));
 
 app.get(
@@ -360,6 +365,11 @@ app.get(
         },
         email: {
           status: isEmailConfigured()
+            ? "configured"
+            : "disabled"
+        },
+        admin: {
+          status: isAdminConfigured()
             ? "configured"
             : "disabled"
         }

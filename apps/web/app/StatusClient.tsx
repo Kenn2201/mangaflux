@@ -40,6 +40,9 @@ type StatusPayload = {
     email?: {
       status: HealthState;
     };
+    admin?: {
+      status: HealthState;
+    };
   };
 };
 
@@ -268,6 +271,27 @@ export default function StatusClient() {
           </strong>
           <p>
             Configuration status for verification and password-reset email.
+          </p>
+        </article>
+
+        <article>
+          <div className="status-card-heading">
+            <div>
+              <p className="eyebrow">Operations</p>
+              <h2>Admin access</h2>
+            </div>
+            <span
+              className={`status-dot ${toneFor(
+                data?.components?.admin?.status
+              )}`}
+            />
+          </div>
+          <strong>
+            {labelFor(data?.components?.admin?.status)}
+          </strong>
+          <p>
+            Server-side administrator allowlist configuration. Email values are
+            never exposed here.
           </p>
         </article>
       </section>
