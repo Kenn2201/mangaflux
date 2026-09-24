@@ -1,0 +1,449 @@
+"use client";
+
+import Link from "next/link";
+import {
+  FormEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState
+} from "react";
+import { notify } from "../lib/toast";
+
+type CommunityComment = {
+  id: string;
+  userId: string;
+  displayName?: string | null;
+  avatarDataUrl?: string | null;
+  body: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type CommunityPayload = {
+  items: CommunityComment[];
+  total: number;
+  limit: number;
+  offset: number;
+  reactions: Record<string, number>;
+  viewerReaction?: string | null;
+  viewerUserId?: string | null;
+  authenticated: boolean;
+};
+
+const REACTIONS = [
+  { key: "like", emoji: "❤️", label: "Like" },
+  { key: "funny", emoji: "😂", label: "Funny" },
+  { key: "wow", emoji: "😮", label: "Wow" },
+  { key: "sad", emoji: "😢", label: "Sad" },
+  { key: "fire", emoji: "🔥", label: "Fire" }
+] as const;
+
+function formatDate(value: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "Recently";
+
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit"
+  }).format(date);
+}
+
+function avatarInitial(comment: CommunityComment) {
+  return (comment.displayName?.trim().charAt(0) || "R").toUpperCase();
+}
+
+export default function CommunityThread({
+  targetType,
+  targetId,
+  heading = "Community"
+}: {
+  targetType: "manga" | "chapter";
+  targetId: string;
+  heading?: string;
+}) {
+  const limit = 10;
+  const [data, setData] = useState<CommunityPayload | null>(null);
+  const [offset, setOffset] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [body, setBody] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setMessage("");
+
+    try {
+      const response = await fetch(
+        `/api/community/${targetType}/${encodeURIComponent(
+          targetId
+        )}?limit=${limit}&offset=${offset}`,
+        { cache: "no-store" }
+      );
+
+      const payload = (await response.json().catch(() => null)) as
+        | (CommunityPayload & { message?: string })
+        | null;
+
+      if (!response.ok || !payload) {
+        throw new Error(
+          payload?.message ?? "Community is temporarily unavailable."
+        );
+      }
+
+      setData(payload);
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Community is temporarily unavailable."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [offset, targetId, targetType]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  async function react(reaction: string) {
+    if (!data?.authenticated) {
+      notify({
+        tone: "info",
+        title: "Sign in to react",
+        message: "MangaFlux reactions are tied to verified accounts."
+      });
+      return;
+    }
+
+    if (busy) return;
+    setBusy(true);
+
+    try {
+      const response = await fetch(
+        `/api/community/${targetType}/${encodeURIComponent(
+          targetId
+        )}/reaction`,
+        {
+          method: "PUT",
+          headers: {
+            "content-type": "application/json",
+            "x-mangaflux-client": "web"
+          },
+          body: JSON.stringify({ reaction })
+        }
+      );
+
+      const payload = (await response.json().catch(() => null)) as
+        | {
+            selected?: string | null;
+            reactions?: Record<string, number>;
+            message?: string;
+          }
+        | null;
+
+      if (!response.ok || !payload) {
+        throw new Error(payload?.message ?? "Reaction failed.");
+      }
+
+      setData((current) =>
+        current
+          ? {
+              ...current,
+              viewerReaction: payload.selected ?? null,
+              reactions: payload.reactions ?? current.reactions
+            }
+          : current
+      );
+    } catch (error) {
+      notify({
+        tone: "error",
+        title: "Reaction failed",
+        message:
+          error instanceof Error ? error.message : "Try again shortly."
+      });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (busy) return;
+
+    if (!data?.authenticated) {
+      notify({
+        tone: "info",
+        title: "Sign in to comment",
+        message: "Comments are available to verified MangaFlux accounts."
+      });
+      return;
+    }
+
+    const value = body.trim();
+
+    if (!value) return;
+
+    setBusy(true);
+    setMessage("");
+
+    try {
+      const response = await fetch(
+        `/api/community/${targetType}/${encodeURIComponent(
+          targetId
+        )}/comments`,
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "x-mangaflux-client": "web"
+          },
+          body: JSON.stringify({ body: value })
+        }
+      );
+
+      const payload = (await response.json().catch(() => null)) as
+        | {
+            message?: string;
+            retryAfterSeconds?: number;
+          }
+        | null;
+
+      if (!response.ok) {
+        if (response.status === 429 && payload?.retryAfterSeconds) {
+          const minutes = Math.ceil(payload.retryAfterSeconds / 60);
+          throw new Error(
+            `You can comment again in about ${minutes} minute${
+              minutes === 1 ? "" : "s"
+            }.`
+          );
+        }
+
+        throw new Error(payload?.message ?? "Comment could not be posted.");
+      }
+
+      setBody("");
+
+      if (offset !== 0) {
+        setOffset(0);
+      } else {
+        await load();
+      }
+
+      notify({
+        tone: "success",
+        title: "Comment posted",
+        message: "Your comment is now visible on MangaFlux."
+      });
+    } catch (error) {
+      const text =
+        error instanceof Error
+          ? error.message
+          : "Comment could not be posted.";
+
+      setMessage(text);
+
+      notify({
+        tone: "error",
+        title: "Comment not posted",
+        message: text
+      });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function removeComment(commentId: string) {
+    if (busy) return;
+    setBusy(true);
+
+    try {
+      const response = await fetch(
+        `/api/community/comments/${encodeURIComponent(commentId)}`,
+        {
+          method: "DELETE",
+          headers: {
+            "x-mangaflux-client": "web"
+          }
+        }
+      );
+
+      const payload = (await response.json().catch(() => null)) as
+        | { message?: string }
+        | null;
+
+      if (!response.ok) {
+        throw new Error(payload?.message ?? "Comment could not be deleted.");
+      }
+
+      await load();
+
+      notify({
+        tone: "success",
+        title: "Comment deleted"
+      });
+    } catch (error) {
+      notify({
+        tone: "error",
+        title: "Delete failed",
+        message:
+          error instanceof Error ? error.message : "Try again shortly."
+      });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const page = Math.floor(offset / limit) + 1;
+  const totalPages = useMemo(
+    () => Math.max(1, Math.ceil((data?.total ?? 0) / limit)),
+    [data?.total]
+  );
+
+  return (
+    <section className="community-panel">
+      <div className="community-heading">
+        <div>
+          <p className="eyebrow">
+            {targetType === "manga" ? "Manga community" : "Chapter community"}
+          </p>
+          <h2>{heading}</h2>
+        </div>
+
+        <span>{data?.total ?? 0} comments</span>
+      </div>
+
+      <div className="reaction-row" aria-label="Reactions">
+        {REACTIONS.map((reaction) => {
+          const count = data?.reactions?.[reaction.key] ?? 0;
+          const active = data?.viewerReaction === reaction.key;
+
+          return (
+            <button
+              type="button"
+              key={reaction.key}
+              className={active ? "is-active" : ""}
+              aria-pressed={active}
+              aria-label={reaction.label}
+              disabled={busy}
+              onClick={() => void react(reaction.key)}
+            >
+              <span aria-hidden="true">{reaction.emoji}</span>
+              <strong>{count}</strong>
+            </button>
+          );
+        })}
+      </div>
+
+      {data?.authenticated ? (
+        <form className="comment-composer" onSubmit={submit}>
+          <textarea
+            value={body}
+            maxLength={1000}
+            onChange={(event) => setBody(event.target.value)}
+            placeholder="Add a comment…"
+            aria-label="Comment"
+          />
+          <div>
+            <span>{body.length} / 1000 · one comment every 5 minutes</span>
+            <button type="submit" disabled={busy || !body.trim()}>
+              {busy ? "Posting…" : "Post comment"}
+            </button>
+          </div>
+        </form>
+      ) : (
+        <div className="community-signin">
+          <span>Sign in with a verified MangaFlux account to react or comment.</span>
+          <Link href="/account">Sign in</Link>
+        </div>
+      )}
+
+      {message ? <p className="community-message">{message}</p> : null}
+
+      {loading ? (
+        <div className="comment-list" aria-busy="true">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div className="comment-card comment-skeleton" key={index}>
+              <span className="skeleton skeleton-comment-avatar" />
+              <div>
+                <span className="skeleton skeleton-line" style={{ width: "34%" }} />
+                <span className="skeleton skeleton-comment-body" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="comment-list">
+          {data?.items.map((comment) => (
+            <article className="comment-card" key={comment.id}>
+              <div className="comment-avatar">
+                {comment.avatarDataUrl ? (
+                  <img src={comment.avatarDataUrl} alt="" />
+                ) : (
+                  <span>{avatarInitial(comment)}</span>
+                )}
+              </div>
+
+              <div className="comment-content">
+                <div className="comment-meta">
+                  <div>
+                    <strong>{comment.displayName || "MangaFlux Reader"}</strong>
+                    <span>{formatDate(comment.createdAt)}</span>
+                  </div>
+
+                  {data.viewerUserId === comment.userId ? (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => void removeComment(comment.id)}
+                    >
+                      Delete
+                    </button>
+                  ) : null}
+                </div>
+
+                <p>{comment.body}</p>
+              </div>
+            </article>
+          ))}
+
+          {!data?.items.length ? (
+            <div className="community-empty">
+              <strong>No comments yet.</strong>
+              <span>Be the first MangaFlux reader to start the discussion.</span>
+            </div>
+          ) : null}
+        </div>
+      )}
+
+      {data && data.total > limit ? (
+        <nav className="comment-pagination" aria-label="Comment pages">
+          <button
+            type="button"
+            disabled={offset <= 0 || loading}
+            onClick={() =>
+              setOffset((current) => Math.max(0, current - limit))
+            }
+          >
+            ← Newer
+          </button>
+
+          <span>Page {page} / {totalPages}</span>
+
+          <button
+            type="button"
+            disabled={offset + limit >= data.total || loading}
+            onClick={() => setOffset((current) => current + limit)}
+          >
+            Older →
+          </button>
+        </nav>
+      ) : null}
+    </section>
+  );
+}

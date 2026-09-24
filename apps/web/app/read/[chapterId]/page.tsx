@@ -10,6 +10,7 @@ import {
   useState
 } from "react";
 import { ReaderSkeleton } from "../../Skeletons";
+import CommunityThread from "../../CommunityThread";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "https://api.manga.kenncode.me";
@@ -536,7 +537,7 @@ export default function ReaderPage() {
   function toggleControls(event: MouseEvent<HTMLDivElement>) {
     const target = event.target as HTMLElement;
 
-    if (target.closest("a, button, input, label")) return;
+    if (target.closest("a, button, input, textarea, label")) return;
 
     setControlsVisible((visible) => !visible);
   }
@@ -590,6 +591,16 @@ export default function ReaderPage() {
           <Link className="reader-chrome-back" href={chaptersHref}>
             ← Chapters
           </Link>
+
+          {mangaMeta?.coverUrl ? (
+            <div className="reader-chrome-cover" aria-hidden="true">
+              <img src={mangaMeta.coverUrl} alt="" referrerPolicy="no-referrer" />
+            </div>
+          ) : (
+            <div className="reader-chrome-cover reader-chrome-cover-empty" aria-hidden="true">
+              M
+            </div>
+          )}
 
           <div className="reader-chrome-title">
             <strong>
@@ -668,13 +679,17 @@ export default function ReaderPage() {
           </span>
         )}
 
-        <button
-          className="reader-controls-center"
-          type="button"
-          onClick={() => setControlsVisible(false)}
+        <Link
+          className="reader-home-button"
+          href={chaptersHref}
+          aria-label="Back to manga chapters"
+          title="Back to chapters"
         >
-          Hide controls
-        </button>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3.5 10.5 12 3l8.5 7.5v9a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5z" />
+            <path d="M9 21v-6h6v6" />
+          </svg>
+        </Link>
 
         {nextChapter ? (
           <Link href={chapterHref(nextChapter.id)}>
@@ -709,7 +724,10 @@ export default function ReaderPage() {
             })
           }
         >
-          ↑
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 19V5" />
+            <path d="m6.5 10.5 5.5-5.5 5.5 5.5" />
+          </svg>
         </button>
       ) : null}
 
@@ -725,6 +743,19 @@ export default function ReaderPage() {
               ← Previous chapter
             </Link>
           ) : null}
+
+          <Link
+            className="reader-end-home"
+            href={chaptersHref}
+            aria-label="Back to manga chapters"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3.5 10.5 12 3l8.5 7.5v9a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5z" />
+              <path d="M9 21v-6h6v6" />
+            </svg>
+            Chapters
+          </Link>
+
           {nextChapter ? (
             <Link href={chapterHref(nextChapter.id)}>
               Next chapter →
@@ -732,6 +763,14 @@ export default function ReaderPage() {
           ) : null}
         </nav>
       </footer>
+
+      <div className="reader-community-wrap">
+        <CommunityThread
+          targetType="chapter"
+          targetId={chapterId}
+          heading="Chapter reactions & comments"
+        />
+      </div>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import { createDatabase } from "@mangaflux/db";
 import { registerAuthRoutes } from "./auth.js";
+import { registerCommunityRoutes } from "./community.js";
 import { isEmailConfigured } from "./email.js";
 import { registerStateRoutes } from "./state.js";
 import {
@@ -13,7 +14,7 @@ import type {
   MangaSummary
 } from "@mangaflux/sources";
 
-const APP_VERSION = "0.7.1";
+const APP_VERSION = "0.7.2";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LANGUAGE_RE = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i;
@@ -142,6 +143,12 @@ const authSignupRateLimit = makeRateLimit("auth-signup", 5, 10 * 60_000);
 const authLoginRateLimit = makeRateLimit("auth-login", 10, 10 * 60_000);
 const authSessionRateLimit = makeRateLimit("auth-session", 120);
 const authEmailRateLimit = makeRateLimit("auth-email", 8, 15 * 60_000);
+const communityReadRateLimit = makeRateLimit("community-read", 120);
+const communityWriteRateLimit = makeRateLimit(
+  "community-write",
+  30,
+  5 * 60_000
+);
 
 function requireUuid(value: string, reply: any, field = "id") {
   if (UUID_RE.test(value)) return true;
@@ -298,6 +305,11 @@ registerAuthRoutes(app, database, authProxySecret, {
 registerStateRoutes(app, database, authProxySecret, {
   read: stateReadRateLimit,
   write: stateWriteRateLimit
+});
+
+registerCommunityRoutes(app, database, authProxySecret, {
+  read: communityReadRateLimit,
+  write: communityWriteRateLimit
 });
 
 app.get(

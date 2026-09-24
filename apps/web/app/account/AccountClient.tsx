@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import {
+  ChangeEvent,
   FormEvent,
   useEffect,
   useState
@@ -14,6 +15,8 @@ type Session = {
   user?: {
     id: string;
     email: string;
+    displayName?: string | null;
+    avatarDataUrl?: string | null;
     emailVerifiedAt?: string | null;
     createdAt: string;
   } | null;
@@ -36,6 +39,65 @@ type ReaderSummary = {
 
 type Mode = "login" | "signup";
 
+async function imageToAvatar(file: File) {
+  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+    throw new Error("Use a JPEG, PNG, or WebP image.");
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error("Choose an image smaller than 5 MB.");
+  }
+
+  const objectUrl = URL.createObjectURL(file);
+
+  try {
+    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const element = new Image();
+      element.onload = () => resolve(element);
+      element.onerror = () => reject(new Error("Could not read that image."));
+      element.src = objectUrl;
+    });
+
+    const side = Math.min(image.naturalWidth, image.naturalHeight);
+    const sx = Math.floor((image.naturalWidth - side) / 2);
+    const sy = Math.floor((image.naturalHeight - side) / 2);
+    const canvas = document.createElement("canvas");
+    canvas.width = 256;
+    canvas.height = 256;
+
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("Image processing is unavailable.");
+
+    context.drawImage(
+      image,
+      sx,
+      sy,
+      side,
+      side,
+      0,
+      0,
+      256,
+      256
+    );
+
+    let quality = 0.82;
+    let data = canvas.toDataURL("image/webp", quality);
+
+    while (data.length > 260_000 && quality > 0.42) {
+      quality -= 0.08;
+      data = canvas.toDataURL("image/webp", quality);
+    }
+
+    if (!data.startsWith("data:image/webp;base64,") || data.length > 280_000) {
+      throw new Error("That image could not be compressed enough.");
+    }
+
+    return data;
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
 export default function AccountClient() {
   const [session, setSession] = useState<Session | null>(null);
   const [summary, setSummary] = useState<ReaderSummary | null>(null);
@@ -44,6 +106,9 @@ export default function AccountClient() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [profileBusy, setProfileBusy] = useState(false);
+  const [profileName, setProfileName] = useState("");
+  const [avatarDraft, setAvatarDraft] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [needsVerification, setNeedsVerification] = useState(false);
 
@@ -73,6 +138,19 @@ export default function AccountClient() {
   useEffect(() => {
     void refreshSession();
   }, []);
+
+  useEffect(() => {
+    const user = session?.authenticated ? session.user : null;
+
+    if (!user) {
+      setProfileName("");
+      setAvatarDraft(null);
+      return;
+    }
+
+    setProfileName(user.displayName ?? "");
+    setAvatarDraft(user.avatarDataUrl ?? null);
+  }, [session]);
 
   useEffect(() => {
     if (!session?.authenticated) {
@@ -156,6 +234,7 @@ export default function AccountClient() {
         setNeedsVerification(true);
         setMessage(successMessage);
         setMode("login");
+
         notify({
           tone: "success",
           title: "Account created",
@@ -166,15 +245,18 @@ export default function AccountClient() {
 
       await refreshSession();
       setMessage("");
+
       notify({
         tone: "success",
         title: "Welcome back",
-        message: "Your account library and reading progress are ready."
+        message: "Your account library and community profile are ready."
       });
     } catch (error) {
       const text =
         error instanceof Error ? error.message : "Authentication failed.";
+
       setMessage(text);
+
       notify({
         tone: "error",
         title: "Couldn’t continue",
@@ -214,6 +296,7 @@ export default function AccountClient() {
         "If verification is still needed, a new email has been sent.";
 
       setMessage(text);
+
       notify({
         tone: "success",
         title: "Verification email requested",
@@ -224,7 +307,9 @@ export default function AccountClient() {
         error instanceof Error
           ? error.message
           : "Could not resend verification.";
+
       setMessage(text);
+
       notify({
         tone: "error",
         title: "Email not sent",
@@ -232,6 +317,85 @@ export default function AccountClient() {
       });
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function chooseAvatar(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) return;
+
+    setProfileBusy(true);
+
+    try {
+      const avatar = await imageToAvatar(file);
+      setAvatarDraft(avatar);
+
+      notify({
+        tone: "success",
+        title: "Avatar ready",
+        message: "Save your profile to publish the new image."
+      });
+    } catch (error) {
+      notify({
+        tone: "error",
+        title: "Avatar not accepted",
+        message:
+          error instanceof Error ? error.message : "Try another image."
+      });
+    } finally {
+      setProfileBusy(false);
+    }
+  }
+
+  async function saveProfile(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (profileBusy) return;
+
+    setProfileBusy(true);
+
+    try {
+      const response = await fetch("/api/account/profile", {
+        method: "PUT",
+        headers: {
+          "content-type": "application/json",
+          "x-mangaflux-client": "web"
+        },
+        body: JSON.stringify({
+          displayName: profileName.trim() || null,
+          avatarDataUrl: avatarDraft
+        })
+      });
+
+      const body = await response.json().catch(() => null) as {
+        user?: Session["user"];
+        message?: string;
+      } | null;
+
+      if (!response.ok || !body?.user) {
+        throw new Error(body?.message ?? "Profile could not be updated.");
+      }
+
+      setSession({
+        authenticated: true,
+        user: body.user
+      });
+
+      notify({
+        tone: "success",
+        title: "Profile updated",
+        message: "Your name and avatar now appear in MangaFlux community."
+      });
+    } catch (error) {
+      notify({
+        tone: "error",
+        title: "Profile update failed",
+        message:
+          error instanceof Error ? error.message : "Try again shortly."
+      });
+    } finally {
+      setProfileBusy(false);
     }
   }
 
@@ -253,6 +417,7 @@ export default function AccountClient() {
 
       setSession({ authenticated: false, user: null });
       setSummary(null);
+
       notify({
         tone: "success",
         title: "Signed out",
@@ -261,7 +426,9 @@ export default function AccountClient() {
     } catch (error) {
       const text =
         error instanceof Error ? error.message : "Could not sign out.";
+
       setMessage(text);
+
       notify({
         tone: "error",
         title: "Sign out failed",
@@ -273,7 +440,8 @@ export default function AccountClient() {
   }
 
   const user = session?.authenticated ? session.user : null;
-  const initial = user?.email.charAt(0).toUpperCase() || "M";
+  const avatarLabel = user?.displayName || user?.email || "M";
+  const initial = avatarLabel.charAt(0).toUpperCase();
 
   return (
     <section className="account-shell">
@@ -282,7 +450,8 @@ export default function AccountClient() {
           <p className="eyebrow">MangaFlux account</p>
           <h1 className="account-title">Your library, across devices.</h1>
           <p className="account-lede">
-            One account for bookmarks, history, Continue Reading, and recovery.
+            Reading history, bookmarks, recovery, and your MangaFlux community
+            identity live here.
           </p>
         </div>
       </div>
@@ -293,13 +462,20 @@ export default function AccountClient() {
         <div className="profile-stack">
           <section className="panel account-panel profile-card">
             <div className="profile-identity">
-              <div className="profile-avatar" aria-hidden="true">
-                {initial}
+              <div className="profile-avatar profile-avatar-image" aria-hidden="true">
+                {avatarDraft ? (
+                  <img src={avatarDraft} alt="" />
+                ) : (
+                  initial
+                )}
               </div>
 
               <div className="profile-identity-copy">
                 <p className="eyebrow">Signed in</p>
-                <h2>{user.email}</h2>
+                <h2>{user.displayName || user.email}</h2>
+                {user.displayName ? (
+                  <span className="profile-email">{user.email}</span>
+                ) : null}
                 <span
                   className={`email-badge ${
                     user.emailVerifiedAt ? "verified" : "pending"
@@ -314,11 +490,16 @@ export default function AccountClient() {
 
             <div className="profile-stats">
               <div className="profile-stat">
-                <strong>{summaryLoading ? "—" : summary?.bookmarks.length ?? 0}</strong>
+                <strong>
+                  {summaryLoading ? "—" : summary?.bookmarks.length ?? 0}
+                </strong>
                 <span>Bookmarks</span>
               </div>
+
               <div className="profile-stat">
-                <strong>{summaryLoading ? "—" : summary?.history.length ?? 0}</strong>
+                <strong>
+                  {summaryLoading ? "—" : summary?.history.length ?? 0}
+                </strong>
                 <span>Series in progress</span>
               </div>
             </div>
@@ -340,17 +521,74 @@ export default function AccountClient() {
                 <span aria-hidden="true">→</span>
               </Link>
             ) : null}
+          </section>
 
-            {!user.emailVerifiedAt ? (
+          <section className="panel account-panel community-profile-card">
+            <div className="section-heading">
+              <div>
+                <p className="eyebrow">Community profile</p>
+                <h2>Name & avatar</h2>
+              </div>
+            </div>
+
+            <form className="profile-editor" onSubmit={saveProfile}>
+              <div className="profile-avatar-editor">
+                <div className="profile-avatar profile-avatar-image">
+                  {avatarDraft ? (
+                    <img src={avatarDraft} alt="Profile preview" />
+                  ) : (
+                    initial
+                  )}
+                </div>
+
+                <div>
+                  <label className="avatar-upload-button">
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      onChange={chooseAvatar}
+                      disabled={profileBusy}
+                    />
+                    Choose image
+                  </label>
+
+                  {avatarDraft ? (
+                    <button
+                      className="profile-text-button"
+                      type="button"
+                      disabled={profileBusy}
+                      onClick={() => setAvatarDraft(null)}
+                    >
+                      Remove avatar
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+
+              <label className="profile-name-field">
+                <span>Display name</span>
+                <input
+                  value={profileName}
+                  minLength={2}
+                  maxLength={32}
+                  placeholder="How readers will see you"
+                  onChange={(event) => setProfileName(event.target.value)}
+                />
+              </label>
+
+              <p className="device-note">
+                Images are cropped to a small square WebP before upload. Your
+                email is never shown in public comments.
+              </p>
+
               <button
-                className="email-link-button"
-                type="button"
-                disabled={busy}
-                onClick={() => void resendVerification(user.email)}
+                className="account-submit"
+                type="submit"
+                disabled={profileBusy}
               >
-                Resend verification email
+                {profileBusy ? "Saving…" : "Save community profile"}
               </button>
-            ) : null}
+            </form>
           </section>
 
           <section className="panel account-panel security-card">
@@ -388,12 +626,24 @@ export default function AccountClient() {
                 <span className="security-state">Active</span>
               </div>
             </div>
+
+            {!user.emailVerifiedAt ? (
+              <button
+                className="email-link-button"
+                type="button"
+                disabled={busy}
+                onClick={() => void resendVerification(user.email)}
+              >
+                Resend verification email
+              </button>
+            ) : null}
           </section>
 
           <div className="account-actions profile-actions">
-            <Link className="account-primary-link" href="/#library">
+            <Link className="account-primary-link" href="/dashboard#library">
               Open library
             </Link>
+
             <button
               className="secondary-button account-button"
               type="button"
@@ -417,6 +667,7 @@ export default function AccountClient() {
             >
               Sign in
             </button>
+
             <button
               type="button"
               className={mode === "signup" ? "is-active" : ""}
@@ -479,6 +730,7 @@ export default function AccountClient() {
 
           <div className="auth-helper-row">
             <Link href="/account/forgot">Forgot password?</Link>
+
             {needsVerification ? (
               <button
                 type="button"

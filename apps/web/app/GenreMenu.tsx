@@ -6,6 +6,7 @@ import {
   useMemo,
   useState
 } from "react";
+import { createPortal } from "react-dom";
 
 type MangaTag = {
   id: string;
@@ -66,13 +67,105 @@ export default function GenreMenu() {
     }
 
     document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
+    document.body.classList.add("genre-sheet-open");
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.classList.remove("genre-sheet-open");
+    };
   }, [open]);
 
   const genres = useMemo(() => {
     const grouped = items.filter((item) => item.group === "genre");
-    return (grouped.length ? grouped : items).slice(0, 36);
+    return (grouped.length ? grouped : items).slice(0, 24);
   }, [items]);
+
+  const layer =
+    open && typeof document !== "undefined"
+      ? createPortal(
+          <div className="genre-menu-layer">
+            <button
+              type="button"
+              className="genre-menu-backdrop"
+              aria-label="Close genre browser"
+              onClick={() => setOpen(false)}
+            />
+
+            <section
+              className="genre-menu-panel"
+              aria-label="Browse manga genres"
+            >
+              <div className="genre-menu-heading">
+                <div>
+                  <p className="eyebrow">Browse</p>
+                  <h2>Genres</h2>
+                </div>
+
+                <button
+                  type="button"
+                  className="genre-close"
+                  aria-label="Close genres"
+                  onClick={() => setOpen(false)}
+                >
+                  ×
+                </button>
+              </div>
+
+              {loading ? (
+                <div className="genre-loading" aria-busy="true">
+                  {Array.from({ length: 14 }).map((_, index) => (
+                    <span className="skeleton" key={index} />
+                  ))}
+                </div>
+              ) : failed ? (
+                <div className="genre-error">
+                  <strong>Genres did not load.</strong>
+                  <span>Search and discovery still work.</span>
+                  <button
+                    type="button"
+                    onClick={() => setRequestKey((value) => value + 1)}
+                  >
+                    Retry
+                  </button>
+                </div>
+              ) : (
+                <div className="genre-menu-grid">
+                  {genres.map((genre) => (
+                    <Link
+                      key={genre.id}
+                      href={`/browse?kind=popular&tag=${encodeURIComponent(
+                        genre.id
+                      )}&name=${encodeURIComponent(genre.name)}`}
+                      onClick={() => setOpen(false)}
+                    >
+                      {genre.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
+
+              <div className="genre-menu-links">
+                <Link
+                  href="/genres"
+                  onClick={() => setOpen(false)}
+                >
+                  Browse more genres
+                  <span aria-hidden="true">→</span>
+                </Link>
+
+                <Link
+                  href="/browse?kind=popular"
+                  onClick={() => setOpen(false)}
+                >
+                  Browse all manga
+                  <span aria-hidden="true">→</span>
+                </Link>
+              </div>
+            </section>
+          </div>,
+          document.body
+        )
+      : null;
 
   return (
     <>
@@ -90,75 +183,7 @@ export default function GenreMenu() {
         <span>Genres</span>
       </button>
 
-      {open ? (
-        <div className="genre-menu-layer">
-          <button
-            type="button"
-            className="genre-menu-backdrop"
-            aria-label="Close genre browser"
-            onClick={() => setOpen(false)}
-          />
-
-          <section className="genre-menu-panel" aria-label="Browse manga genres">
-            <div className="genre-menu-heading">
-              <div>
-                <p className="eyebrow">Browse</p>
-                <h2>Genres</h2>
-              </div>
-              <button
-                type="button"
-                className="genre-close"
-                aria-label="Close genres"
-                onClick={() => setOpen(false)}
-              >
-                ×
-              </button>
-            </div>
-
-            {loading ? (
-              <div className="genre-loading" aria-busy="true">
-                {Array.from({ length: 14 }).map((_, index) => (
-                  <span className="skeleton" key={index} />
-                ))}
-              </div>
-            ) : failed ? (
-              <div className="genre-error">
-                <strong>Genres did not load.</strong>
-                <span>Search and discovery still work.</span>
-                <button
-                  type="button"
-                  onClick={() => setRequestKey((value) => value + 1)}
-                >
-                  Retry
-                </button>
-              </div>
-            ) : (
-              <div className="genre-menu-grid">
-                {genres.map((genre) => (
-                  <Link
-                    key={genre.id}
-                    href={`/browse?kind=popular&tag=${encodeURIComponent(
-                      genre.id
-                    )}&name=${encodeURIComponent(genre.name)}`}
-                    onClick={() => setOpen(false)}
-                  >
-                    {genre.name}
-                  </Link>
-                ))}
-              </div>
-            )}
-
-            <Link
-              className="genre-menu-all"
-              href="/browse?kind=popular"
-              onClick={() => setOpen(false)}
-            >
-              Browse all manga
-              <span aria-hidden="true">→</span>
-            </Link>
-          </section>
-        </div>
-      ) : null}
+      {layer}
     </>
   );
 }

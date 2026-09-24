@@ -58,6 +58,8 @@ export const users = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     email: text("email").notNull(),
     passwordHash: text("password_hash").notNull(),
+    displayName: text("display_name"),
+    avatarDataUrl: text("avatar_data_url"),
     emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
@@ -188,6 +190,64 @@ export const readerImports = pgTable(
   },
   (table) => [
     primaryKey({ columns: [table.userId, table.readerId] })
+  ]
+);
+
+export const communityComments = pgTable(
+  "community_comments",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    targetType: text("target_type").notNull(),
+    targetId: text("target_id").notNull(),
+    body: text("body").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+  },
+  (table) => [
+    index("community_comments_target_created_idx").on(
+      table.targetType,
+      table.targetId,
+      table.createdAt
+    ),
+    index("community_comments_user_created_idx").on(
+      table.userId,
+      table.createdAt
+    )
+  ]
+);
+
+export const communityReactions = pgTable(
+  "community_reactions",
+  {
+    targetType: text("target_type").notNull(),
+    targetId: text("target_id").notNull(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    reaction: text("reaction").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+  },
+  (table) => [
+    primaryKey({
+      columns: [
+        table.targetType,
+        table.targetId,
+        table.userId
+      ]
+    }),
+    index("community_reactions_target_idx").on(
+      table.targetType,
+      table.targetId
+    )
   ]
 );
 

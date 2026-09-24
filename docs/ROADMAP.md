@@ -5,39 +5,36 @@
 - landing page
 - signed-in dashboard
 - header autocomplete search
-- genre browser
-- MangaFlux Hot / Popular / Top Rated / Latest Updates
+- genres
+- Hot / Popular / Top Rated / Latest Updates
 - paginated discovery
 
-## v0.7.1 — Chapter Scale & Reader Controls — current
+## v0.7.1 — Chapter Scale & Reader Controls — complete
 
-- fixed genre-menu indefinite loading loop
-- chapter pagination beyond 100 items
-- newest / oldest chapter sorting
-- exact chapter-number lookup
-- reader navigation across paginated chapter feeds
-- tap-to-show reader chrome
-- persistent centered Page X / Y
-- persistent thin progress meter
-- auto-hide large reader controls
-- lower-right scroll-to-top
-- previous/next chapter overlay controls
-- Data Saver in revealed reader chrome
+- chapter pagination beyond 100
+- newest/oldest sorting
+- chapter lookup
+- tap reader chrome
+- persistent progress/page HUD
+- reader chapter navigation
 
-## v0.7.2 — Community & Profiles — next
+## v0.7.2 — Community & Profiles — current
 
+- fixed mobile genre sheet positioning
+- dedicated genre directory
+- clickable manga tags
+- reader cover + centered chapters control + centered top arrow
+- profile display names
 - profile avatar upload
-- display-name/profile polish
-- MangaFlux-native manga comments
+- manga comments
 - chapter comments
-- verified-account-only posting
+- verified-account-only posting/reactions
+- one comment every five minutes server-side
 - comment pagination
-- one comment per five minutes server-side cooldown
-- bounded comment length
 - own-comment deletion
-- reactions
+- manga/chapter reactions
 
-## v0.7.3 — Recommendations
+## v0.7.3 — Recommendations — next
 
 - Because you read…
 - genre/tag similarity

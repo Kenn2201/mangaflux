@@ -7,6 +7,8 @@ type Session = {
   authenticated: boolean;
   user?: {
     email: string;
+    displayName?: string | null;
+    avatarDataUrl?: string | null;
   } | null;
 };
 
@@ -39,6 +41,7 @@ export default function AccountStatus() {
     }
 
     void load();
+
     return () => {
       cancelled = true;
     };
@@ -56,16 +59,24 @@ export default function AccountStatus() {
     );
   }
 
-  const email = session.user?.email;
-  const initial = email?.trim().charAt(0).toUpperCase() || "M";
+  const user = session.user;
+  const label = user?.displayName || user?.email || "Account";
+  const initial = label.trim().charAt(0).toUpperCase() || "M";
 
   return (
     <Link className="account-chip" href="/account">
       <span className="account-chip-avatar" aria-hidden="true">
-        {session.authenticated ? initial : "○"}
+        {session.authenticated && user?.avatarDataUrl ? (
+          <img src={user.avatarDataUrl} alt="" />
+        ) : session.authenticated ? (
+          initial
+        ) : (
+          "○"
+        )}
       </span>
+
       <span className="account-chip-label">
-        {session.authenticated ? email ?? "Account" : "Sign in"}
+        {session.authenticated ? label : "Sign in"}
       </span>
     </Link>
   );

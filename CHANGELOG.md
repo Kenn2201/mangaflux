@@ -7,32 +7,40 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- Community comments/reactions and profile avatars
 - Personalized recommendations
+- Reliability/source-health work
 
-## 0.7.1 - 2026-09-24 — Chapter Scale & Reader Controls
-
-### Fixed
-- Genre menu no longer repeatedly restarts its request while the loading state changes.
-- Genre menu now exposes an explicit retry state instead of an indefinite spinner.
+## 0.7.2 - 2026-09-24 — Community & Profiles
 
 ### Added
-- Paginated MangaDex chapter feed with total/limit/offset metadata.
-- Newest and Oldest chapter sorting.
-- Exact chapter-number lookup.
-- Reader previous/next lookup across paginated chapter feeds.
-- Tap-to-show reader chrome.
-- Auto-hide reader controls.
-- Persistent Page X / Y HUD.
-- Persistent reading progress meter.
-- Reader overlay chapter navigation.
-- Lower-right scroll-to-top control.
+- MangaFlux-native manga comments.
+- MangaFlux-native chapter comments.
+- Manga/chapter reaction bar with Like, Funny, Wow, Sad, and Fire.
+- Verified-account-only posting and reactions.
+- Server-side one-comment-per-five-minutes cooldown.
+- 1,000-character comment limit.
+- Comment pagination.
+- Own-comment deletion.
+- Profile display names.
+- Profile avatar upload with client-side square WebP normalization.
+- Dedicated Genres & Themes directory.
+- Browse More Genres action in the genre sheet.
 
-### Changed
-- Manga chapter lists now display 50 items per page rather than silently exposing only the newest 100.
-- Reader navigation can traverse series whose current chapter is outside the newest 100 feed items.
-- Reader source/save/quality controls move into temporary chrome while page/progress indicators stay visible.
+### Fixed
+- Mobile genre sheet now renders outside the sticky header via a portal.
+- Scroll-to-top icon is optically centered using SVG.
+- Reader mobile header now shows manga cover context.
+- Reader bottom controls now include a centered Chapters/Home action.
+- Manga tags/genres are now clickable discovery links.
 
+### Security / privacy
+- Community writes require authenticated, verified MangaFlux accounts.
+- Comment cooldown is enforced server-side, not only in the UI.
+- Public comments never expose account email.
+- Avatar input is restricted to a bounded WebP data URL after local normalization.
+- Community mutations remain behind the Vercel auth-proxy/CSRF boundary.
+
+## 0.7.1 - 2026-09-24 — Chapter Scale & Reader Controls
 ## 0.7.0 - 2026-09-24 — Discovery & Dashboard
 ## 0.6.0 - 2026-09-24 — Mobile UX Foundation
 ## 0.5.1 - 2026-09-24 — Transactional Email

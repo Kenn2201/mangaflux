@@ -41,6 +41,8 @@ export async function createUser(
     .returning({
       id: users.id,
       email: users.email,
+      displayName: users.displayName,
+      avatarDataUrl: users.avatarDataUrl,
       emailVerifiedAt: users.emailVerifiedAt,
       createdAt: users.createdAt
     });
@@ -106,6 +108,8 @@ export async function getSessionUser(
       expiresAt: sessions.expiresAt,
       userId: users.id,
       email: users.email,
+      displayName: users.displayName,
+      avatarDataUrl: users.avatarDataUrl,
       emailVerifiedAt: users.emailVerifiedAt,
       createdAt: users.createdAt
     })
