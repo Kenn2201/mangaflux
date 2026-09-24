@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   useEffect,
   useMemo,
+  useRef,
   useState
 } from "react";
 import { createPortal } from "react-dom";
@@ -21,6 +22,9 @@ export default function GenreMenu() {
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
   const [requestKey, setRequestKey] = useState(0);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const closeRef = useRef<HTMLButtonElement | null>(null);
+  const panelRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!open || items.length) return;
@@ -65,15 +69,45 @@ export default function GenreMenu() {
     if (!open) return;
 
     function onKeyDown(event: globalThis.KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setOpen(false);
+        return;
+      }
+
+      if (event.key !== "Tab" || !panelRef.current) return;
+
+      const focusable = Array.from(
+        panelRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      );
+
+      if (!focusable.length) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (
+        !event.shiftKey &&
+        document.activeElement === last
+      ) {
+        event.preventDefault();
+        first.focus();
+      }
     }
 
     document.addEventListener("keydown", onKeyDown);
     document.body.classList.add("genre-sheet-open");
+    window.setTimeout(() => closeRef.current?.focus(), 0);
 
     return () => {
       document.removeEventListener("keydown", onKeyDown);
       document.body.classList.remove("genre-sheet-open");
+      triggerRef.current?.focus();
     };
   }, [open]);
 
@@ -95,17 +129,21 @@ export default function GenreMenu() {
 
             <section
               className="genre-menu-panel"
-              aria-label="Browse manga genres"
+              ref={panelRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="genre-menu-title"
             >
               <div className="genre-menu-heading">
                 <div>
                   <p className="eyebrow">Browse</p>
-                  <h2>Genres</h2>
+                  <h2 id="genre-menu-title">Genres</h2>
                 </div>
 
                 <button
                   type="button"
                   className="genre-close"
+                  ref={closeRef}
                   aria-label="Close genres"
                   onClick={() => setOpen(false)}
                 >
@@ -173,6 +211,7 @@ export default function GenreMenu() {
     <>
       <button
         className="genre-menu-button"
+        ref={triggerRef}
         type="button"
         aria-label="Browse genres"
         aria-expanded={open}

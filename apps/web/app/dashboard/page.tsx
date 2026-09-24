@@ -1,7 +1,11 @@
 import DashboardGate from "../DashboardGate";
 
 export const metadata = {
-  title: "Dashboard"
+  title: "Dashboard",
+  robots: {
+    index: false,
+    follow: false
+  }
 };
 
 export default function DashboardPage() {

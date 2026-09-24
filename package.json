@@ -1,7 +1,7 @@
 {
   "name": "mangaflux",
   "private": true,
-  "version": "0.8.3",
+  "version": "0.9.0",
   "engines": { "node": ">=22" },
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
@@ -11,8 +11,9 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "check:secrets": "node scripts/check-secrets.mjs",
     "check:migrations": "node scripts/check-migrations.mjs",
+    "check:release": "node scripts/check-release.mjs",
     "db:migrate": "npm run migrate --workspace=@mangaflux/db",
-    "verify": "npm run check:secrets && npm run check:migrations && npm run typecheck && npm run build && npm run audit",
+    "verify": "npm run check:secrets && npm run check:migrations && npm run check:release && npm run typecheck && npm run build && npm run audit",
     "audit": "npm audit --audit-level=high"
   }
 }

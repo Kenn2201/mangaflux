@@ -2,7 +2,7 @@
 
 > A mobile-first modular manga discovery, reading, community, recommendation, and reliability-focused platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v0.8.3--Cache_Performance_Hardening-indigo.svg)
+![Version](https://img.shields.io/badge/version-v0.9.0--V1_Release_Candidate-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,52 +10,54 @@
 
 ## Current release
 
-**v0.8.3 — Cache, Rate Limits & Performance Hardening**
+**v0.9.0 — V1 Release Candidate**
 
-This release finishes the core v0.8 reliability work before the v0.9 release-candidate audit.
+MangaFlux has entered stabilization. v0.9 is intentionally focused on release quality rather than another major feature set.
 
-### MangaDex request efficiency
+### Release-candidate hardening
 
-- duplicate identical in-flight MangaDex GETs are coalesced into one upstream request
-- source caches are bounded instead of growing without limit
-- expired/old entries are evicted
-- admin diagnostics now expose cache hits, cache entry count, and coalesced-request count
-- existing MangaDex pacing remains in place
+- synchronized-version/release-invariant CI check
+- browser-facing security-header baseline
+- Next.js framework signature header disabled
+- private account/dashboard/admin pages marked noindex
+- robots rules exclude API/private product surfaces
+- global not-found and recoverable route-error experiences
+- keyboard skip links
+- mobile navigation exposes current-page state
+- autocomplete upgraded to combobox/listbox semantics
+- genre browser upgraded to modal-dialog semantics with focus return
+- hidden reader chrome becomes inert to keyboard interaction
+- dedicated V1 production test checklist
 
-### Public response caching
+### Automated release invariants
 
-Public non-account data now has explicit shared-cache policy:
+CI now verifies:
 
-- search: 30 seconds
-- discovery/home: 60 seconds
-- chapter lists: 60 seconds
-- manga details: 5 minutes
-- related titles: 5 minutes
-- genres/tags: 6 hours
+- all workspace versions match
+- API version matches package version
+- MangaDex User-Agent matches release version
+- admin email is not hardcoded in the Render blueprint
+- known secrets are never renamed into NEXT_PUBLIC variables
+- private API routes do not use MangaFlux public-proxy cache helpers
+- required frontend security headers remain configured
 
-Responses include `s-maxage` and `stale-while-revalidate` where appropriate, and the Vercel proxy preserves trusted public cache headers from the API. Error responses remain `no-store`.
+The existing secret scan, migration validation, TypeScript checks, production build, and dependency audit still run on every release PR.
 
-Private/authenticated account, community-write, admin, and state responses are not moved into public caching.
+### Manual release gate
 
-### Rate-limit hardening
+CI cannot replace real device QA. The canonical production checklist is:
 
-- in-memory rate-limit bucket storage is bounded
-- expired buckets continue to be cleaned automatically
-- responses now include a `RateLimit-Policy` header in addition to limit/remaining/reset information
-- the current in-memory limiter remains appropriate for the single Render API instance
-- a shared Redis/edge limiter remains deferred until horizontal scaling actually exists
+`docs/V1-RELEASE-CHECKLIST.md`
 
-### Runtime model
+v1.0.0 should be tagged only after the v0.9 production checklist is completed and blocking findings are resolved.
 
-MangaFlux still uses the lightweight `/health` endpoint for Render/cron wake checks. Deeper source/database probes stay under `/api/status`, avoiding expensive dependency checks on every wake request.
-
-## v0.8 reliability phase
+## Completed phases
 
 ~~~text
-v0.8.0  Reliability & Source Health
-v0.8.1  Admin Operations
-v0.8.2  Diagnostics & Observability
-v0.8.3  Cache, Rate Limits & Performance Hardening
+v0.6.x  Mobile UX Foundation
+v0.7.x  Product Experience
+v0.8.x  Reliability + Operations
+v0.9.0  V1 Release Candidate
 ~~~
 
-Next: **v0.9.x — V1 Release Candidate**, focused on regression testing, accessibility, security review, repository cleanup, and production release QA.
+Next: resolve any v0.9 physical/regression findings, then prepare **v1.0.0 Stable V1**.

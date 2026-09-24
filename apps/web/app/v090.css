@@ -1,0 +1,100 @@
+/* MangaFlux v0.9.0 — Release Candidate accessibility + failure states */
+
+.skip-link {
+  position: fixed;
+  z-index: 1000;
+  top: max(8px, env(safe-area-inset-top));
+  left: 12px;
+  transform: translateY(-180%);
+  padding: 10px 14px;
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  background: #f0f0f0;
+  color: #090909;
+  font-size: 12px;
+  font-weight: 900;
+  transition: transform .16s ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.app-content:focus,
+#reader-content:focus {
+  outline: none;
+}
+
+.release-state-page {
+  min-height: 68vh;
+  display: grid;
+  align-items: center;
+}
+
+.release-state-card {
+  max-width: 760px;
+}
+
+.release-state-card > p:not(.eyebrow) {
+  max-width: 620px;
+  color: #999;
+  line-height: 1.65;
+}
+
+.release-state-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 20px;
+}
+
+.release-state-actions a,
+.release-state-actions button {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 14px;
+  border: 1px solid #353535;
+  border-radius: 13px;
+  background: #141414;
+  color: #d1d1d1;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.release-state-actions button {
+  border-color: #ededed;
+  background: #ededed;
+  color: #080808;
+}
+
+.search-suggestion[aria-selected="true"] {
+  outline: 2px solid #888;
+  outline-offset: -2px;
+}
+
+[aria-current="page"] {
+  text-decoration-thickness: max(1px, .08em);
+}
+
+@media (max-width: 700px) {
+  .skip-link {
+    left: max(8px, env(safe-area-inset-left));
+  }
+
+  .release-state-actions {
+    display: grid;
+  }
+
+  .release-state-actions a,
+  .release-state-actions button {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skip-link {
+    transition: none;
+  }
+}
