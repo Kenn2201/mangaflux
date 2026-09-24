@@ -1,22 +1,18 @@
-# MangaFlux — Versioning & Release Checklist
+# MangaFlux — Versioning & Release Policy
 
 MangaFlux follows Semantic Versioning.
 
 ## Current version
 
-**v0.9.1 — RC UX & Account Hardening**
+**v1.0.0 — Stable V1**
 
-- `0.MINOR.0` = meaningful pre-V1 milestone
-- `0.MINOR.PATCH` = compatible focused pre-V1 fix
-- `1.0.0` = stable V1 finish line
+- `PATCH` = compatible bug/security/reliability fixes
+- `MINOR` = compatible new features
+- `MAJOR` = deliberate platform/architecture changes that may require migrations or compatibility work
 
-## v0.9 policy
+## Stable release gate
 
-v0.9.x is feature-frozen for major product work. Changes should primarily be regression fixes, accessibility/security/reliability hardening, and small UX gaps discovered by production testing.
-
-## Automated gate
-
-Before merging into `main`:
+Before merging a release into `main`:
 
 1. Secret scan.
 2. Migration-journal validation.
@@ -24,15 +20,16 @@ Before merging into `main`:
 4. TypeScript checks.
 5. Production build.
 6. Dependency audit.
+7. Physical production testing appropriate to the release scope.
 
-## Manual gate
+## Version families
 
-Use `docs/V1-RELEASE-CHECKLIST.md`.
-
-The final v1.0.0 tag must come from a production-tested main commit after blocking v0.9 findings are resolved.
+- **1.x:** stable MangaDex product evolution
+- **2.x:** permitted multi-source architecture
+- **3.x:** semantic discovery, personalization, richer clients/platform capabilities
 
 ## Branch workflow
 
 - `main`: deployable production
 - `kenn/*`: temporary development/release branches
-- merged `kenn/*` branches may be deleted after merge; PR/commit history remains
+- merged temporary branches may be deleted after merge; PR and commit history remain

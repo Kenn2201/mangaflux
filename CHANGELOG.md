@@ -6,46 +6,27 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 
 ## Unreleased
 
-### Release-candidate work
-- Remaining physical iPhone/tablet/desktop findings
-- Accessibility findings and fixes
-- Final production smoke-test findings
-- Branch cleanup
-- v1.0.0 release preparation
+### Planned
+- v1.x quality-of-life and product-depth releases
+
+## 1.0.0 - 2026-09-24 — Stable V1
+
+### Stable
+- Promoted the audited v0.9 release-candidate codebase to the stable V1 baseline.
+- Synchronized all workspace, API, and MangaDex adapter versions to 1.0.0.
+- Preserved the V1 single-source MangaDex architecture and existing production safety boundaries.
+
+### Product
+- Mobile-first landing, discovery/dashboard, search autocomplete, genres, filters, recommendations, library, account, and reader UX.
+- Scalable chapter browsing and direct chapter jump.
+- Verified accounts, password recovery, one-active-session behavior, avatars, community profiles, reactions, comments, and account-backed reading state.
+- Admin operations, source/database status, runtime diagnostics, bounded caching, and rate-limit hardening.
+
+### Release engineering
+- Secret scan, migration validation, release-invariant checks, TypeScript checks, production build, and dependency audit remain mandatory for release PRs.
+- v0.9 became the final release-candidate stabilization series before Stable V1.
 
 ## 0.9.1 - 2026-09-24 — RC UX & Account Hardening
-
-### Added
-- Visible Browse filter bar for ranking, genre, status, and release year.
-- Reader Jump Chapter dialog for direct chapter-number navigation.
-- Public MangaFlux community profile endpoint and profile modal.
-- Public community stats for comments and reactions.
-- Recent public-comment activity links inside profile modal.
-- Account-page public-profile preview.
-- Admin View Profile action.
-- Confirmation dialog component for destructive/session-changing actions.
-
-### Changed
-- Successful login now replaces the account's previous active session.
-- Signing in on another device/browser remains allowed, but the newest login becomes the sole active session.
-- Sign-in/create-account UI now explains sync, verification, community identity, and session behavior.
-- Session row now explains the one-active-session rule.
-- iPhone/mobile avatar normalization progressively reduces dimensions and WebP quality before failing.
-- Local avatar source limit raised to 10 MB while the final uploaded WebP remains bounded.
-- Browse filters preserve an active creator filter.
-
-### Confirmations
-- Sign out requires confirmation.
-- Own-comment deletion requires confirmation.
-- Password reset requires confirmation and explains session revocation.
-- Admin comment removal requires confirmation.
-- Admin user-session revocation requires confirmation.
-
-### Privacy / security
-- Public community profile data never includes account email.
-- Existing comment/reaction authentication and cooldown rules are unchanged.
-- Single-session replacement happens server-side during verified login.
-
 ## 0.9.0 - 2026-09-24 — V1 Release Candidate
 ## 0.8.3 - 2026-09-24 — Cache, Rate Limits & Performance Hardening
 ## 0.8.2 - 2026-09-24 — Diagnostics & Observability

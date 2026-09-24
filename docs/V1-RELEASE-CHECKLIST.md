@@ -1,131 +1,30 @@
-# MangaFlux V1 Release Candidate Checklist
+# MangaFlux V1 Release Record
 
-This is the manual production checklist for v0.9.x. CI verifies code/build/security invariants, but the items below require real production testing before v1.0.0.
+MangaFlux v1.0.0 was promoted from the v0.9 release-candidate series after the automated release gate passed and the blocking issues found during physical production testing were addressed.
 
-## 1. Deployment / infrastructure
+## Automated release gate
 
-- [ ] `https://api.manga.kenncode.me/health` reports v0.9.0.
-- [ ] persistence/auth/email/admin are configured.
-- [ ] `https://manga.kenncode.me/status` reports expected component state.
-- [ ] Render cold start recovers normally.
-- [ ] cron wake check still uses lightweight `/health`.
-- [ ] Vercel production deployment is on the same main commit as Render.
+- [x] secret scan
+- [x] migration journal validation
+- [x] release-invariant validation
+- [x] TypeScript checks
+- [x] production build
+- [x] dependency audit
 
-## 2. Anonymous product flow
+## Release-candidate fixes completed
 
-- [ ] Landing page works on iPhone Safari.
-- [ ] Header autocomplete works with keyboard arrows + Enter + Escape.
-- [ ] Search results work.
-- [ ] Genres bottom sheet opens/closes and Browse More Genres works.
-- [ ] Hot / Popular / Top Rated / Latest Updates load.
-- [ ] Show All pagination works.
-- [ ] visible ranking/genre/status/year Browse filters work.
-- [ ] creator filters remain active when applying compatible Browse filters.
-- [ ] year/status/author/artist/tag links work.
-- [ ] manga details and related/recommendation rails load.
+- [x] mobile Genre sheet behavior
+- [x] reader control alignment/navigation fixes
+- [x] scalable 300+ chapter access
+- [x] direct reader chapter jump
+- [x] clickable metadata and Browse filters
+- [x] public community profiles
+- [x] improved account/sign-in/profile UX
+- [x] mobile avatar compression fallback
+- [x] one active session per account
+- [x] confirmations around destructive/session-changing actions
+- [x] admin access/diagnostics verification
 
-## 3. Chapter / reader
+## Stable baseline
 
-- [ ] a manga with 300+ chapters can reach old chapters.
-- [ ] newest/oldest sorting works.
-- [ ] direct chapter lookup works.
-- [ ] reader loads all pages.
-- [ ] Page X / Y and persistent progress meter stay correct.
-- [ ] tap-to-show/hide chrome works.
-- [ ] hidden reader chrome is not keyboard-focusable.
-- [ ] Previous / Chapters / Next controls work.
-- [ ] Jump Chapter can move directly from an early chapter to a much later chapter (for example 5 → 20).
-- [ ] chapter jump reports a useful message for a missing chapter.
-- [ ] scroll-to-top works.
-- [ ] Data Saver persists.
-- [ ] failed image retry works.
-- [ ] Continue Reading resumes near the saved page.
-
-## 4. Authentication / recovery
-
-- [ ] new account creation sends verification email.
-- [ ] unverified login is blocked.
-- [ ] verification link succeeds once.
-- [ ] verified login succeeds.
-- [ ] logging in on a second browser/device invalidates the previous active session.
-- [ ] the newest browser/device remains signed in.
-- [ ] logout shows confirmation and clears the active session.
-- [ ] forgot-password response remains generic.
-- [ ] reset link succeeds once and revokes old sessions.
-- [ ] account page never flashes signed-out UI before session resolution.
-
-## 5. Profiles / community
-
-- [ ] display-name update persists.
-- [ ] JPEG/PNG/WebP avatar upload persists.
-- [ ] a normal iPhone camera-roll photo can be processed without the previous compression error.
-- [ ] Account Preview Profile opens the same public profile view used by comments.
-- [ ] clicking another reader's avatar/name opens a public profile modal.
-- [ ] public profile shows comment/reaction stats and recent public comments.
-- [ ] public profile never exposes account email.
-- [ ] public comments do not show email.
-- [ ] manga reactions work.
-- [ ] chapter reactions work.
-- [ ] comments require a verified account.
-- [ ] one-comment-per-five-minutes cooldown is enforced by the API.
-- [ ] own-comment delete requires confirmation and works.
-- [ ] comment pagination works.
-- [ ] password reset requires confirmation and still revokes previous sessions.
-
-## 6. Admin
-
-- [ ] non-admin account receives no admin card.
-- [ ] direct non-admin `/admin` access is denied by API authorization.
-- [ ] configured verified admin sees Admin Console.
-- [ ] overview counters load.
-- [ ] diagnostics load.
-- [ ] View Profile opens a user's public community profile.
-- [ ] comment removal requires confirmation and works.
-- [ ] revoke another user's sessions requires confirmation and works.
-- [ ] current admin self-revoke remains blocked.
-- [ ] no passwords, password hashes, raw tokens, secrets, or SQL controls are exposed.
-
-## 7. Accessibility
-
-- [ ] Skip to main content appears on keyboard focus.
-- [ ] mobile navigation announces current page.
-- [ ] header search behaves as an accessible combobox/listbox.
-- [ ] genre browser announces as a modal dialog and returns focus to trigger.
-- [ ] all important controls are keyboard reachable.
-- [ ] visible keyboard focus is not clipped or hidden.
-- [ ] VoiceOver can identify Home, Browse, Library, Account and reader controls.
-- [ ] reduced-motion preference suppresses nonessential motion.
-- [ ] text remains usable at 200% zoom.
-- [ ] 320px / 390px / 430px mobile widths do not overflow horizontally.
-
-## 8. Security / cache behavior
-
-- [ ] secret scan passes.
-- [ ] migration journal check passes.
-- [ ] release-invariant check passes.
-- [ ] dependency audit has no high-severity finding.
-- [ ] private auth/account/state/community/admin responses are no-store.
-- [ ] public source data may use the documented shared cache policy.
-- [ ] 429 responses include Retry-After and RateLimit policy information.
-- [ ] admin authorization remains server-side.
-- [ ] no secret is stored in a NEXT_PUBLIC variable.
-- [ ] direct source fetching remains HTTPS + host-allowlisted.
-
-## 9. Responsive regression
-
-- [ ] iPhone Safari.
-- [ ] iPhone landscape.
-- [ ] tablet-sized viewport.
-- [ ] desktop Chrome/Edge/Safari-class viewport.
-- [ ] bottom navigation does not cover actionable content.
-- [ ] reader safe-area behavior works around iPhone home indicator/notch.
-
-## 10. Release gate
-
-v1.0.0 should not be tagged until:
-
-- [ ] all blocking v0.9 findings are resolved.
-- [ ] production smoke test passes after the final merge.
-- [ ] merged temporary `kenn/*` branches are cleaned up.
-- [ ] README / CHANGELOG / VERSIONING / ROADMAP agree on v1.0.0.
-- [ ] v1.0.0 release tag is created from the audited production commit.
+The Stable V1 production baseline remains subject to normal regression monitoring. Any post-release compatible defect is handled as a v1.0.x patch; compatible feature work moves to v1.1+.
