@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { publicProxyHeaders } from "../../../lib/publicProxyCache";
 
 const API_URL =
   process.env.MANGAFLUX_API_URL ??
@@ -21,10 +22,10 @@ export async function GET() {
 
     return new NextResponse(body, {
       status: upstream.status,
-      headers: {
-        "content-type":
-          upstream.headers.get("content-type") ?? "application/json"
-      }
+      headers: publicProxyHeaders(
+        upstream,
+        "public, max-age=21600, s-maxage=21600, stale-while-revalidate=43200"
+      )
     });
   } catch (error) {
     console.error("MangaFlux genres proxy failed", error);

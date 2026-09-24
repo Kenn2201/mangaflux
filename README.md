@@ -2,7 +2,7 @@
 
 > A mobile-first modular manga discovery, reading, community, recommendation, and reliability-focused platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v0.8.2--Diagnostics_Observability-indigo.svg)
+![Version](https://img.shields.io/badge/version-v0.8.3--Cache_Performance_Hardening-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,56 +10,52 @@
 
 ## Current release
 
-**v0.8.2 — Diagnostics & Observability**
+**v0.8.3 — Cache, Rate Limits & Performance Hardening**
 
-MangaFlux now has privacy-minimized runtime diagnostics inside the protected administrator console.
+This release finishes the core v0.8 reliability work before the v0.9 release-candidate audit.
 
-### Runtime diagnostics
+### MangaDex request efficiency
 
-The admin console now reports a rolling 15-minute view of:
+- duplicate identical in-flight MangaDex GETs are coalesced into one upstream request
+- source caches are bounded instead of growing without limit
+- expired/old entries are evicted
+- admin diagnostics now expose cache hits, cache entry count, and coalesced-request count
+- existing MangaDex pacing remains in place
 
-- request count
-- 4xx client errors
-- 429 rate-limit responses
-- 5xx server errors
-- average request latency
-- p95 request latency
-- process RSS / heap usage
-- API process uptime and Node version
-- busiest normalized routes
-- recent 429/5xx failures
+### Public response caching
 
-Diagnostics are in-memory and intentionally do **not** collect:
+Public non-account data now has explicit shared-cache policy:
 
-- request bodies
-- query strings
-- IP addresses
-- authorization headers
-- account emails
-- passwords
-- session tokens
-- API keys
+- search: 30 seconds
+- discovery/home: 60 seconds
+- chapter lists: 60 seconds
+- manga details: 5 minutes
+- related titles: 5 minutes
+- genres/tags: 6 hours
 
-The data resets when the Render process restarts, which is acceptable for this lightweight pre-V1 operational view.
+Responses include `s-maxage` and `stale-while-revalidate` where appropriate, and the Vercel proxy preserves trusted public cache headers from the API. Error responses remain `no-store`.
 
-### Admin configuration diagnostics
+Private/authenticated account, community-write, admin, and state responses are not moved into public caching.
 
-Public system status now reports whether the API-side admin allowlist is **configured** or **disabled** without exposing the configured email addresses.
+### Rate-limit hardening
 
-Administrator access still comes only from the Render API service environment:
+- in-memory rate-limit bucket storage is bounded
+- expired buckets continue to be cleaned automatically
+- responses now include a `RateLimit-Policy` header in addition to limit/remaining/reset information
+- the current in-memory limiter remains appropriate for the single Render API instance
+- a shared Redis/edge limiter remains deferred until horizontal scaling actually exists
 
-~~~text
-ADMIN_EMAILS=your-verified-account@example.com
-~~~
+### Runtime model
 
-Putting `ADMIN_EMAILS` only in Vercel does not make an account an administrator because authorization is evaluated by the Render/Fastify backend.
+MangaFlux still uses the lightweight `/health` endpoint for Render/cron wake checks. Deeper source/database probes stay under `/api/status`, avoiding expensive dependency checks on every wake request.
 
-### Reliability phase
+## v0.8 reliability phase
 
 ~~~text
 v0.8.0  Reliability & Source Health
 v0.8.1  Admin Operations
 v0.8.2  Diagnostics & Observability
+v0.8.3  Cache, Rate Limits & Performance Hardening
 ~~~
 
-Next: cache/revalidation, rate-limit, and performance/cold-start hardening before the v0.9 release-candidate phase.
+Next: **v0.9.x — V1 Release Candidate**, focused on regression testing, accessibility, security review, repository cleanup, and production release QA.

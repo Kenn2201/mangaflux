@@ -20,27 +20,31 @@
 ## Reliability / operations
 
 - [x] public system status
-- [x] MangaDex source-health probe
-- [x] Neon persistence-health probe
-- [x] transient safe-read retry/backoff
-- [x] request timeout / Retry-After handling
+- [x] MangaDex + Neon health probes
+- [x] safe-read retries / timeouts / Retry-After
 - [x] protected admin console
 - [x] admin comment removal/session revocation
 - [x] privacy-minimized runtime diagnostics
 - [x] request/error/rate-limit/latency metrics
 - [x] process uptime/memory diagnostics
-- [x] public admin-configuration state
-- [ ] caching/revalidation review
-- [ ] rate-limit scaling review
-- [ ] production performance/cold-start review
-- [ ] optional external monitoring
+- [x] bounded source caches
+- [x] in-flight MangaDex request coalescing
+- [x] public cache/revalidation policy
+- [x] bounded rate-limit buckets
+- [x] cache diagnostics
+- [x] production performance/cold-start architecture review
+- [ ] optional external monitoring decision
 
-## Final stabilization
+## v0.9 release candidate
 
-- [ ] iPhone/mobile regression QA
+- [ ] full iPhone/mobile regression QA
 - [ ] tablet/desktop regression QA
 - [ ] accessibility QA
-- [ ] final auth/admin/community/security/dependency/migration audit
+- [ ] auth/email/session audit
+- [ ] admin/community/avatar security audit
+- [ ] cache/rate-limit production verification
+- [ ] dependency/migration/security audit
 - [ ] production smoke test
 - [ ] branch/repository cleanup
+- [ ] final release documentation
 - [ ] v1.0.0 release tag

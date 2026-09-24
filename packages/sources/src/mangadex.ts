@@ -22,7 +22,7 @@ import type {
 const BASE = process.env.MANGADEX_BASE_URL ?? "https://api.mangadex.org";
 const HOSTS = ["api.mangadex.org"];
 const COVER_BASE = "https://uploads.mangadex.org/covers";
-const USER_AGENT = "MangaFlux/0.8.2 (+https://manga.kenncode.me)";
+const USER_AGENT = "MangaFlux/0.8.3 (+https://manga.kenncode.me)";
 const MANIFEST_TTL_MS = 60_000;
 const SEARCH_TTL_MS = 30_000;
 const DETAILS_TTL_MS = 5 * 60_000;
@@ -34,6 +34,7 @@ const HOT_TTL_MS = 2 * 60_000;
 const HEALTH_TTL_MS = 30_000;
 const MAX_IMAGE_BYTES = 15_000_000;
 const MANGADEX_MIN_INTERVAL_MS = 250;
+const MAX_CACHE_ENTRIES = 400;
 
 type Relationship = {
   id: string;
@@ -114,18 +115,54 @@ const hotPoolCache = new Map<string, CacheEntry<MangaSummary[]>>();
 let tagsCache: CacheEntry<MangaTag[]> | undefined;
 let healthCache: CacheEntry<SourceHealth> | undefined;
 
+type SourceResponse = Awaited<ReturnType<typeof fetchSource>>;
+
+const inFlightRequests = new Map<string, Promise<SourceResponse>>();
+const cacheCounters = {
+  hits: 0,
+  misses: 0,
+  writes: 0,
+  evictions: 0,
+  dedupedRequests: 0
+};
+
 let requestQueue: Promise<void> = Promise.resolve();
 let lastRequestAt = 0;
 
+function pruneCache<T>(cache: Map<string, CacheEntry<T>>) {
+  const now = Date.now();
+
+  for (const [key, entry] of cache) {
+    if (entry.expiresAt <= now) {
+      cache.delete(key);
+      cacheCounters.evictions += 1;
+    }
+  }
+
+  while (cache.size >= MAX_CACHE_ENTRIES) {
+    const oldestKey = cache.keys().next().value as string | undefined;
+    if (!oldestKey) break;
+    cache.delete(oldestKey);
+    cacheCounters.evictions += 1;
+  }
+}
+
 function readCache<T>(cache: Map<string, CacheEntry<T>>, key: string) {
   const entry = cache.get(key);
-  if (!entry) return undefined;
 
-  if (entry.expiresAt <= Date.now()) {
-    cache.delete(key);
+  if (!entry) {
+    cacheCounters.misses += 1;
     return undefined;
   }
 
+  if (entry.expiresAt <= Date.now()) {
+    cache.delete(key);
+    cacheCounters.evictions += 1;
+    cacheCounters.misses += 1;
+    return undefined;
+  }
+
+  cacheCounters.hits += 1;
   return entry.value;
 }
 
@@ -135,10 +172,13 @@ function writeCache<T>(
   value: T,
   ttlMs: number
 ) {
+  pruneCache(cache);
+
   cache.set(key, {
     value,
     expiresAt: Date.now() + ttlMs
   });
+  cacheCounters.writes += 1;
 }
 
 async function paceMangaDexRequest<T>(task: () => Promise<T>) {
@@ -176,12 +216,48 @@ function mangaDexHeaders() {
 }
 
 async function mangaDexFetch(url: string) {
-  return paceMangaDexRequest(() =>
+  const existing = inFlightRequests.get(url);
+
+  if (existing) {
+    cacheCounters.dedupedRequests += 1;
+    return existing;
+  }
+
+  const request = paceMangaDexRequest(() =>
     fetchSource(url, {
       allowedHosts: HOSTS,
       init: { headers: mangaDexHeaders() }
     })
   );
+
+  inFlightRequests.set(url, request);
+
+  try {
+    return await request;
+  } finally {
+    inFlightRequests.delete(url);
+  }
+}
+
+export function getMangaDexCacheStats() {
+  return {
+    hits: cacheCounters.hits,
+    misses: cacheCounters.misses,
+    writes: cacheCounters.writes,
+    evictions: cacheCounters.evictions,
+    dedupedRequests: cacheCounters.dedupedRequests,
+    inFlightRequests: inFlightRequests.size,
+    entries:
+      atHomeCache.size +
+      searchCache.size +
+      detailsCache.size +
+      relatedCache.size +
+      chapterPageCache.size +
+      discoveryCache.size +
+      hotPoolCache.size +
+      (tagsCache ? 1 : 0) +
+      (healthCache ? 1 : 0)
+  };
 }
 
 function pickText(values: Record<string, string> | undefined) {
