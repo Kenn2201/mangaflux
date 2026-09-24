@@ -12,6 +12,7 @@ import AccountStatus from "./AccountStatus";
 import GenreMenu from "./GenreMenu";
 import HeaderSearch from "./HeaderSearch";
 import ToastHost from "./ToastHost";
+import SystemStatusLink from "./SystemStatusLink";
 
 function NavIcon({
   name
@@ -86,7 +87,8 @@ export default function AppChrome({
 
   const browseActive =
     pathname.startsWith("/browse") ||
-    pathname.startsWith("/search");
+    pathname.startsWith("/search") ||
+    pathname.startsWith("/genres");
   const libraryActive = pathname.startsWith("/dashboard");
   const accountActive = pathname.startsWith("/account");
 
@@ -120,10 +122,13 @@ export default function AppChrome({
           <strong>MangaFlux</strong>
           <span>Discover. Read. Continue anywhere.</span>
         </div>
-        <p>
-          Manga metadata and chapter attribution are provided by MangaDex and
-          credited throughout the reader.
-        </p>
+        <div className="footer-meta">
+          <p>
+            Manga metadata and chapter attribution are provided by MangaDex and
+            credited throughout the reader.
+          </p>
+          <SystemStatusLink />
+        </div>
       </footer>
 
       <nav className="mobile-bottom-nav" aria-label="Mobile navigation">

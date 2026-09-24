@@ -7,6 +7,7 @@ import {
   useState
 } from "react";
 import { createPortal } from "react-dom";
+import { reliableFetch } from "../lib/reliableFetch";
 
 type MangaTag = {
   id: string;
@@ -30,9 +31,10 @@ export default function GenreMenu() {
 
     async function load() {
       try {
-        const response = await fetch("/api/genres", {
-          cache: "no-store"
-        });
+        const response = await reliableFetch(
+          "/api/genres",
+          { cache: "no-store" }
+        );
 
         if (!response.ok) {
           throw new Error("Genres unavailable");

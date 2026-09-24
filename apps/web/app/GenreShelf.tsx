@@ -6,6 +6,7 @@ import {
   useMemo,
   useState
 } from "react";
+import { reliableFetch } from "../lib/reliableFetch";
 
 type MangaTag = {
   id: string;
@@ -21,9 +22,10 @@ export default function GenreShelf() {
 
     async function load() {
       try {
-        const response = await fetch("/api/genres", {
-          cache: "no-store"
-        });
+        const response = await reliableFetch(
+          "/api/genres",
+          { cache: "no-store" }
+        );
 
         if (!response.ok) return;
 

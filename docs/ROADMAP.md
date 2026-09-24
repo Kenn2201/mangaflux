@@ -2,51 +2,30 @@
 
 ## v0.7.x — Product Experience — complete
 
-### v0.7.0 — Discovery & Dashboard
-- landing page
-- signed-in dashboard
-- header autocomplete
-- genres
-- Hot / Popular / Top Rated / Latest Updates
-- paginated discovery
+- discovery and signed-in dashboard
+- chapter scale and reader controls
+- community and profiles
+- explainable recommendations
 
-### v0.7.1 — Chapter Scale & Reader Controls
-- chapter pagination beyond 100
-- sorting and chapter lookup
-- tap reader chrome
-- persistent progress/page HUD
-- reader navigation
+## v0.8.x — Reliability + Source Health — current
 
-### v0.7.2 — Community & Profiles
-- display names and avatars
-- manga/chapter comments
-- reactions
-- verified posting
-- five-minute cooldown
-- clickable genres
-- reader audit fixes
+### v0.8.0 — Reliability & Source Health
+- public system-status page
+- MangaDex source probe
+- Neon persistence probe
+- footer status indicator
+- transient GET retry/backoff
+- Retry-After handling
+- request timeouts
+- degraded-state status links
 
-### v0.7.3 — Recommendations — current
-- clickable publication status
-- clickable year
-- clickable authors/artists
-- creator and year discovery filters
-- explicit related-title rail
-- More Like This metadata recommendations
-- Because You Read dashboard recommendations
-- history/bookmark exclusion
-- final v0.7 mobile recommendation polish
-
-## v0.8.x — Reliability + Source Health — next
-
-- source health/status UI
-- downstream availability states
-- retry/backoff UX
-- operational diagnostics
-- optional Sentry monitoring
+### Remaining v0.8.x
+- richer operational diagnostics
+- optional Sentry production monitoring
 - cache/revalidation review
-- shared rate limiting if horizontally scaled
-- production performance review
+- rate-limit review
+- performance and cold-start review
+- horizontally-scaled shared rate limiting if/when multiple API instances are introduced
 
 ## v0.9.x — V1 release candidate
 
@@ -57,6 +36,7 @@
 - dependency/migration/security audit
 - production smoke tests
 - release documentation
+- branch/repository cleanup
 
 ## v1.0.0 — Stable V1
 

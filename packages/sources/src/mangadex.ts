@@ -15,13 +15,14 @@ import type {
   MangaSource,
   MangaSummary,
   MangaTag,
-  SearchOptions
+  SearchOptions,
+  SourceHealth
 } from "./types.js";
 
 const BASE = process.env.MANGADEX_BASE_URL ?? "https://api.mangadex.org";
 const HOSTS = ["api.mangadex.org"];
 const COVER_BASE = "https://uploads.mangadex.org/covers";
-const USER_AGENT = "MangaFlux/0.7.3 (+https://manga.kenncode.me)";
+const USER_AGENT = "MangaFlux/0.8.0 (+https://manga.kenncode.me)";
 const MANIFEST_TTL_MS = 60_000;
 const SEARCH_TTL_MS = 30_000;
 const DETAILS_TTL_MS = 5 * 60_000;
@@ -30,6 +31,7 @@ const CHAPTERS_TTL_MS = 60_000;
 const DISCOVERY_TTL_MS = 90_000;
 const TAGS_TTL_MS = 6 * 60 * 60_000;
 const HOT_TTL_MS = 2 * 60_000;
+const HEALTH_TTL_MS = 30_000;
 const MAX_IMAGE_BYTES = 15_000_000;
 const MANGADEX_MIN_INTERVAL_MS = 250;
 
@@ -110,6 +112,7 @@ const chapterPageCache = new Map<string, CacheEntry<ChapterListPage>>();
 const discoveryCache = new Map<string, CacheEntry<MangaListPage>>();
 const hotPoolCache = new Map<string, CacheEntry<MangaSummary[]>>();
 let tagsCache: CacheEntry<MangaTag[]> | undefined;
+let healthCache: CacheEntry<SourceHealth> | undefined;
 
 let requestQueue: Promise<void> = Promise.resolve();
 let lastRequestAt = 0;
@@ -461,6 +464,46 @@ async function listTags(): Promise<MangaTag[]> {
   return tags;
 }
 
+async function probeMangaDex(): Promise<SourceHealth> {
+  if (healthCache && healthCache.expiresAt > Date.now()) {
+    return healthCache.value;
+  }
+
+  const startedAt = Date.now();
+  let value: SourceHealth;
+
+  try {
+    const url = new URL("/manga", BASE);
+    url.searchParams.set("limit", "1");
+
+    const response = await mangaDexFetch(url.toString());
+    const latencyMs = Date.now() - startedAt;
+
+    value = {
+      id: "mangadex",
+      name: "MangaDex",
+      status: response.ok ? "operational" : "degraded",
+      latencyMs,
+      checkedAt: new Date().toISOString()
+    };
+  } catch {
+    value = {
+      id: "mangadex",
+      name: "MangaDex",
+      status: "unavailable",
+      latencyMs: Date.now() - startedAt,
+      checkedAt: new Date().toISOString()
+    };
+  }
+
+  healthCache = {
+    value,
+    expiresAt: Date.now() + HEALTH_TTL_MS
+  };
+
+  return value;
+}
+
 async function getChapter(chapterId: string) {
   const url = new URL(`/chapter/${encodeURIComponent(chapterId)}`, BASE);
   url.searchParams.append("includes[]", "scanlation_group");
@@ -725,6 +768,10 @@ export const mangaDexSource: MangaSource = {
 
     writeCache(relatedCache, id, items, RELATED_TTL_MS);
     return items;
+  },
+
+  async health(): Promise<SourceHealth> {
+    return probeMangaDex();
   },
 
   async chapterPage(

@@ -1,6 +1,9 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
-import { createDatabase } from "@mangaflux/db";
+import {
+  createDatabase,
+  probeDatabase
+} from "@mangaflux/db";
 import { registerAuthRoutes } from "./auth.js";
 import { registerCommunityRoutes } from "./community.js";
 import { isEmailConfigured } from "./email.js";
@@ -14,7 +17,7 @@ import type {
   MangaSummary
 } from "@mangaflux/sources";
 
-const APP_VERSION = "0.7.3";
+const APP_VERSION = "0.8.0";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LANGUAGE_RE = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i;
@@ -139,6 +142,7 @@ function makeRateLimit(name: string, limit: number, windowMs = 60_000) {
   };
 }
 
+const statusRateLimit = makeRateLimit("status", 30);
 const searchRateLimit = makeRateLimit("search", 30);
 const discoveryRateLimit = makeRateLimit("discovery", 60);
 const metadataRateLimit = makeRateLimit("metadata", 90);
@@ -300,6 +304,62 @@ app.get("/health", async () => ({
       : "disabled",
   email: isEmailConfigured() ? "configured" : "disabled"
 }));
+
+app.get(
+  "/api/status",
+  { preHandler: statusRateLimit },
+  async (_request, reply) => {
+    const [sourceHealth, databaseHealth] = await Promise.all([
+      mangaDexSource.health(),
+      database
+        ? probeDatabase(database)
+        : Promise.resolve({
+            status: "disabled" as const,
+            latencyMs: 0,
+            checkedAt: new Date().toISOString()
+          })
+    ]);
+
+    const persistenceStatus = databaseHealth.status;
+    const overall =
+      sourceHealth.status === "operational" &&
+      persistenceStatus === "operational"
+        ? "operational"
+        : "degraded";
+
+    reply.header(
+      "Cache-Control",
+      "public, max-age=15, stale-while-revalidate=30"
+    );
+
+    return {
+      ok: overall === "operational",
+      status: overall,
+      service: "mangaflux-api",
+      version: APP_VERSION,
+      checkedAt: new Date().toISOString(),
+      uptimeSeconds: Math.floor(process.uptime()),
+      components: {
+        api: {
+          status: "operational"
+        },
+        source: sourceHealth,
+        persistence: databaseHealth,
+        auth: {
+          status:
+            database && authProxySecret
+              ? "configured"
+              : "disabled"
+        },
+        email: {
+          status: isEmailConfigured()
+            ? "configured"
+            : "disabled"
+        }
+      }
+    };
+  }
+);
 
 registerAuthRoutes(app, database, authProxySecret, {
   signup: authSignupRateLimit,

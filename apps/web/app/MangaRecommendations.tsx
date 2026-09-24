@@ -8,6 +8,7 @@ import {
 import MangaTile, {
   type MangaTileItem
 } from "./MangaTile";
+import { reliableFetch } from "../lib/reliableFetch";
 
 type MangaTag = {
   id: string;
@@ -69,7 +70,7 @@ export default function MangaRecommendations({
     const controller = new AbortController();
 
     async function fetchPage(url: string) {
-      const response = await fetch(url, {
+      const response = await reliableFetch(url, {
         cache: "no-store",
         signal: controller.signal
       });
@@ -87,7 +88,7 @@ export default function MangaRecommendations({
       setLoading(true);
 
       try {
-        const relatedPromise = fetch(
+        const relatedPromise = reliableFetch(
           `/api/manga/${encodeURIComponent(mangaId)}/related`,
           {
             cache: "no-store",

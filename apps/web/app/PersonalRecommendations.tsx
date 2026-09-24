@@ -7,6 +7,7 @@ import {
 import MangaTile, {
   type MangaTileItem
 } from "./MangaTile";
+import { reliableFetch } from "../lib/reliableFetch";
 
 type Bookmark = {
   mangaId: string;
@@ -54,7 +55,7 @@ export default function PersonalRecommendations() {
     const controller = new AbortController();
 
     async function fetchItems(url: string) {
-      const response = await fetch(url, {
+      const response = await reliableFetch(url, {
         cache: "no-store",
         signal: controller.signal
       });
@@ -70,10 +71,16 @@ export default function PersonalRecommendations() {
 
     async function load() {
       try {
-        const summaryResponse = await fetch("/api/state/summary", {
-          cache: "no-store",
-          signal: controller.signal
-        });
+        const summaryResponse = await reliableFetch(
+          "/api/state/summary",
+          {
+            cache: "no-store",
+            signal: controller.signal
+          },
+          {
+            retries: 1
+          }
+        );
 
         if (!summaryResponse.ok) return;
 
@@ -95,7 +102,7 @@ export default function PersonalRecommendations() {
 
         setSeedTitle(title);
 
-        const detailsResponse = await fetch(
+        const detailsResponse = await reliableFetch(
           `/api/manga/${encodeURIComponent(seedId)}`,
           {
             cache: "no-store",

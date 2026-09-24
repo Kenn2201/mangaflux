@@ -8,6 +8,8 @@ import MangaTile, {
   type MangaTileItem
 } from "./MangaTile";
 import { SearchSkeleton } from "./Skeletons";
+import Link from "next/link";
+import { reliableFetch } from "../lib/reliableFetch";
 
 export default function SearchResultsClient({
   query
@@ -33,7 +35,7 @@ export default function SearchResultsClient({
       setMessage("");
 
       try {
-        const response = await fetch(
+        const response = await reliableFetch(
           `/api/search?q=${encodeURIComponent(query.trim())}&limit=24`,
           {
             cache: "no-store",
@@ -87,7 +89,12 @@ export default function SearchResultsClient({
 
   return (
     <>
-      {message ? <p className="message">{message}</p> : null}
+      {message ? (
+        <div className="reliability-error">
+          <p className="message">{message}</p>
+          <Link href="/status">Check system status →</Link>
+        </div>
+      ) : null}
 
       {items.length ? (
         <div className="browse-grid">

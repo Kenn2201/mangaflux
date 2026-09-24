@@ -10,6 +10,7 @@ import {
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import type { MangaTileItem } from "./MangaTile";
+import { reliableFetch } from "../lib/reliableFetch";
 
 type SearchPayload = {
   items: MangaTileItem[];
@@ -52,11 +53,15 @@ export default function HeaderSearch() {
       setLoading(true);
 
       try {
-        const response = await fetch(
+        const response = await reliableFetch(
           `/api/search?q=${encodeURIComponent(value)}&limit=6`,
           {
             cache: "no-store",
             signal: controller.signal
+          },
+          {
+            retries: 1,
+            timeoutMs: 9_000
           }
         );
 
