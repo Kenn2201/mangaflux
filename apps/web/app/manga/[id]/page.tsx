@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
   FormEvent,
   useEffect,
@@ -65,6 +65,7 @@ const CHAPTER_LIMIT = 50;
 
 export default function MangaPage() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const id = params.id;
 
   const [manga, setManga] = useState<MangaDetails | null>(null);
@@ -82,6 +83,7 @@ export default function MangaPage() {
   const [bookmarked, setBookmarked] = useState<boolean | null>(null);
   const [bookmarkBusy, setBookmarkBusy] = useState(false);
   const [readerSettingsOpen, setReaderSettingsOpen] = useState(false);
+  const [surpriseBusy, setSurpriseBusy] = useState(false);
   const [readerPreferences, setReaderPreferences] =
     useState<ReaderPreferences>({
       language: "en",
@@ -392,6 +394,88 @@ export default function MangaPage() {
     ? `/search?q=${encodeURIComponent(searchQuery)}`
     : "/";
 
+  async function surpriseMe() {
+    if (!manga || surpriseBusy) return;
+
+    setSurpriseBusy(true);
+
+    try {
+      const usefulTags =
+        manga.tagDetails
+          ?.filter(
+            (tag) =>
+              tag.group === "genre" ||
+              tag.group === "theme"
+          )
+          .slice(0, 2) ?? [];
+      const creator =
+        manga.creators?.find(
+          (item) => item.role === "author"
+        ) ?? manga.creators?.[0];
+
+      const requests: string[] = usefulTags.map(
+        (tag, index) =>
+          `/api/discovery?kind=${
+            index === 0 ? "popular" : "top"
+          }&limit=18&tag=${encodeURIComponent(tag.id)}`
+      );
+
+      if (creator) {
+        requests.push(
+          `/api/discovery?kind=popular&limit=18&creator=${encodeURIComponent(
+            creator.id
+          )}`
+        );
+      }
+
+      if (!requests.length) {
+        requests.push("/api/discovery?kind=popular&limit=24");
+      }
+
+      const groups = await Promise.all(
+        requests.map(async (url) => {
+          const response = await fetch(url, {
+            cache: "no-store"
+          });
+
+          if (!response.ok) return [];
+
+          const payload = (await response.json()) as {
+            items?: Array<{ id: string }>;
+          };
+
+          return payload.items ?? [];
+        })
+      );
+
+      const candidates = new Map<string, { id: string }>();
+
+      for (const group of groups) {
+        for (const item of group) {
+          if (item.id !== id) {
+            candidates.set(item.id, item);
+          }
+        }
+      }
+
+      const pool = [...candidates.values()];
+
+      if (!pool.length) {
+        throw new Error("No similar manga available.");
+      }
+
+      const random = new Uint32Array(1);
+      window.crypto.getRandomValues(random);
+      const pick = pool[random[0] % pool.length];
+
+      router.push(`/manga/${pick.id}`);
+    } catch {
+      router.push("/browse?kind=popular");
+    } finally {
+      setSurpriseBusy(false);
+    }
+  }
+
   if (loading) {
     return <MangaDetailsSkeleton backHref={searchHref} />;
   }
@@ -413,9 +497,21 @@ export default function MangaPage() {
 
   return (
     <main>
-      <Link className="back-link" href={searchHref}>
-        ← {searchQuery ? `Back to “${searchQuery}”` : "Discover"}
-      </Link>
+      <div className="manga-context-nav" aria-label="Manga navigation">
+        <Link href="/dashboard#library">
+          ← Library
+        </Link>
+        <Link href="/browse?kind=popular">
+          Discover more
+        </Link>
+        <button
+          type="button"
+          disabled={surpriseBusy}
+          onClick={() => void surpriseMe()}
+        >
+          {surpriseBusy ? "Rolling…" : "Surprise me"}
+        </button>
+      </div>
 
       <section className="details">
         <div className="details-cover">

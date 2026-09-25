@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import {
   MouseEvent,
   useEffect,
@@ -180,13 +180,11 @@ function findDistinctNeighbor(
 
 export default function ReaderPage() {
   const params = useParams<{ chapterId: string }>();
-  const router = useRouter();
   const chapterId = params.chapterId;
   const pagesRef = useRef<HTMLDivElement | null>(null);
   const resumeTargetRef = useRef<number | null>(null);
   const settledPagesRef = useRef<Set<number>>(new Set());
   const resumeReleaseTimerRef = useRef<number | null>(null);
-  const exitMenuRef = useRef<HTMLDivElement | null>(null);
   const lastSavedRef = useRef("");
 
   const [data, setData] = useState<ReaderResponse | null>(null);
@@ -212,8 +210,6 @@ export default function ReaderPage() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [resumeTarget, setResumeTarget] = useState<number | null>(null);
   const [resumePending, setResumePending] = useState(false);
-  const [exitMenuOpen, setExitMenuOpen] = useState(false);
-  const [surpriseBusy, setSurpriseBusy] = useState(false);
   const [saveState, setSaveState] = useState<
     "idle" | "saving" | "saved" | "error"
   >("idle");
@@ -586,7 +582,6 @@ export default function ReaderPage() {
     if (
       !controlsVisible ||
       loading ||
-      exitMenuOpen ||
       readerSettingsOpen
     ) {
       return;
@@ -601,7 +596,6 @@ export default function ReaderPage() {
     controlsVisible,
     loading,
     chapterId,
-    exitMenuOpen,
     readerSettingsOpen
   ]);
 
@@ -715,118 +709,6 @@ export default function ReaderPage() {
     setControlsVisible((visible) => !visible);
   }
 
-  useEffect(() => {
-    if (!exitMenuOpen) return;
-
-    function onPointerDown(event: PointerEvent) {
-      const target = event.target as Node;
-
-      if (!exitMenuRef.current?.contains(target)) {
-        setExitMenuOpen(false);
-      }
-    }
-
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        setExitMenuOpen(false);
-      }
-    }
-
-    document.addEventListener("pointerdown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      document.removeEventListener("pointerdown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [exitMenuOpen]);
-
-  async function surpriseMe() {
-    if (surpriseBusy || !data?.chapter.mangaId) return;
-
-    setSurpriseBusy(true);
-
-    try {
-      const usefulTags =
-        mangaMeta?.tagDetails
-          ?.filter(
-            (tag) =>
-              tag.group === "genre" ||
-              tag.group === "theme"
-          )
-          .slice(0, 2) ?? [];
-      const creator =
-        mangaMeta?.creators?.find(
-          (item) => item.role === "author"
-        ) ?? mangaMeta?.creators?.[0];
-
-      const requests: string[] = usefulTags.map(
-        (tag, index) =>
-          `/api/discovery?kind=${
-            index === 0 ? "popular" : "top"
-          }&limit=18&tag=${encodeURIComponent(tag.id)}`
-      );
-
-      if (creator) {
-        requests.push(
-          `/api/discovery?kind=popular&limit=18&creator=${encodeURIComponent(
-            creator.id
-          )}`
-        );
-      }
-
-      if (!requests.length) {
-        requests.push("/api/discovery?kind=popular&limit=24");
-      }
-
-      const groups = await Promise.all(
-        requests.map(async (url) => {
-          const response = await fetch(url, {
-            cache: "no-store"
-          });
-
-          if (!response.ok) return [];
-
-          const payload = (await response.json()) as {
-            items?: Array<{ id: string }>;
-          };
-
-          return payload.items ?? [];
-        })
-      );
-
-      const candidates = new Map<string, { id: string }>();
-
-      for (const group of groups) {
-        for (const item of group) {
-          if (item.id !== data.chapter.mangaId) {
-            candidates.set(item.id, item);
-          }
-        }
-      }
-
-      const pool = [...candidates.values()];
-
-      if (!pool.length) {
-        throw new Error("No similar manga available.");
-      }
-
-      const random = new Uint32Array(1);
-      window.crypto.getRandomValues(random);
-      const index = random[0] % pool.length;
-      const pick = pool[index];
-
-      setExitMenuOpen(false);
-      router.push(`/manga/${pick.id}`);
-    } catch {
-      setExitMenuOpen(false);
-      router.push("/browse?kind=popular");
-    } finally {
-      setSurpriseBusy(false);
-    }
-  }
-
   if (loading) {
     return <ReaderSkeleton backHref={chaptersHref} />;
   }
@@ -881,61 +763,9 @@ export default function ReaderPage() {
         inert={!controlsVisible ? true : undefined}
       >
         <div className="reader-chrome-main">
-          <div className="reader-exit-wrap" ref={exitMenuRef}>
-            <button
-              className="reader-chrome-back"
-              type="button"
-              aria-haspopup="menu"
-              aria-expanded={exitMenuOpen}
-              onClick={() =>
-                setExitMenuOpen((open) => !open)
-              }
-            >
-              ← Back
-            </button>
-
-            {exitMenuOpen ? (
-              <div
-                className="reader-exit-menu"
-                role="menu"
-                aria-label="Leave reader"
-              >
-                <Link
-                  href="/dashboard#library"
-                  role="menuitem"
-                  onClick={() => setExitMenuOpen(false)}
-                >
-                  <strong>Library</strong>
-                  <span>Return to your saved reading.</span>
-                </Link>
-
-                <Link
-                  href="/browse?kind=popular"
-                  role="menuitem"
-                  onClick={() => setExitMenuOpen(false)}
-                >
-                  <strong>Discover more</strong>
-                  <span>Browse more manga.</span>
-                </Link>
-
-                <button
-                  type="button"
-                  role="menuitem"
-                  disabled={surpriseBusy}
-                  onClick={() => void surpriseMe()}
-                >
-                  <strong>
-                    {surpriseBusy
-                      ? "Rolling…"
-                      : "Surprise me"}
-                  </strong>
-                  <span>
-                    Pick a random manga with similar signals.
-                  </span>
-                </button>
-              </div>
-            ) : null}
-          </div>
+          <Link className="reader-chrome-back" href={chaptersHref}>
+            ← Manga
+          </Link>
 
           {mangaMeta?.coverUrl ? (
             <div className="reader-chrome-cover" aria-hidden="true">

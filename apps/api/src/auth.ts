@@ -66,6 +66,8 @@ type AuthBody = {
 type ProfileBody = {
   displayName?: string | null;
   avatarDataUrl?: string | null;
+  bio?: string | null;
+  showPublicActivity?: boolean;
 };
 
 function normalizeEmail(value: unknown) {
@@ -106,6 +108,23 @@ function normalizeDisplayName(value: unknown) {
   }
 
   return name;
+}
+
+function normalizeBio(value: unknown) {
+  if (value === null || value === undefined) return null;
+  if (typeof value !== "string") return undefined;
+
+  const bio = value.trim();
+  if (!bio) return null;
+
+  if (
+    bio.length > 280 ||
+    /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(bio)
+  ) {
+    return undefined;
+  }
+
+  return bio;
 }
 
 function normalizeAvatarDataUrl(value: unknown) {
@@ -589,6 +608,8 @@ export function registerAuthRoutes(
           email: session.email,
           displayName: session.displayName,
           avatarDataUrl: session.avatarDataUrl,
+          bio: session.bio,
+          showPublicActivity: session.showPublicActivity,
           emailVerifiedAt: session.emailVerifiedAt,
           createdAt: session.createdAt,
           role: roleForEmail(session.email)
@@ -618,12 +639,27 @@ export function registerAuthRoutes(
       const avatarDataUrl = normalizeAvatarDataUrl(
         request.body?.avatarDataUrl
       );
+      const bio =
+        request.body?.bio === undefined
+          ? session.bio ?? null
+          : normalizeBio(request.body.bio);
+      const showPublicActivity =
+        request.body?.showPublicActivity === undefined
+          ? session.showPublicActivity ?? true
+          : typeof request.body.showPublicActivity === "boolean"
+            ? request.body.showPublicActivity
+            : undefined;
 
-      if (displayName === undefined || avatarDataUrl === undefined) {
+      if (
+        displayName === undefined ||
+        avatarDataUrl === undefined ||
+        bio === undefined ||
+        showPublicActivity === undefined
+      ) {
         return reply.code(400).send({
           error: "INVALID_REQUEST",
           message:
-            "Display name must be 2-32 characters and avatar must be a small WebP image."
+            "Use a 2-32 character display name, a bio up to 280 characters, a valid activity visibility setting, and a small WebP avatar."
         });
       }
 
@@ -632,7 +668,9 @@ export function registerAuthRoutes(
         session.userId,
         {
           displayName,
-          avatarDataUrl
+          avatarDataUrl,
+          bio,
+          showPublicActivity
         }
       );
 

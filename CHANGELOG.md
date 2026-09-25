@@ -7,8 +7,26 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- v1.1.6+ final sign-off fixes only if physical-device QA finds regressions
-- move to v1.2.x once Library & Reading Quality is signed off
+- v1.2.1+ richer profile/activity browsing and community UX
+- keep v1.3.x reserved for Following & Notifications
+
+## 1.2.0 - 2026-09-25 — Profile Bio & Privacy Foundation
+
+### Profiles
+- Added optional public profile bios up to 280 characters.
+- Added account editing and public-profile rendering for bios.
+- Kept email and private account credentials out of public profile responses.
+
+### Privacy
+- Added a per-account Show public activity setting.
+- When disabled, public profile activity totals and recent-comment history are withheld.
+- Existing accounts safely default to public activity enabled.
+
+### Reader navigation correction
+- Moved Library, Discover more, and Surprise me from the immersive reader to the manga details page.
+- Reader Back now returns directly to the current manga page.
+- Reader Home continues to return directly to the current manga page.
+- Surprise me continues to use similarity signals rather than unrestricted randomness.
 
 ## 1.1.5 - 2026-09-25 — Reader Navigation & Resume Fixes
 

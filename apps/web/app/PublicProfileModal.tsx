@@ -13,8 +13,10 @@ type PublicProfile = {
     id: string;
     displayName?: string | null;
     avatarDataUrl?: string | null;
+    bio?: string | null;
     createdAt: string;
   };
+  activityVisible: boolean;
   stats: {
     comments: number;
     reactions: number;
@@ -190,6 +192,12 @@ export default function PublicProfileModal({
               </div>
             </div>
 
+            {data.user.bio ? (
+              <p className="public-profile-bio">{data.user.bio}</p>
+            ) : null}
+
+            {data.activityVisible ? (
+              <>
             <div className="public-profile-stats">
               <div>
                 <strong>{data.stats.comments}</strong>
@@ -240,6 +248,13 @@ export default function PublicProfileModal({
                 </div>
               )}
             </div>
+              </>
+            ) : (
+              <div className="community-empty public-profile-private">
+                <strong>Activity is private.</strong>
+                <span>This reader chose not to show public activity totals or recent comments.</span>
+              </div>
+            )}
           </>
         ) : null}
       </section>

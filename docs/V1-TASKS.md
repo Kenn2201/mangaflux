@@ -80,15 +80,35 @@
 - [x] reader Home explicitly opens the current manga page
 - [x] visual press feedback with reduced-motion handling
 
-## Remaining v1.1.x
+## v1.1.x sign-off
 
-- [ ] final physical-device regression sign-off
-- [ ] fix only regressions discovered during final sign-off
-- [ ] move to v1.2 after Library & Reading Quality is signed off
+- [x] physical-device regression sign-off accepted
+- [x] Library & Reading Quality phase closed
+- [x] move active development to v1.2 Profiles & Community Depth
+
+## v1.2.0 — Profile Bio & Privacy Foundation
+
+- [x] optional profile bio up to 280 characters
+- [x] persist bio for signed-in accounts
+- [x] show bio in public community profiles
+- [x] per-account public-activity visibility control
+- [x] hide public activity totals when activity privacy is disabled
+- [x] hide recent public comments when activity privacy is disabled
+- [x] keep email/private account data out of public profiles
+- [x] move Library / Discover more / Surprise me to manga details
+- [x] reader Back and Home both return to current manga
+
+## Remaining v1.2.x
+
+- [ ] richer activity browsing and presentation
+- [ ] better comment UX
+- [ ] better reaction UX
+- [ ] broader user/privacy preferences
+- [ ] notification/privacy preference groundwork
+- [ ] stronger community moderation/admin tools
 
 ## Future V1.x
 
-- [ ] v1.2 Profiles & Community Depth
 - [ ] v1.3 Following & Notifications
 - [ ] v1.4 Discovery & Personalization
 - [ ] v1.5+ Product polish/PWA/performance

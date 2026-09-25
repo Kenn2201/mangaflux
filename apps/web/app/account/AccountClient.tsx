@@ -19,6 +19,8 @@ type Session = {
     email: string;
     displayName?: string | null;
     avatarDataUrl?: string | null;
+    bio?: string | null;
+    showPublicActivity?: boolean;
     emailVerifiedAt?: string | null;
     createdAt: string;
     role?: "user" | "admin";
@@ -144,6 +146,8 @@ export default function AccountClient() {
   const [busy, setBusy] = useState(false);
   const [profileBusy, setProfileBusy] = useState(false);
   const [profileName, setProfileName] = useState("");
+  const [profileBio, setProfileBio] = useState("");
+  const [showPublicActivity, setShowPublicActivity] = useState(true);
   const [avatarDraft, setAvatarDraft] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [needsVerification, setNeedsVerification] = useState(false);
@@ -182,11 +186,15 @@ export default function AccountClient() {
 
     if (!user) {
       setProfileName("");
+      setProfileBio("");
+      setShowPublicActivity(true);
       setAvatarDraft(null);
       return;
     }
 
     setProfileName(user.displayName ?? "");
+    setProfileBio(user.bio ?? "");
+    setShowPublicActivity(user.showPublicActivity ?? true);
     setAvatarDraft(user.avatarDataUrl ?? null);
   }, [session]);
 
@@ -402,7 +410,9 @@ export default function AccountClient() {
         },
         body: JSON.stringify({
           displayName: profileName.trim() || null,
-          avatarDataUrl: avatarDraft
+          avatarDataUrl: avatarDraft,
+          bio: profileBio.trim() || null,
+          showPublicActivity
         })
       });
 
@@ -423,7 +433,7 @@ export default function AccountClient() {
       notify({
         tone: "success",
         title: "Profile updated",
-        message: "Your name and avatar now appear in MangaFlux community."
+        message: "Your community identity and privacy settings are updated."
       });
     } catch (error) {
       notify({
@@ -565,7 +575,7 @@ export default function AccountClient() {
             <div className="section-heading">
               <div>
                 <p className="eyebrow">Community profile</p>
-                <h2>Name & avatar</h2>
+                <h2>Identity & privacy</h2>
               </div>
 
               <button
@@ -622,10 +632,36 @@ export default function AccountClient() {
                 />
               </label>
 
+              <label className="profile-bio-field">
+                <span>Bio</span>
+                <textarea
+                  value={profileBio}
+                  maxLength={280}
+                  placeholder="A short intro for your MangaFlux community profile"
+                  onChange={(event) => setProfileBio(event.target.value)}
+                />
+                <small>{profileBio.length} / 280</small>
+              </label>
+
+              <label className="profile-privacy-toggle">
+                <span>
+                  <strong>Show public activity</strong>
+                  <small>
+                    Let readers see your comment/reaction totals and recent public comments.
+                  </small>
+                </span>
+                <input
+                  type="checkbox"
+                  checked={showPublicActivity}
+                  onChange={(event) =>
+                    setShowPublicActivity(event.target.checked)
+                  }
+                />
+              </label>
+
               <p className="device-note">
                 Images are cropped and progressively compressed into a small
-                WebP for mobile upload. Your email is never shown in public
-                comments.
+                WebP for mobile upload. Your email is never shown publicly.
               </p>
 
               <button

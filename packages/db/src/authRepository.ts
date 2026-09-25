@@ -45,6 +45,8 @@ export async function createUser(
       email: users.email,
       displayName: users.displayName,
       avatarDataUrl: users.avatarDataUrl,
+      bio: users.bio,
+      showPublicActivity: users.showPublicActivity,
       emailVerifiedAt: users.emailVerifiedAt,
       createdAt: users.createdAt
     });
@@ -122,6 +124,8 @@ export async function getSessionUser(
       email: users.email,
       displayName: users.displayName,
       avatarDataUrl: users.avatarDataUrl,
+      bio: users.bio,
+      showPublicActivity: users.showPublicActivity,
       emailVerifiedAt: users.emailVerifiedAt,
       createdAt: users.createdAt
     })

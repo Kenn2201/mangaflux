@@ -8,6 +8,8 @@ export async function updateUserProfile(
   input: {
     displayName: string | null;
     avatarDataUrl: string | null;
+    bio: string | null;
+    showPublicActivity: boolean;
   }
 ) {
   const [user] = await db
@@ -15,6 +17,8 @@ export async function updateUserProfile(
     .set({
       displayName: input.displayName,
       avatarDataUrl: input.avatarDataUrl,
+      bio: input.bio,
+      showPublicActivity: input.showPublicActivity,
       updatedAt: new Date()
     })
     .where(eq(users.id, userId))
@@ -23,6 +27,8 @@ export async function updateUserProfile(
       email: users.email,
       displayName: users.displayName,
       avatarDataUrl: users.avatarDataUrl,
+      bio: users.bio,
+      showPublicActivity: users.showPublicActivity,
       emailVerifiedAt: users.emailVerifiedAt,
       createdAt: users.createdAt
     });
