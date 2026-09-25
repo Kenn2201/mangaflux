@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v1.1.1--Reading_Quality_Refinements-indigo.svg)
+![Version](https://img.shields.io/badge/version-v1.1.2--Reader_Layout_Controls-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v1.1.1 — Reading Quality Refinements**
+**v1.1.2 — Reader Layout Controls**
 
-MangaFlux V1 remains a stable single-source MangaDex product. v1.1.1 deepens reading quality without changing the source architecture.
+MangaFlux V1 remains a stable single-source MangaDex product. v1.1.2 adds focused reader-layout controls while preserving the account-synced preference foundation from v1.1.1.
 
 ### Library improvements
 
@@ -26,11 +26,14 @@ MangaFlux V1 remains a stable single-source MangaDex product. v1.1.1 deepens rea
 
 ### Reader settings
 
-Each manga can now keep browser-local per-series reader preferences:
+Each manga can keep per-series reader preferences with signed-in account synchronization and browser-local fallback:
 
 - preferred chapter language
 - Data Saver
+- preferred scanlation group
 - whether alternate scanlation releases are shown
+- image fit: Fit width or Fit screen
+- page spacing: Seamless, Small gap, or Large gap
 
 The settings sheet is available from manga chapter lists and inside the immersive reader.
 
@@ -40,18 +43,18 @@ The settings sheet is available from manga chapter lists and inside the immersiv
 - direct chapter jump respects the selected language
 - previous/next reader navigation respects the selected language
 - duplicate chapter-number releases are collapsed by default
+- collapsed duplicates prefer the selected scanlation group when available
 - scanlation group attribution remains visible
 - an alternate-release count is shown when duplicates are collapsed
 - readers can opt back into all alternate releases
 
-### v1.1.1 refinements
+### v1.1.2 refinements
 
-- signed-in per-series reader preferences synchronize through the MangaFlux account
-- browser-local preferences remain the signed-out/offline fallback
-- timestamp conflict resolution prevents an older device choice from overwriting a newer preference
-- optional preferred scanlation group per manga
-- collapsed duplicate releases prefer the selected group when available
-- landscape Reader Settings layout is hardened for short viewports
+- Fit screen keeps each manga page inside the current viewport height while preserving vertical reading
+- page-spacing controls let readers keep pages seamless or add small/large visual gaps
+- the new layout preferences use the same timestamp-safe account synchronization as the existing per-series preferences
+- existing accounts receive safe migration defaults: Fit width + Seamless
+- the immersive reader's quick Data Saver control now uses the same persisted/synchronized preference path as Reader Settings
 
 ### Architecture boundary
 
@@ -59,13 +62,24 @@ V1 remains MangaDex-only. MangaFlux does not bypass anti-bot protections, CAPTCH
 
 ## Branch workflow
 
-Development now uses one persistent working branch:
+Incremental work should not be pushed repeatedly to the deployment-watched development branch.
 
 ~~~text
 main
-└── kenn/develop
+  ↓
+temporary kenn/work-* branch
+  ↓
+complete implementation + fixes + docs
+  ↓
+one final PR to main
+  ↓
+CI gate
+  ↓
+main
+  ↓
+sync kenn/develop to the merged main head
 ~~~
 
-New MangaFlux work should use `kenn/develop`, pass CI in a PR, merge to `main`, then reset `kenn/develop` to the new `main` head for the next task. Do not create a new `kenn/*` branch for every version.
+Use temporary work branches for in-progress commits. Keep `kenn/develop` clean during implementation and avoid incremental pushes that cause unnecessary deployment churn.
 
 See `docs/ROADMAP.md` for the canonical 1.x / 2.x / 3.x roadmap.
