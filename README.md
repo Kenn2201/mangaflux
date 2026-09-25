@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v1.2.0--Profile_Bio_Privacy_Foundation-indigo.svg)
+![Version](https://img.shields.io/badge/version-v1.2.1--Profile_Editing_Mobile_Modal_Polish-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v1.2.0 — Profile Bio & Privacy Foundation**
+**v1.2.1 — Profile Editing & Mobile Modal Polish**
 
-MangaFlux V1 remains a stable single-source MangaDex product. v1.2.0 begins Profiles & Community Depth with richer public identity and privacy controls while keeping the existing reader/source architecture.
+MangaFlux V1 remains a stable single-source MangaDex product. v1.2.1 polishes the first Profiles & Community Depth release with an explicit edit workflow and reliable mobile profile-modal return behavior.
 
 ### Library improvements
 
@@ -49,15 +49,15 @@ The settings sheet is available from manga chapter lists and inside the immersiv
 - an alternate-release count is shown when duplicates are collapsed
 - readers can opt back into all alternate releases
 
-### v1.2.0 refinements
+### v1.2.1 refinements
 
-- community profiles support an optional bio up to 280 characters
-- readers can hide profile activity totals and recent-comment history while keeping their public identity available
-- profile privacy is enforced server-side when public profile data is assembled
-- existing accounts default to showing public activity so the migration is backward-compatible
-- Library, Discover more, and similarity-based Surprise me controls now live on the manga details page
-- inside the immersive reader, both Back and Home return to the current manga page
-- existing v1.1.5 resume stability, chapter-list jump, and press feedback remain unchanged
+- community profile settings are read-only by default
+- Edit profile explicitly enters the editable state
+- Save profile returns the card to read-only mode
+- Cancel discards draft edits and restores the saved profile state
+- mobile public-profile modals preserve the exact underlying scroll position when opened and closed
+- closing a public profile restores focus without scrolling the manga/comment page
+- v1.2.0 bio, privacy, manga navigation, and v1.1.x reader behavior remain unchanged
 
 ### Architecture boundary
 

@@ -13,7 +13,8 @@ v1.1.3  ████████████████████  ✅
 v1.1.4  ████████████████████  ✅
 v1.1.5  ████████████████████  ✅
 v1.2.0  ████████████████████  ✅
-v1.2.1+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
+v1.2.1  ████████████████████  ✅
+v1.2.2+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
 v1.3.x  Following & Notifications
 v1.4.x  Discovery & Personalization
 v1.5+   Product Polish
@@ -23,7 +24,7 @@ v2.x    Multi-Source + Platform Expansion
 v3.x    Advanced MangaFlux
 ~~~
 
-**v1.1.x — Library & Reading Quality is now signed off.** MangaFlux has moved into **v1.2.x — Profiles & Community Depth**, beginning with **v1.2.0 — Profile Bio & Privacy Foundation**.
+**v1.1.x — Library & Reading Quality is signed off.** MangaFlux is now in **v1.2.x — Profiles & Community Depth**. **v1.2.1 — Profile Editing & Mobile Modal Polish** is complete, and v1.2.2+ continues community-depth work.
 
 ---
 
@@ -214,7 +215,22 @@ The v1.1.x reading-quality phase is complete. Regression-only fixes can still be
 - Reader Back returns to the current manga page
 - Reader Home returns to the current manga page
 
-### ➡️ v1.2.1+ — Community Depth — NEXT
+### ✅ v1.2.1 — Profile Editing & Mobile Modal Polish
+
+#### Profile editing
+- Community profile is read-only by default
+- Explicit Edit profile action enters editing mode
+- Save exits editing mode and returns to saved profile summary
+- Cancel discards drafts and restores saved values
+
+#### Mobile profile modal
+- Preserve exact page scroll while the public-profile modal is open
+- Restore scroll position when closing
+- Restore originating control focus without causing a scroll jump
+
+---
+
+### ➡️ v1.2.2+ — Community Depth — NEXT
 
 Continue the v1.2.x phase with focused slices such as:
 

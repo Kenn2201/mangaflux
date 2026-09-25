@@ -1,0 +1,138 @@
+/* MangaFlux v1.2.1 — Profile Editing & Mobile Modal Polish */
+
+.profile-section-heading {
+  align-items: start;
+}
+
+.profile-heading-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.profile-edit-button {
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid #ededed;
+  border-radius: 12px;
+  background: #ededed;
+  color: #080808;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.profile-readonly {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.profile-readonly-identity,
+.profile-readonly-privacy {
+  display: grid;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid #2d2d2d;
+  border-radius: 15px;
+  background: #0f0f0f;
+}
+
+.profile-readonly-identity {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.profile-readonly-identity > div:last-child {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.profile-readonly-identity strong {
+  overflow: hidden;
+  color: #ddd;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-readonly-identity span {
+  color: #828282;
+  font-size: 11px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.profile-readonly-privacy {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.profile-readonly-privacy > span {
+  display: grid;
+  gap: 4px;
+}
+
+.profile-readonly-privacy > span > strong {
+  font-size: 12px;
+}
+
+.profile-readonly-privacy small {
+  color: #747474;
+  font-size: 10px;
+}
+
+.profile-readonly-privacy > strong {
+  padding: 6px 9px;
+  border: 1px solid #333;
+  border-radius: 999px;
+  background: #151515;
+  color: #bbb;
+  font-size: 9px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.profile-editor-actions {
+  display: grid;
+  grid-template-columns: minmax(0, .7fr) minmax(0, 1.3fr);
+  gap: 8px;
+}
+
+.profile-editor-actions > button {
+  min-height: 46px;
+}
+
+.profile-editor-actions .secondary-button {
+  border: 1px solid #343434;
+  border-radius: 13px;
+  background: #141414;
+  color: #a8a8a8;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.profile-editor-actions .account-submit {
+  margin: 0;
+}
+
+@media (max-width: 700px) {
+  .profile-heading-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .profile-heading-actions > button {
+    width: 100%;
+  }
+
+  .profile-editor-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-editor-actions .account-submit {
+    order: -1;
+  }
+}
