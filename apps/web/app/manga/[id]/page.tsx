@@ -86,7 +86,9 @@ export default function MangaPage() {
     useState<ReaderPreferences>({
       language: "en",
       dataSaver: false,
-      showAlternateReleases: false
+      showAlternateReleases: false,
+      imageFit: "width",
+      pageGap: "none"
     });
 
   useEffect(() => {
