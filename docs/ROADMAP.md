@@ -26,8 +26,9 @@ v1.3.4  ████████████████████  ✅
 v1.3.5  ████████████████████  ✅
 v1.3.6  ████████████████████  ✅
 v1.3.7  ████████████████████  ✅
-v1.3.8+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
-v1.3.x  Following & Notifications
+v1.3.x  ████████████████████  ✅ COMPLETE
+v1.4.0  ████████████████████  ✅
+v1.4.1+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
 v1.4.x  Discovery & Personalization
 v1.5+   Product Polish
          ↓
@@ -36,7 +37,7 @@ v2.x    Multi-Source + Platform Expansion
 v3.x    Advanced MangaFlux
 ~~~
 
-**v1.1.x — Library & Reading Quality** and **v1.2.x — Profiles & Community Depth** are signed off after physical QA. MangaFlux is now in **v1.3.x — Following & Notifications**. **v1.3.7 — Notification Quiet Hours** is complete, and v1.3.8+ remains available for notification delivery maturity before the project advances to v1.4.x Discovery & Personalization.
+**v1.1.x — Library & Reading Quality**, **v1.2.x — Profiles & Community Depth**, and **v1.3.x — Following & Notifications** are signed off after physical QA. Optional Discord/webhook delivery is deferred. MangaFlux is now in **v1.4.x — Discovery & Personalization** with **v1.4.0 — Recommendation Explanations** as the first focused release.
 
 ---
 
@@ -414,21 +415,29 @@ Introduce a proper following system separate from bookmarks.
 - emailQuietHours checker counter
 - Migration 0013 with quiet hours disabled by default for existing accounts
 
-### ➡️ v1.3.8+ — Notification Delivery Maturity — NEXT
+### ✅ v1.3.x — Following & Notifications — COMPLETE
 
-Keep this slot focused and optional:
+Physical QA is signed off through v1.3.7. Core following, per-manga alerts, durable notification events, inbox/history, email delivery, delivery safety, and quiet hours are complete.
 
-- observe the core notification pipeline after quiet-hours QA
-- add external Discord/webhook delivery only if still justified
-- otherwise close v1.3.x and advance to v1.4.x Discovery & Personalization
+Discord/webhook delivery is intentionally deferred and is not required to close this phase.
 
 ---
 
-## v1.4.x — Discovery & Personalization
+## ➡️ v1.4.x — Discovery & Personalization — CURRENT
 
 Make discovery increasingly personalized.
 
-- Better recommendation explanations
+### ✅ v1.4.0 — Recommendation Explanations
+
+- Preserve the actual creator, genre/theme, and year signals used by dashboard recommendation ranking
+- Show concise per-title explanations for why each recommendation appeared
+- Keep explanations grounded in real discovery signals rather than generated guesses
+- Preserve existing ranking and already-read/library exclusion behavior
+- No new database migration
+
+### ➡️ v1.4.1+ — Personalization Depth — NEXT
+
+- Activity-based recommendations
 - Activity-based recommendations
 - Saved discovery filters
 - Recently viewed controls

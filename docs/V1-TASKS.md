@@ -237,13 +237,33 @@
 - [x] expose emailQuietHours checker counter
 - [x] add migration 0013 with safe disabled defaults
 
-## Remaining v1.3.x
+## v1.3.x — Following & Notifications — COMPLETE
 
-- [ ] observe delivery stability after quiet-hours QA
-- [ ] optional Discord/webhook delivery only if still justified
-- [ ] otherwise close v1.3.x and advance to v1.4.x
+- [x] physical QA signed off through v1.3.7
+- [x] core following and notification delivery stable
+- [x] Discord/webhook delivery deferred by product decision
+- [x] close v1.3.x and advance to v1.4.x
+
+## v1.4.0 — Recommendation Explanations
+
+- [x] preserve recommendation ranking signals
+- [x] explain matching creator signals
+- [x] explain matching genre/theme signals
+- [x] explain release-year signals
+- [x] keep explanations grounded in actual discovery requests
+- [x] preserve existing ranking/exclusion behavior
+- [x] no new database migration
+
+## Remaining v1.4.x
+
+- [ ] activity-based recommendations
+- [ ] saved discovery filters
+- [ ] recently viewed controls
+- [ ] search-history controls
+- [ ] stronger language/genre/status preferences
+- [ ] improve Hot / Popular / Trending
 
 ## Future V1.x
 
-- [ ] v1.4 Discovery & Personalization
+- [ ] v1.5+ Product polish/PWA/performance
 - [ ] v1.5+ Product polish/PWA/performance

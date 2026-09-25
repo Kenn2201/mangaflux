@@ -1,0 +1,22 @@
+/* MangaFlux v1.4.0 — Recommendation Explanations */
+
+.recommendation-explained {
+  min-width: 0;
+}
+
+.recommendation-explained .recommendation-card {
+  height: auto;
+}
+
+.recommendation-reason {
+  margin: 8px 2px 0;
+  font-size: 12px;
+  line-height: 1.45;
+  opacity: 0.72;
+}
+
+@media (max-width: 700px) {
+  .recommendation-reason {
+    font-size: 11px;
+  }
+}
