@@ -62,24 +62,24 @@ V1 remains MangaDex-only. MangaFlux does not bypass anti-bot protections, CAPTCH
 
 ## Branch workflow
 
-Incremental work should not be pushed repeatedly to the deployment-watched development branch.
+MangaFlux uses one persistent development branch and does not create temporary version/work branches.
 
 ~~~text
 main
   ↓
-temporary kenn/work-* branch
+kenn/develop
   ↓
 complete implementation + fixes + docs
   ↓
-one final PR to main
+one PR to main
   ↓
 CI gate
   ↓
 main
   ↓
-sync kenn/develop to the merged main head
+reset kenn/develop to the merged main head
 ~~~
 
-Use temporary work branches for in-progress commits. Keep `kenn/develop` clean during implementation and avoid incremental pushes that cause unnecessary deployment churn.
+Keep all release work on `kenn/develop`. Consolidate the release there, open one complete PR to `main`, merge only after CI passes, then reset `kenn/develop` to the merged `main` head.
 
 See `docs/ROADMAP.md` for the canonical 1.x / 2.x / 3.x roadmap.

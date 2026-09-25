@@ -26,8 +26,9 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 - Routed the immersive reader's quick Data Saver toggle through the same persisted/synchronized preference path.
 
 ### Development workflow
-- Moved incremental implementation work to temporary `kenn/work-*` branches.
-- Keep `kenn/develop` clean during implementation and open one final release PR to `main` to avoid repeated deployment churn.
+- Keep MangaFlux development on the persistent `kenn/develop` branch.
+- Do not create temporary version/work branches for normal release work.
+- Open one complete release PR from `kenn/develop` to `main`, merge only after CI passes, then reset `kenn/develop` to the merged `main` head.
 
 ## 1.1.1 - 2026-09-25 — Reading Quality Refinements
 
