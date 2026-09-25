@@ -130,10 +130,19 @@
 - [x] prevent active admin from self-restricting
 - [x] show restriction state in account and admin UX
 
+## v1.2.4 — Mobile Avatar Reliability & Admin Polish
+
+- [x] fix valid mobile JPEG avatar selection failures
+- [x] WebP-first avatar encoding with JPEG fallback
+- [x] bounded additional compression fallbacks
+- [x] validate WebP/JPEG signatures server-side
+- [x] search recent admin users by display name/email
+- [x] filter recent admin users by community state
+
 ## Remaining v1.2.x
 
 - [ ] notification/privacy preference groundwork
-- [ ] final community moderation/admin polish
+- [ ] final community-depth QA and regression fixes
 - [ ] additional profile/activity presentation improvements found during QA
 
 ## Future V1.x

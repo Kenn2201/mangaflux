@@ -7,8 +7,21 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- v1.2.4+ notification/privacy preference groundwork and final community-depth polish
+- v1.2.5+ notification/privacy preference groundwork and final community-depth QA
 - keep v1.3.x reserved for Following & Notifications
+
+## 1.2.4 - 2026-09-25 — Mobile Avatar Reliability & Admin Polish
+
+### Mobile avatar reliability
+- Fixed profile-photo selection failures seen on mobile Safari/iPhone for otherwise valid JPEG images.
+- Avatar processing now attempts WebP and falls back to JPEG when browser WebP encoding is unavailable or unsuitable.
+- Added smaller compression fallbacks while keeping strict upload-size limits.
+- Server avatar validation now accepts WebP/JPEG and verifies their actual file signatures.
+
+### Admin polish
+- Added recent-user search by display name/email.
+- Added Community active / Community restricted filtering.
+- Existing restriction, restore, session-revoke, and comment-removal protections remain unchanged.
 
 ## 1.2.3 - 2026-09-25 — Profile Privacy & Community Moderation
 

@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v1.2.3--Profile_Privacy_Community_Moderation-indigo.svg)
+![Version](https://img.shields.io/badge/version-v1.2.4--Mobile_Avatar_Reliability_Admin_Polish-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v1.2.3 — Profile Privacy & Community Moderation**
+**v1.2.4 — Mobile Avatar Reliability & Admin Polish**
 
-MangaFlux V1 remains a stable single-source MangaDex product. v1.2.3 adds another public-profile privacy control and a scoped moderation restriction that blocks community posting/reactions while preserving reading and account access.
+MangaFlux V1 remains a stable single-source MangaDex product. v1.2.4 fixes mobile avatar processing across browser encoding differences and makes recent-account moderation easier to search and filter.
 
 ### Library improvements
 
@@ -49,16 +49,15 @@ The settings sheet is available from manga chapter lists and inside the immersiv
 - an alternate-release count is shown when duplicates are collapsed
 - readers can opt back into all alternate releases
 
-### v1.2.3 refinements
+### v1.2.4 refinements
 
-- readers can hide their MangaFlux joined date from public community profiles
-- joined-date privacy is enforced by omitting the membership timestamp from public profile responses
-- administrators can restrict or restore a user's commenting/reaction access without disabling reading or account access
-- community restrictions are enforced server-side for both comments and reactions
-- restricted users see a clear account/discussion notice instead of active posting controls
-- administrator self-restriction is blocked
-- existing accounts safely default to joined-date visible and community access enabled
-- v1.2.2 activity browsing, sorting, reaction status, and pagination behavior remain unchanged
+- mobile avatar preparation now tries WebP first and falls back to JPEG when the browser cannot reliably encode WebP
+- avatar compression has additional smaller-size/quality fallbacks for iPhone/mobile browser reliability
+- the API validates actual WebP/JPEG file signatures instead of trusting only a data-URL label
+- avatar byte/data limits remain bounded
+- admin recent-user moderation can search by display name/email
+- admin recent-user moderation can filter Community active / Community restricted accounts
+- v1.2.3 privacy and community restriction behavior remains unchanged
 
 ### Architecture boundary
 

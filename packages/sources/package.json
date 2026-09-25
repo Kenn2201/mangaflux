@@ -1,10 +1,10 @@
 {
   "name": "@mangaflux/sources",
   "private": true,
-  "version": "1.2.3",
+  "version": "1.2.4",
   "type": "module",
   "exports": "./src/index.ts",
   "dependencies": {
-    "@mangaflux/runtime": "1.2.3"
+    "@mangaflux/runtime": "1.2.4"
   }
 }

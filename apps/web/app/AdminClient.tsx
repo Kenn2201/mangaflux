@@ -145,6 +145,9 @@ export default function AdminClient() {
   const [pendingAction, setPendingAction] =
     useState<PendingAdminAction>(null);
   const [profileUserId, setProfileUserId] = useState<string | null>(null);
+  const [userSearch, setUserSearch] = useState("");
+  const [communityFilter, setCommunityFilter] =
+    useState<"all" | "active" | "restricted">("all");
 
   const loadOverview = useCallback(async () => {
     setLoading(true);
@@ -404,6 +407,21 @@ export default function AdminClient() {
     );
   }
 
+  const visibleUsers = overview?.recentUsers.filter((user) => {
+    const query = userSearch.trim().toLowerCase();
+    const matchesSearch =
+      !query ||
+      user.email.toLowerCase().includes(query) ||
+      (user.displayName ?? "").toLowerCase().includes(query);
+    const matchesCommunity =
+      communityFilter === "all" ||
+      (communityFilter === "restricted"
+        ? Boolean(user.communityRestricted)
+        : !user.communityRestricted);
+
+    return matchesSearch && matchesCommunity;
+  }) ?? [];
+
   return (
     <main className="admin-page">
       <section className="admin-hero">
@@ -553,8 +571,31 @@ export default function AdminClient() {
                 <span>{overview.counts.users} total</span>
               </div>
 
+              <div className="admin-user-filters" aria-label="Recent user filters">
+                <input
+                  type="search"
+                  value={userSearch}
+                  placeholder="Search recent users"
+                  aria-label="Search recent users"
+                  onChange={(event) => setUserSearch(event.target.value)}
+                />
+                <select
+                  value={communityFilter}
+                  aria-label="Filter community access"
+                  onChange={(event) =>
+                    setCommunityFilter(
+                      event.target.value as "all" | "active" | "restricted"
+                    )
+                  }
+                >
+                  <option value="all">All community states</option>
+                  <option value="active">Community active</option>
+                  <option value="restricted">Community restricted</option>
+                </select>
+              </div>
+
               <div className="admin-list">
-                {overview.recentUsers.map((user) => (
+                {visibleUsers.length ? visibleUsers.map((user) => (
                   <article className="admin-user-row" key={user.id}>
                     <div className="admin-avatar">
                       {user.avatarDataUrl ? (
@@ -631,7 +672,11 @@ export default function AdminClient() {
                       </button>
                     </div>
                   </article>
-                ))}
+                )) : (
+                  <p className="admin-empty">
+                    No recent users match these filters.
+                  </p>
+                )}
               </div>
             </div>
 

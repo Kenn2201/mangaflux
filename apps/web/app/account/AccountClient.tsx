@@ -81,49 +81,44 @@ async function imageToAvatar(file: File) {
     const side = Math.min(image.naturalWidth, image.naturalHeight);
     const sx = Math.floor((image.naturalWidth - side) / 2);
     const sy = Math.floor((image.naturalHeight - side) / 2);
-    const sizes = [224, 192, 160, 128, 112];
-    const qualities = [0.82, 0.7, 0.58, 0.46, 0.34];
+    const sizes = [224, 192, 160, 128, 112, 96, 80];
+    const qualities = [0.82, 0.7, 0.58, 0.46, 0.34, 0.24];
+    const formats = ["image/webp", "image/jpeg"] as const;
     const targetBytes = 145_000;
 
     for (const size of sizes) {
       const canvas = document.createElement("canvas");
       canvas.width = size;
       canvas.height = size;
-
       const context = canvas.getContext("2d");
+
       if (!context) {
         throw new Error("Image processing is unavailable.");
       }
 
-      context.drawImage(
-        image,
-        sx,
-        sy,
-        side,
-        side,
-        0,
-        0,
-        size,
-        size
-      );
+      context.drawImage(image, sx, sy, side, side, 0, 0, size, size);
 
-      for (const quality of qualities) {
-        const blob = await new Promise<Blob | null>((resolve) =>
-          canvas.toBlob(resolve, "image/webp", quality)
-        );
-
-        if (
-          blob &&
-          blob.type === "image/webp" &&
-          blob.size > 0 &&
-          blob.size <= targetBytes
-        ) {
-          const data = await blobToDataUrl(blob);
+      for (const format of formats) {
+        for (const quality of qualities) {
+          const blob = await new Promise<Blob | null>((resolve) =>
+            canvas.toBlob(resolve, format, quality)
+          );
 
           if (
-            data.startsWith("data:image/webp;base64,") &&
-            data.length <= 220_000
+            !blob ||
+            blob.size <= 0 ||
+            blob.size > targetBytes ||
+            !formats.includes(blob.type as (typeof formats)[number])
           ) {
+            continue;
+          }
+
+          const data = await blobToDataUrl(blob);
+          const validPrefix =
+            data.startsWith("data:image/webp;base64,") ||
+            data.startsWith("data:image/jpeg;base64,");
+
+          if (validPrefix && data.length <= 220_000) {
             return data;
           }
         }
@@ -131,7 +126,7 @@ async function imageToAvatar(file: File) {
     }
 
     throw new Error(
-      "This photo is unusually complex. Try a tighter crop or a different image."
+      "This image could not be prepared on this browser. Try a different JPEG, PNG, or WebP image."
     );
   } finally {
     URL.revokeObjectURL(objectUrl);
@@ -720,8 +715,8 @@ export default function AccountClient() {
                 </label>
 
                 <p className="device-note">
-                  Images are cropped and progressively compressed into a small
-                  WebP for mobile upload. Your email is never shown publicly.
+                  Images are cropped and compressed into a small WebP or JPEG
+                  for reliable mobile upload. Your email is never shown publicly.
                 </p>
 
                 <div className="profile-editor-actions">
