@@ -7,6 +7,21 @@ const API_URL =
   "https://api.manga.kenncode.me";
 
 const kinds = new Set(["hot", "popular", "top", "latest"]);
+const languages = new Set([
+  "en",
+  "ja",
+  "ko",
+  "zh",
+  "zh-hk",
+  "es",
+  "fr",
+  "de",
+  "it",
+  "pt-br",
+  "id",
+  "vi",
+  "th"
+]);
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +32,8 @@ export async function GET(request: NextRequest) {
   const tag = request.nextUrl.searchParams.get("tag")?.trim();
   const creator = request.nextUrl.searchParams.get("creator")?.trim();
   const status = request.nextUrl.searchParams.get("status")?.trim();
+  const language =
+    request.nextUrl.searchParams.get("language")?.trim().toLowerCase() ?? "en";
   const yearValue = request.nextUrl.searchParams.get("year")?.trim();
   const year = yearValue ? Number(yearValue) : undefined;
 
@@ -28,6 +45,7 @@ export async function GET(request: NextRequest) {
     !Number.isInteger(offset) ||
     offset < 0 ||
     offset > 10_000 ||
+    !languages.has(language) ||
     (year !== undefined &&
       (!Number.isInteger(year) || year < 1900 || year > 2100))
   ) {
@@ -46,6 +64,7 @@ export async function GET(request: NextRequest) {
   if (tag) params.set("tag", tag);
   if (creator) params.set("creator", creator);
   if (status) params.set("status", status);
+  params.set("language", language);
   if (year !== undefined) params.set("year", String(year));
 
   try {

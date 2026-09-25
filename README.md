@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v1.4.4--Search_History_Controls-indigo.svg)
+![Version](https://img.shields.io/badge/version-v1.4.5--Discovery_Language_Preference-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v1.4.4 — Search History Controls**
+**v1.4.5 — Discovery Language Preference**
 
-MangaFlux V1 remains a stable single-source MangaDex product. After v1.4.3 Recently Viewed Controls passed physical QA, v1.4.4 adds device-local recent searches with explicit controls while keeping autocomplete typing transient.
+MangaFlux V1 remains a stable single-source MangaDex product. After v1.4.4 Search History Controls passed physical QA, v1.4.5 replaces English-only discovery with a device-local chapter-availability language preference across Browse and recommendation surfaces.
 
 ### Library improvements
 
@@ -49,15 +49,15 @@ The settings sheet is available from manga chapter lists and inside the immersiv
 - an alternate-release count is shown when duplicates are collapsed
 - readers can opt back into all alternate releases
 
-### v1.4.4 refinements
+### v1.4.5 refinements
 
-- v1.4.3 Recently Viewed Controls passed physical QA and is signed off
-- up to 10 unique explicit search terms are remembered on the current device
-- submitting a search, choosing a search suggestion, or revisiting a results query moves that term to the front
-- autocomplete keystrokes alone are not written to search history
-- recent searches appear when the header search is focused while empty
-- the empty Search page exposes recent-search rerun, remove-one, and clear-all controls
-- search history remains separate from Recently viewed, reading history, bookmarks, and account data
+- v1.4.4 Search History Controls passed physical QA and is signed off
+- discovery is no longer hard-coded to English chapter availability
+- readers can choose a device-local discovery language from the existing supported language set
+- Home and Dashboard Hot / Popular / Top / Latest rails respect the selected language
+- Browse, personalized recommendations, similar-title recommendations, and Surprise me respect the same preference
+- MangaDex discovery cache keys include language so results do not leak across preference changes
+- per-series reader chapter language remains separate from discovery language
 - no new database migration is required
 
 ### Architecture boundary

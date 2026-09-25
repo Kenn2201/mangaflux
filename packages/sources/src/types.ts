@@ -74,6 +74,7 @@ export type DiscoveryOptions = {
   year?: number;
   creatorId?: string;
   status?: MangaPublicationStatus;
+  language?: string;
 };
 
 export type Chapter = {
