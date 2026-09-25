@@ -16,6 +16,7 @@ import ReaderSettingsSheet from "../../ReaderSettingsSheet";
 import {
   getReaderPreferences,
   readerLanguageOptions,
+  syncReaderPreferences,
   type ReaderPreferences
 } from "../../../lib/readerPreferences";
 
@@ -244,6 +245,21 @@ export default function ReaderPage() {
       cancelled = true;
     };
   }, [chapterId]);
+
+  useEffect(() => {
+    if (!data?.chapter.mangaId) return;
+
+    let cancelled = false;
+    void syncReaderPreferences(data.chapter.mangaId).then((next) => {
+      if (cancelled) return;
+      setReaderPreferences(next);
+      setDataSaver(next.dataSaver);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [data?.chapter.mangaId]);
 
   useEffect(() => {
     if (!data?.chapter.mangaId) return;
@@ -797,6 +813,7 @@ export default function ReaderPage() {
 
       <ReaderSettingsSheet
         mangaId={data.chapter.mangaId}
+        scanlationGroups={data.attribution.scanlationGroups}
         open={readerSettingsOpen}
         onClose={() => setReaderSettingsOpen(false)}
         onChange={(next) => {
