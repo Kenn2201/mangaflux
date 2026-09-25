@@ -28,7 +28,7 @@ import type {
   MangaSummary
 } from "@mangaflux/sources";
 
-const APP_VERSION = "1.3.6";
+const APP_VERSION = "1.3.7";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LANGUAGE_RE = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i;
@@ -195,6 +195,36 @@ const notificationCheckRateLimit = makeRateLimit(
   10 * 60_000
 );
 const MAX_NOTIFICATION_EMAILS_PER_CHECK = 20;
+
+function isNotificationQuietNow(
+  input: { enabled: boolean; start: string; end: string; timeZone: string },
+  now = new Date()
+) {
+  if (!input.enabled || input.start === input.end) return false;
+  try {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: input.timeZone,
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23"
+    }).formatToParts(now);
+    const hour = Number(parts.find((part) => part.type === "hour")?.value);
+    const minute = Number(parts.find((part) => part.type === "minute")?.value);
+    if (!Number.isInteger(hour) || !Number.isInteger(minute)) return false;
+    const current = hour * 60 + minute;
+    const toMinutes = (value: string) => {
+      const [hours, minutes] = value.split(":").map(Number);
+      return hours * 60 + minutes;
+    };
+    const start = toMinutes(input.start);
+    const end = toMinutes(input.end);
+    return start < end
+      ? current >= start && current < end
+      : current >= start || current < end;
+  } catch {
+    return false;
+  }
+}
 
 function requireUuid(value: string, reply: any, field = "id") {
   if (UUID_RE.test(value)) return true;
@@ -457,6 +487,7 @@ app.post(
     let emailSkipped = 0;
     let emailFailed = 0;
     let emailRateLimited = 0;
+    let emailQuietHours = 0;
     let advanced = 0;
     let skipped = 0;
     let failed = 0;
@@ -558,7 +589,15 @@ app.post(
             if (result.event) {
               const deliveryUser = await getNotificationDeliveryUser(database, user.id);
               if (deliveryUser?.notificationEmailEnabled && deliveryUser.emailVerifiedAt && isEmailConfigured()) {
-                if (emailSent >= MAX_NOTIFICATION_EMAILS_PER_CHECK) {
+                const quietNow = isNotificationQuietNow({
+                  enabled: deliveryUser.notificationQuietHoursEnabled,
+                  start: deliveryUser.notificationQuietHoursStart,
+                  end: deliveryUser.notificationQuietHoursEnd,
+                  timeZone: deliveryUser.notificationTimeZone
+                });
+                if (quietNow) {
+                  emailQuietHours += 1;
+                } else if (emailSent >= MAX_NOTIFICATION_EMAILS_PER_CHECK) {
                   emailRateLimited += 1;
                 } else {
                   try {
@@ -607,6 +646,7 @@ app.post(
       emailSkipped,
       emailFailed,
       emailRateLimited,
+      emailQuietHours,
       advanced,
       skipped,
       failed

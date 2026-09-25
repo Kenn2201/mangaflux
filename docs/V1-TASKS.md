@@ -226,10 +226,22 @@
 - [x] preserve inbox/checkpoint state independently from delivery outcome
 - [x] reuse existing schema without a new migration
 
+## v1.3.7 — Notification Quiet Hours
+
+- [x] persisted account quiet-hours toggle
+- [x] configurable local start/end time
+- [x] validate and persist IANA time zone
+- [x] device time-zone helper in Account settings
+- [x] support cross-midnight quiet windows
+- [x] suppress email during quiet hours while preserving inbox events
+- [x] expose emailQuietHours checker counter
+- [x] add migration 0013 with safe disabled defaults
+
 ## Remaining v1.3.x
 
-- [ ] account quiet-hours controls
-- [ ] optional Discord/webhook delivery after core notifications stabilize
+- [ ] observe delivery stability after quiet-hours QA
+- [ ] optional Discord/webhook delivery only if still justified
+- [ ] otherwise close v1.3.x and advance to v1.4.x
 
 ## Future V1.x
 

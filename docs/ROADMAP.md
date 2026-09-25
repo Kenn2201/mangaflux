@@ -25,7 +25,8 @@ v1.3.3  ████████████████████  ✅
 v1.3.4  ████████████████████  ✅
 v1.3.5  ████████████████████  ✅
 v1.3.6  ████████████████████  ✅
-v1.3.7+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
+v1.3.7  ████████████████████  ✅
+v1.3.8+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
 v1.3.x  Following & Notifications
 v1.4.x  Discovery & Personalization
 v1.5+   Product Polish
@@ -35,7 +36,7 @@ v2.x    Multi-Source + Platform Expansion
 v3.x    Advanced MangaFlux
 ~~~
 
-**v1.1.x — Library & Reading Quality** and **v1.2.x — Profiles & Community Depth** are signed off after physical QA. MangaFlux is now in **v1.3.x — Following & Notifications**. **v1.3.6 — Notification Delivery Safety** is complete, and v1.3.7+ continues with account quiet-hours controls before optional external delivery integrations.
+**v1.1.x — Library & Reading Quality** and **v1.2.x — Profiles & Community Depth** are signed off after physical QA. MangaFlux is now in **v1.3.x — Following & Notifications**. **v1.3.7 — Notification Quiet Hours** is complete, and v1.3.8+ remains available for notification delivery maturity before the project advances to v1.4.x Discovery & Personalization.
 
 ---
 
@@ -402,12 +403,24 @@ Introduce a proper following system separate from bookmarks.
 - Durable inbox/checkpoint state remains independent from delivery outcome
 - No new database migration
 
-### ➡️ v1.3.7+ — Quiet Hours & Delivery Maturity — NEXT
+### ✅ v1.3.7 — Notification Quiet Hours
 
-Continue in focused slices:
+- Persisted account-level quiet-hours toggle
+- Configurable local start/end time
+- IANA time-zone persistence and validation
+- Device time-zone helper in Account settings
+- Cross-midnight quiet windows
+- Email suppressed during quiet hours while inbox events remain durable
+- emailQuietHours checker counter
+- Migration 0013 with quiet hours disabled by default for existing accounts
 
-- account quiet-hours controls
-- optional Discord/webhook notifications only after core delivery is stable
+### ➡️ v1.3.8+ — Notification Delivery Maturity — NEXT
+
+Keep this slot focused and optional:
+
+- observe the core notification pipeline after quiet-hours QA
+- add external Discord/webhook delivery only if still justified
+- otherwise close v1.3.x and advance to v1.4.x Discovery & Personalization
 
 ---
 

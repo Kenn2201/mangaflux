@@ -1,0 +1,34 @@
+.notification-quiet-hours {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.notification-quiet-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  padding: 0.8rem;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.12));
+  border-radius: 14px;
+}
+
+.notification-quiet-grid label {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.notification-quiet-grid input {
+  min-height: 44px;
+  width: 100%;
+}
+
+.notification-quiet-grid .profile-text-button {
+  align-self: end;
+  min-height: 44px;
+}
+
+@media (max-width: 700px) {
+  .notification-quiet-grid {
+    grid-template-columns: 1fr;
+  }
+}

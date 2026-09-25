@@ -92,6 +92,13 @@
       "when": 1790414400000,
       "tag": "0012_v133_notification_checkpoints",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1790418000000,
+      "tag": "0013_v137_notification_quiet_hours",
+      "breakpoints": true
     }
   ]
 }

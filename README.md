@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v1.3.6--Notification_Delivery_Safety-indigo.svg)
+![Version](https://img.shields.io/badge/version-v1.3.7--Notification_Quiet_Hours-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v1.3.6 — Notification Delivery Safety**
+**v1.3.7 — Notification Quiet Hours**
 
-MangaFlux V1 remains a stable single-source MangaDex product. v1.3.6 hardens the new-chapter email path with an explicit per-check delivery cap while preserving the existing account, verification, and per-manga notification gates.
+MangaFlux V1 remains a stable single-source MangaDex product. v1.3.7 adds account-level, time-zone-aware quiet hours that preserve durable inbox notifications while suppressing new-chapter email during the configured local window.
 
 ### Library improvements
 
@@ -49,16 +49,16 @@ The settings sheet is available from manga chapter lists and inside the immersiv
 - an alternate-release count is shown when duplicates are collapsed
 - readers can opt back into all alternate releases
 
-### v1.3.6 refinements
+### v1.3.7 refinements
 
-- hardened the checker-to-email delivery path for newly created chapter events
-- global Email notifications, verified email, and per-manga Alerts remain required gates
-- capped successful notification email sends to 20 per checker invocation
-- excess eligible deliveries are counted as emailRateLimited instead of creating an unbounded burst
-- checker exposes sent, skipped, failed, and rate-limited aggregate delivery counters
-- durable inbox events and checkpoints remain independent from email delivery success
-- no new database migration is required
-- account quiet-hours controls remain a later focused v1.3.x slice
+- added persisted account-level notification quiet hours
+- users can configure local start/end times and an IANA time zone
+- the web account editor can adopt the current device time zone
+- quiet hours suppress new-chapter email while durable inbox events still remain available
+- cross-midnight windows such as 22:00–07:00 are supported
+- checker reports emailQuietHours separately from skipped, failed, sent, and rate-limited outcomes
+- migration 0013 adds quiet-hour preferences with safe defaults disabled for existing accounts
+- optional external notification integrations remain outside this release
 
 ### Architecture boundary
 
