@@ -172,9 +172,19 @@
 - [x] new follows default to alerts enabled
 - [x] keep notification generation/delivery out of v1.3.1
 
+## v1.3.2 — Notification Event Foundation
+
+- [x] durable new-chapter event schema
+- [x] idempotent event uniqueness across retries
+- [x] store manga/chapter/source publication metadata
+- [x] reserve read-state timestamp for future inbox work
+- [x] query only per-manga Alerts on follows as event-eligible
+- [x] repository primitives for event creation/listing
+- [x] keep polling/inbox/email delivery out of v1.3.2
+
 ## Remaining v1.3.x
 
-- [ ] new-chapter notification event foundation
+- [ ] controlled new-chapter event generation/checkpointing
 - [ ] notification inbox/history
 - [ ] global email preference integration
 - [ ] quiet/disable controls and rate limiting

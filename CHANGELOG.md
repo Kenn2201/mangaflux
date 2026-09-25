@@ -7,9 +7,19 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- v1.3.2+ new-chapter notification event foundation
-- notification inbox/history after event generation is stable
-- integrate global Email notifications as a delivery gate
+- v1.3.3+ controlled new-chapter event generation/checkpointing
+- notification inbox/history after generation is stable
+- global Email notifications integration as a delivery gate
+
+## 1.3.2 - 2026-09-26 — Notification Event Foundation
+
+### Event model
+- Added durable notification_events storage for new-chapter events.
+- Added user/source/manga/chapter/type uniqueness so retries cannot create duplicate events.
+- Stored manga/chapter display metadata, source publication time, event creation time, and a future read timestamp.
+- Added an eligible-follow query that excludes per-manga Alerts off rows.
+- Added repository primitives for idempotent event creation and chronological event listing.
+- No polling, user-visible inbox, or email delivery is enabled by this release.
 
 ## 1.3.1 - 2026-09-26 — Per-Manga Notification Preferences
 

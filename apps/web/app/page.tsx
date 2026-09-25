@@ -93,7 +93,7 @@ export default async function Home({
       </section>
 
       <div className="landing-version">
-        v1.3.1 · Per-Manga Notification Preferences
+        v1.3.2 · Notification Event Foundation
       </div>
     </main>
   );
