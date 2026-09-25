@@ -10,6 +10,11 @@ import MangaTile, {
 import { SearchSkeleton } from "./Skeletons";
 import Link from "next/link";
 import { reliableFetch } from "../lib/reliableFetch";
+import {
+  announceSearchQuery,
+  recordSearchHistory
+} from "../lib/searchHistory";
+import SearchHistoryPanel from "./SearchHistoryPanel";
 
 export default function SearchResultsClient({
   query
@@ -21,13 +26,17 @@ export default function SearchResultsClient({
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    if (!query.trim()) {
+    const value = query.trim();
+
+    if (!value) {
       setItems([]);
       setLoading(false);
       setMessage("");
       return;
     }
 
+    announceSearchQuery(value);
+    recordSearchHistory(value);
     const controller = new AbortController();
 
     async function load() {
@@ -36,7 +45,7 @@ export default function SearchResultsClient({
 
       try {
         const response = await reliableFetch(
-          `/api/search?q=${encodeURIComponent(query.trim())}&limit=24`,
+          `/api/search?q=${encodeURIComponent(value)}&limit=24`,
           {
             cache: "no-store",
             signal: controller.signal
@@ -75,11 +84,14 @@ export default function SearchResultsClient({
 
   if (!query.trim()) {
     return (
-      <section className="search-empty panel">
-        <p className="eyebrow">Search</p>
-        <h2>Type a title in the search bar above.</h2>
-        <p>Suggestions will appear while you type.</p>
-      </section>
+      <>
+        <section className="search-empty panel">
+          <p className="eyebrow">Search</p>
+          <h2>Type a title in the search bar above.</h2>
+          <p>Suggestions will appear while you type.</p>
+        </section>
+        <SearchHistoryPanel />
+      </>
     );
   }
 

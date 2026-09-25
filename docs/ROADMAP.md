@@ -30,8 +30,9 @@ v1.3.x  ████████████████████  ✅ COMPLE
 v1.4.0  ████████████████████  ✅ QA
 v1.4.1  ████████████████████  ✅ QA
 v1.4.2  ████████████████████  ✅ QA
-v1.4.3  ████████████████████  🧪 CURRENT
-v1.4.4+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT AFTER QA
+v1.4.3  ████████████████████  ✅ QA
+v1.4.4  ████████████████████  🧪 CURRENT
+v1.4.5+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT AFTER QA
 v1.4.x  Discovery & Personalization
 v1.5+   Product Polish
          ↓
@@ -40,7 +41,7 @@ v2.x    Multi-Source + Platform Expansion
 v3.x    Advanced MangaFlux
 ~~~
 
-**v1.1.x — Library & Reading Quality**, **v1.2.x — Profiles & Community Depth**, and **v1.3.x — Following & Notifications** are signed off after physical QA. Optional Discord/webhook delivery is deferred. **v1.4.0 — Recommendation Explanations**, **v1.4.1 — Activity-Based Recommendations**, and **v1.4.2 — Saved Discovery Filters** have also passed physical QA. MangaFlux is now implementing **v1.4.3 — Recently Viewed Controls** inside **v1.4.x — Discovery & Personalization**.
+**v1.1.x — Library & Reading Quality**, **v1.2.x — Profiles & Community Depth**, and **v1.3.x — Following & Notifications** are signed off after physical QA. Optional Discord/webhook delivery is deferred. **v1.4.0 — Recommendation Explanations**, **v1.4.1 — Activity-Based Recommendations**, **v1.4.2 — Saved Discovery Filters**, and **v1.4.3 — Recently Viewed Controls** have also passed physical QA. MangaFlux is now implementing **v1.4.4 — Search History Controls** inside **v1.4.x — Discovery & Personalization**.
 
 ---
 
@@ -463,7 +464,7 @@ Make discovery increasingly personalized.
 - Physical production QA passed
 - No new database migration
 
-### 🧪 v1.4.3 — Recently Viewed Controls — CURRENT
+### ✅ v1.4.3 — Recently Viewed Controls — QA SIGNED OFF
 
 - Record successful manga-detail views separately from reading progress
 - Keep the 12 most recent unique manga on the current device
@@ -472,11 +473,22 @@ Make discovery increasingly personalized.
 - Remove one recently viewed manga
 - Clear the full recently viewed list
 - Keep bookmarks, reading history, Following, and account data untouched
+- Physical production QA passed
 - No new database migration
 
-### ➡️ v1.4.4+ — Remaining Personalization Depth — NEXT AFTER QA
+### 🧪 v1.4.4 — Search History Controls — CURRENT
 
-- Search-history controls
+- Remember up to 10 unique explicit search terms on the current device
+- Record submitted searches, selected search suggestions, and visited results queries
+- Do not store ordinary autocomplete keystrokes
+- Move repeated searches to the front instead of duplicating them
+- Show recent searches when the header search is focused and empty
+- Re-run, remove one, or clear all recent searches
+- Keep search history separate from Recently viewed, reading history, and account data
+- No new database migration
+
+### ➡️ v1.4.5+ — Remaining Personalization Depth — NEXT AFTER QA
+
 - Stronger language preferences
 - Genre preferences
 - Manga-status preferences
