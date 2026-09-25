@@ -163,9 +163,17 @@
 - [x] signed-out Follow prompt/state
 - [x] per-follow notification flag foundation
 
+## v1.3.1 — Per-Manga Notification Preferences
+
+- [x] per-follow Alerts on / Alerts off preference
+- [x] persist preference on existing follow row
+- [x] manga-details notification control
+- [x] Following Library notification control
+- [x] new follows default to alerts enabled
+- [x] keep notification generation/delivery out of v1.3.1
+
 ## Remaining v1.3.x
 
-- [ ] per-manga notification preferences
 - [ ] new-chapter notification event foundation
 - [ ] notification inbox/history
 - [ ] global email preference integration

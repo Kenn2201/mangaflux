@@ -19,6 +19,7 @@ import {
   getUserFollow,
   getUserReaderPreferences,
   getUserSummary,
+  setUserFollowNotifications,
   upsertBookmark,
   upsertProgress,
   upsertUserBookmark,
@@ -42,6 +43,12 @@ type BookmarkBody = {
   mangaId?: string;
   title?: string;
   coverUrl?: string | null;
+};
+
+type FollowNotificationBody = {
+  source?: string;
+  mangaId?: string;
+  notificationsEnabled?: boolean;
 };
 
 type ReaderPreferencesBody = {
@@ -842,6 +849,56 @@ export function registerStateRoutes(
         userId: session.userId,
         ...body
       });
+
+      return { followed: true, item };
+    }
+  );
+
+  app.patch<{ Body: FollowNotificationBody }>(
+    "/api/account/state/follow",
+    { preHandler: limits.write },
+    async (request, reply) => {
+      const session = await authenticateSession(
+        request,
+        reply,
+        database,
+        authProxySecret
+      );
+      if (!session || !database) return;
+
+      const source = request.body?.source ?? "mangadex";
+      const mangaId = request.body?.mangaId;
+      const notificationsEnabled =
+        request.body?.notificationsEnabled;
+
+      if (
+        !validateSourceAndManga(source, mangaId, reply) ||
+        typeof notificationsEnabled !== "boolean"
+      ) {
+        if (!reply.sent) {
+          reply.code(400).send({
+            error: "INVALID_REQUEST",
+            message: "A boolean notificationsEnabled value is required."
+          });
+        }
+        return;
+      }
+
+      const item = await setUserFollowNotifications(
+        database,
+        session.userId,
+        source,
+        mangaId!,
+        notificationsEnabled
+      );
+
+      if (!item) {
+        reply.code(404).send({
+          error: "NOT_FOLLOWING",
+          message: "Follow this manga before changing notification settings."
+        });
+        return;
+      }
 
       return { followed: true, item };
     }

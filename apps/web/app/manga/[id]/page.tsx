@@ -84,6 +84,8 @@ export default function MangaPage() {
   const [bookmarkBusy, setBookmarkBusy] = useState(false);
   const [followed, setFollowed] = useState<boolean | null>(null);
   const [followBusy, setFollowBusy] = useState(false);
+  const [followNotificationsEnabled, setFollowNotificationsEnabled] =
+    useState(true);
   const [followAvailable, setFollowAvailable] = useState(true);
   const [readerSettingsOpen, setReaderSettingsOpen] = useState(false);
   const [surpriseBusy, setSurpriseBusy] = useState(false);
@@ -280,11 +282,15 @@ export default function MangaPage() {
 
         const payload = (await response.json()) as {
           followed: boolean;
+          item?: { notificationsEnabled?: boolean } | null;
         };
 
         if (!cancelled) {
           setFollowAvailable(true);
           setFollowed(payload.followed);
+          setFollowNotificationsEnabled(
+            payload.item?.notificationsEnabled ?? true
+          );
         }
       } catch {
         // Following is account-only and optional to basic reading.
@@ -386,6 +392,7 @@ export default function MangaPage() {
 
       const nextFollowed = !followed;
       setFollowed(nextFollowed);
+      if (nextFollowed) setFollowNotificationsEnabled(true);
 
       notify({
         tone: "success",
@@ -398,6 +405,46 @@ export default function MangaPage() {
       notify({
         tone: "error",
         title: "Follow update failed",
+        message: "Try again shortly."
+      });
+    } finally {
+      setFollowBusy(false);
+    }
+  }
+
+  async function toggleFollowNotifications() {
+    if (!manga || followBusy || !followed) return;
+
+    setFollowBusy(true);
+    const nextEnabled = !followNotificationsEnabled;
+
+    try {
+      const response = await fetch("/api/state/follow", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          source: "mangadex",
+          mangaId: id,
+          notificationsEnabled: nextEnabled
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("Notification preference update failed");
+      }
+
+      setFollowNotificationsEnabled(nextEnabled);
+      notify({
+        tone: "success",
+        title: nextEnabled ? "Manga notifications on" : "Manga notifications off",
+        message: nextEnabled
+          ? `Future chapter alerts for ${manga.title} are enabled.`
+          : `Future chapter alerts for ${manga.title} are muted.`
+      });
+    } catch {
+      notify({
+        tone: "error",
+        title: "Notification setting failed",
         message: "Try again shortly."
       });
     } finally {
@@ -757,6 +804,21 @@ export default function MangaPage() {
                     ? "✓ Following"
                     : "+ Follow"}
             </button>
+
+            {followed ? (
+              <button
+                className={`follow-notification-button ${followNotificationsEnabled ? "is-active" : ""}`}
+                type="button"
+                onClick={() => void toggleFollowNotifications()}
+                disabled={followBusy}
+                aria-pressed={followNotificationsEnabled}
+                title="Choose whether this followed manga can create future chapter notifications."
+              >
+                {followNotificationsEnabled
+                  ? "🔔 Alerts on"
+                  : "🔕 Alerts off"}
+              </button>
+            ) : null}
 
             {manga.externalUrl ? (
               <a

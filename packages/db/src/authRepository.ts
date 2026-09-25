@@ -371,6 +371,28 @@ export async function upsertUserFollow(
   return item;
 }
 
+export async function setUserFollowNotifications(
+  db: MangaFluxDatabase,
+  userId: string,
+  source: string,
+  mangaId: string,
+  notificationsEnabled: boolean
+) {
+  const [item] = await db
+    .update(userFollows)
+    .set({ notificationsEnabled })
+    .where(
+      and(
+        eq(userFollows.userId, userId),
+        eq(userFollows.source, source),
+        eq(userFollows.mangaId, mangaId)
+      )
+    )
+    .returning();
+
+  return item ?? null;
+}
+
 export async function deleteUserFollow(
   db: MangaFluxDatabase,
   userId: string,

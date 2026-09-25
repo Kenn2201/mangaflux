@@ -1,0 +1,38 @@
+/* MangaFlux v1.3.1 — Per-Manga Notification Preferences */
+
+.follow-notification-button,
+.following-alert-toggle {
+  min-height: 40px;
+  border: 1px solid #363636;
+  border-radius: 999px;
+  background: #111;
+  color: #bdbdbd;
+  padding: 0 14px;
+  font: inherit;
+  font-weight: 700;
+}
+
+.follow-notification-button.is-active,
+.following-alert-toggle.is-active {
+  border-color: #6f806d;
+  color: #ededed;
+  background: #182018;
+}
+
+.following-card-wrap {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+
+.following-alert-toggle {
+  width: 100%;
+  font-size: 12px;
+}
+
+@media (max-width: 700px) {
+  .follow-notification-button,
+  .following-alert-toggle {
+    min-height: 44px;
+  }
+}
