@@ -253,10 +253,22 @@
 - [x] keep explanations grounded in actual discovery requests
 - [x] preserve existing ranking/exclusion behavior
 - [x] no new database migration
+- [x] physical production QA signed off
+
+## v1.4.1 — Activity-Based Recommendations
+
+- [x] blend up to three recent reading/bookmark activity seeds
+- [x] order activity seeds by persisted reading/bookmark timestamps
+- [x] weight newer activity more strongly
+- [x] deduplicate creator/genre/theme/year discovery signals across seeds
+- [x] reinforce ranking when recent titles share the same signal
+- [x] cap discovery work at eight ranked signals
+- [x] tie recommendation explanations to contributing recent titles
+- [x] preserve bookmark/history exclusions
+- [x] no new database migration
 
 ## Remaining v1.4.x
 
-- [ ] activity-based recommendations
 - [ ] saved discovery filters
 - [ ] recently viewed controls
 - [ ] search-history controls
@@ -265,5 +277,4 @@
 
 ## Future V1.x
 
-- [ ] v1.5+ Product polish/PWA/performance
 - [ ] v1.5+ Product polish/PWA/performance
