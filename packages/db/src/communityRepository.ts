@@ -1,5 +1,6 @@
 import {
   and,
+  asc,
   count,
   desc,
   eq
@@ -16,7 +17,8 @@ export async function listCommunityComments(
   targetType: string,
   targetId: string,
   limit: number,
-  offset: number
+  offset: number,
+  order: "asc" | "desc" = "desc"
 ) {
   const [items, totalRows] = await Promise.all([
     db
@@ -37,7 +39,11 @@ export async function listCommunityComments(
           eq(communityComments.targetId, targetId)
         )
       )
-      .orderBy(desc(communityComments.createdAt))
+      .orderBy(
+        order === "asc"
+          ? asc(communityComments.createdAt)
+          : desc(communityComments.createdAt)
+      )
       .limit(limit)
       .offset(offset),
     db
@@ -120,6 +126,61 @@ export async function getCommunityProfile(
           reactions: 0
         },
     recentComments: activityVisible ? recentComments : []
+  };
+}
+
+export async function listCommunityProfileActivity(
+  db: MangaFluxDatabase,
+  userId: string,
+  limit: number,
+  offset: number
+) {
+  const [profile] = await db
+    .select({
+      showPublicActivity: users.showPublicActivity
+    })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+
+  if (!profile) return null;
+
+  if (!profile.showPublicActivity) {
+    return {
+      activityVisible: false,
+      items: [],
+      total: 0,
+      limit,
+      offset
+    };
+  }
+
+  const [items, totalRows] = await Promise.all([
+    db
+      .select({
+        id: communityComments.id,
+        targetType: communityComments.targetType,
+        targetId: communityComments.targetId,
+        body: communityComments.body,
+        createdAt: communityComments.createdAt
+      })
+      .from(communityComments)
+      .where(eq(communityComments.userId, userId))
+      .orderBy(desc(communityComments.createdAt))
+      .limit(limit)
+      .offset(offset),
+    db
+      .select({ value: count() })
+      .from(communityComments)
+      .where(eq(communityComments.userId, userId))
+  ]);
+
+  return {
+    activityVisible: true,
+    items,
+    total: Number(totalRows[0]?.value ?? 0),
+    limit,
+    offset
   };
 }
 

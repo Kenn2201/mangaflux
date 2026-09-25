@@ -7,8 +7,27 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- v1.2.2+ richer profile activity browsing and community UX
+- v1.2.3+ broader user/privacy preferences and community administration
 - keep v1.3.x reserved for Following & Notifications
+
+## 1.2.2 - 2026-09-25 — Activity Browsing & Discussion UX
+
+### Public profile activity
+- Added a privacy-aware paginated public-profile activity endpoint.
+- Public profiles can switch from Recent comments to full comment-history browsing.
+- Activity pages expose only public comment metadata and continue to hide all account credentials/private data.
+- Public-activity privacy is rechecked server-side for every paginated activity request.
+
+### Discussion browsing
+- Added Newest-first and Oldest-first comment sorting.
+- Comment pagination labels follow the selected chronological direction.
+- Posting a new comment returns the thread to Newest-first/page one so the new comment is visible immediately.
+- Deleting the last comment on a page returns safely to the previous available page.
+
+### Reaction/comment clarity
+- Added a You marker to the signed-in reader's own comments.
+- Added accessible reaction totals and selected-reaction status.
+- Kept the existing verified-account, cooldown, ownership-delete, and privacy protections.
 
 ## 1.2.1 - 2026-09-25 — Profile Editing & Mobile Modal Polish
 

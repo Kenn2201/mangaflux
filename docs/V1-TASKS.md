@@ -108,14 +108,23 @@
 - [x] restore exact scroll position on modal close
 - [x] restore originating comment focus without scrolling
 
+## v1.2.2 — Activity Browsing & Discussion UX
+
+- [x] paginated public-profile comment activity
+- [x] enforce public-activity privacy on every activity page request
+- [x] Newest / Oldest comment sorting
+- [x] direction-aware discussion pagination
+- [x] return new posts to Newest-first page one
+- [x] recover pagination after deleting the final comment on a page
+- [x] mark signed-in reader comments with You
+- [x] show accessible total/selected reaction status
+
 ## Remaining v1.2.x
 
-- [ ] richer activity browsing and presentation
-- [ ] better comment UX
-- [ ] better reaction UX
 - [ ] broader user/privacy preferences
 - [ ] notification/privacy preference groundwork
 - [ ] stronger community moderation/admin tools
+- [ ] additional activity presentation improvements found during QA
 
 ## Future V1.x
 

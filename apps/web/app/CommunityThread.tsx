@@ -22,11 +22,14 @@ type CommunityComment = {
   updatedAt: string;
 };
 
+type CommentOrder = "desc" | "asc";
+
 type CommunityPayload = {
   items: CommunityComment[];
   total: number;
   limit: number;
   offset: number;
+  order?: CommentOrder;
   reactions: Record<string, number>;
   viewerReaction?: string | null;
   viewerUserId?: string | null;
@@ -70,6 +73,7 @@ export default function CommunityThread({
   const limit = 10;
   const [data, setData] = useState<CommunityPayload | null>(null);
   const [offset, setOffset] = useState(0);
+  const [commentOrder, setCommentOrder] = useState<CommentOrder>("desc");
   const [loading, setLoading] = useState(true);
   const [body, setBody] = useState("");
   const [busy, setBusy] = useState(false);
@@ -85,7 +89,7 @@ export default function CommunityThread({
       const response = await fetch(
         `/api/community/${targetType}/${encodeURIComponent(
           targetId
-        )}?limit=${limit}&offset=${offset}`,
+        )}?limit=${limit}&offset=${offset}&order=${commentOrder}`,
         { cache: "no-store" }
       );
 
@@ -109,7 +113,7 @@ export default function CommunityThread({
     } finally {
       setLoading(false);
     }
-  }, [offset, targetId, targetType]);
+  }, [commentOrder, offset, targetId, targetType]);
 
   useEffect(() => {
     void load();
@@ -190,7 +194,6 @@ export default function CommunityThread({
     }
 
     const value = body.trim();
-
     if (!value) return;
 
     setBusy(true);
@@ -233,7 +236,10 @@ export default function CommunityThread({
 
       setBody("");
 
-      if (offset !== 0) {
+      if (commentOrder !== "desc") {
+        setCommentOrder("desc");
+        setOffset(0);
+      } else if (offset !== 0) {
         setOffset(0);
       } else {
         await load();
@@ -242,7 +248,7 @@ export default function CommunityThread({
       notify({
         tone: "success",
         title: "Comment posted",
-        message: "Your comment is now visible on MangaFlux."
+        message: "Your newest comment is now at the top of the discussion."
       });
     } catch (error) {
       const text =
@@ -285,7 +291,11 @@ export default function CommunityThread({
         throw new Error(payload?.message ?? "Comment could not be deleted.");
       }
 
-      await load();
+      if ((data?.items.length ?? 0) <= 1 && offset > 0) {
+        setOffset((current) => Math.max(0, current - limit));
+      } else {
+        await load();
+      }
 
       notify({
         tone: "success",
@@ -307,6 +317,17 @@ export default function CommunityThread({
   const totalPages = useMemo(
     () => Math.max(1, Math.ceil((data?.total ?? 0) / limit)),
     [data?.total]
+  );
+  const reactionTotal = useMemo(
+    () =>
+      Object.values(data?.reactions ?? {}).reduce(
+        (total, value) => total + value,
+        0
+      ),
+    [data?.reactions]
+  );
+  const selectedReaction = REACTIONS.find(
+    (reaction) => reaction.key === data?.viewerReaction
   );
 
   return (
@@ -333,7 +354,9 @@ export default function CommunityThread({
               key={reaction.key}
               className={active ? "is-active" : ""}
               aria-pressed={active}
-              aria-label={reaction.label}
+              aria-label={`${reaction.label}, ${count} reaction${
+                count === 1 ? "" : "s"
+              }`}
               disabled={busy}
               onClick={() => void react(reaction.key)}
             >
@@ -343,6 +366,15 @@ export default function CommunityThread({
           );
         })}
       </div>
+
+      <p className="reaction-summary" role="status" aria-live="polite">
+        {reactionTotal} reaction{reactionTotal === 1 ? "" : "s"}
+        {selectedReaction
+          ? ` · You reacted ${selectedReaction.emoji} ${selectedReaction.label}`
+          : data?.authenticated
+            ? " · Choose one to react"
+            : ""}
+      </p>
 
       {data?.authenticated ? (
         <form className="comment-composer" onSubmit={submit}>
@@ -369,6 +401,41 @@ export default function CommunityThread({
 
       {message ? <p className="community-message">{message}</p> : null}
 
+      <div className="comment-toolbar">
+        <div>
+          <span>Discussion order</span>
+          <strong>
+            {commentOrder === "desc" ? "Newest first" : "Oldest first"}
+          </strong>
+        </div>
+        <div className="comment-sort" aria-label="Comment sort order">
+          <button
+            type="button"
+            className={commentOrder === "desc" ? "is-active" : ""}
+            aria-pressed={commentOrder === "desc"}
+            disabled={loading}
+            onClick={() => {
+              setCommentOrder("desc");
+              setOffset(0);
+            }}
+          >
+            Newest
+          </button>
+          <button
+            type="button"
+            className={commentOrder === "asc" ? "is-active" : ""}
+            aria-pressed={commentOrder === "asc"}
+            disabled={loading}
+            onClick={() => {
+              setCommentOrder("asc");
+              setOffset(0);
+            }}
+          >
+            Oldest
+          </button>
+        </div>
+      </div>
+
       {loading ? (
         <div className="comment-list" aria-busy="true">
           {Array.from({ length: 3 }).map((_, index) => (
@@ -383,49 +450,59 @@ export default function CommunityThread({
         </div>
       ) : (
         <div className="comment-list">
-          {data?.items.map((comment) => (
-            <article className="comment-card" key={comment.id}>
-              <button
-                type="button"
-                className="comment-avatar comment-profile-trigger"
-                aria-label={`View ${comment.displayName || "reader"} profile`}
-                onClick={() => setProfileUserId(comment.userId)}
-              >
-                {comment.avatarDataUrl ? (
-                  <img src={comment.avatarDataUrl} alt="" />
-                ) : (
-                  <span>{avatarInitial(comment)}</span>
-                )}
-              </button>
+          {data?.items.map((comment) => {
+            const isViewer = data.viewerUserId === comment.userId;
 
-              <div className="comment-content">
-                <div className="comment-meta">
-                  <div>
-                    <button
-                      type="button"
-                      className="comment-name-button"
-                      onClick={() => setProfileUserId(comment.userId)}
-                    >
-                      {comment.displayName || "MangaFlux Reader"}
-                    </button>
-                    <span>{formatDate(comment.createdAt)}</span>
+            return (
+              <article
+                className={`comment-card ${isViewer ? "is-viewer" : ""}`}
+                key={comment.id}
+              >
+                <button
+                  type="button"
+                  className="comment-avatar comment-profile-trigger"
+                  aria-label={`View ${comment.displayName || "reader"} profile`}
+                  onClick={() => setProfileUserId(comment.userId)}
+                >
+                  {comment.avatarDataUrl ? (
+                    <img src={comment.avatarDataUrl} alt="" />
+                  ) : (
+                    <span>{avatarInitial(comment)}</span>
+                  )}
+                </button>
+
+                <div className="comment-content">
+                  <div className="comment-meta">
+                    <div>
+                      <button
+                        type="button"
+                        className="comment-name-button"
+                        onClick={() => setProfileUserId(comment.userId)}
+                      >
+                        {comment.displayName || "MangaFlux Reader"}
+                      </button>
+                      {isViewer ? (
+                        <span className="comment-you-badge">You</span>
+                      ) : null}
+                      <span>{formatDate(comment.createdAt)}</span>
+                    </div>
+
+                    {isViewer ? (
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => setDeletePendingId(comment.id)}
+                      >
+                        Delete
+                      </button>
+                    ) : null}
                   </div>
 
-                  {data.viewerUserId === comment.userId ? (
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={() => setDeletePendingId(comment.id)}
-                    >
-                      Delete
-                    </button>
-                  ) : null}
+                  <p>{comment.body}</p>
                 </div>
-
-                <p>{comment.body}</p>
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
 
           {!data?.items.length ? (
             <div className="community-empty">
@@ -445,7 +522,7 @@ export default function CommunityThread({
               setOffset((current) => Math.max(0, current - limit))
             }
           >
-            ← Newer
+            {commentOrder === "desc" ? "← Newer" : "← Older"}
           </button>
 
           <span>Page {page} / {totalPages}</span>
@@ -455,10 +532,11 @@ export default function CommunityThread({
             disabled={offset + limit >= data.total || loading}
             onClick={() => setOffset((current) => current + limit)}
           >
-            Older →
+            {commentOrder === "desc" ? "Older →" : "Newer →"}
           </button>
         </nav>
       ) : null}
+
       <PublicProfileModal
         userId={profileUserId}
         onClose={() => setProfileUserId(null)}
