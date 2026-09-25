@@ -147,14 +147,32 @@
 - [x] return preference through session/profile APIs
 - [x] keep actual notification delivery out of v1.2.x
 
-## Remaining v1.2.x
+## v1.2.x sign-off
 
-- [ ] final physical QA for notification preference persistence
-- [ ] final community-depth regression fixes only if QA finds issues
-- [ ] sign off v1.2.x and move to v1.3 Following & Notifications
+- [x] physical QA for notification preference persistence
+- [x] final community-depth regression pass
+- [x] Profiles & Community Depth phase closed
+- [x] move active development to v1.3 Following & Notifications
+
+## v1.3.0 — Following Foundation
+
+- [x] account-only Follow / Unfollow Manga
+- [x] Following independent from bookmarks and reading progress
+- [x] account-synced Following list
+- [x] dedicated Following Library view/shelf
+- [x] signed-out Follow prompt/state
+- [x] per-follow notification flag foundation
+
+## Remaining v1.3.x
+
+- [ ] per-manga notification preferences
+- [ ] new-chapter notification event foundation
+- [ ] notification inbox/history
+- [ ] global email preference integration
+- [ ] quiet/disable controls and rate limiting
+- [ ] optional Discord/webhook delivery after core notifications stabilize
 
 ## Future V1.x
 
-- [ ] v1.3 Following & Notifications
 - [ ] v1.4 Discovery & Personalization
 - [ ] v1.5+ Product polish/PWA/performance

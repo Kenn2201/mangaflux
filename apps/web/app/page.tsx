@@ -93,7 +93,7 @@ export default async function Home({
       </section>
 
       <div className="landing-version">
-        v1.2.5 · Notification Preference Groundwork
+        v1.3.0 · Following Foundation
       </div>
     </main>
   );

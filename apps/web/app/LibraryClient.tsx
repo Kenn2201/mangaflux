@@ -18,6 +18,15 @@ type Bookmark = {
   createdAt: string;
 };
 
+type Follow = {
+  source: string;
+  mangaId: string;
+  title: string;
+  coverUrl?: string | null;
+  notificationsEnabled: boolean;
+  createdAt: string;
+};
+
 type Progress = {
   source: string;
   mangaId: string;
@@ -32,6 +41,7 @@ type Progress = {
 
 type ReaderSummary = {
   bookmarks: Bookmark[];
+  following?: Follow[];
   history: Progress[];
   continueReading: Progress | null;
 };
@@ -49,7 +59,9 @@ export default function LibraryClient() {
   const [loading, setLoading] = useState(true);
   const [unavailable, setUnavailable] = useState(false);
   const [query, setQuery] = useState("");
-  const [view, setView] = useState<"all" | "bookmarks" | "history">("all");
+  const [view, setView] = useState<
+    "all" | "bookmarks" | "following" | "history"
+  >("all");
   const [sort, setSort] = useState<"recent" | "title" | "progress">("recent");
   const [pendingHistoryAction, setPendingHistoryAction] =
     useState<PendingHistoryAction>(null);
@@ -92,6 +104,27 @@ export default function LibraryClient() {
     if (!data) return [];
 
     return [...data.bookmarks]
+      .filter((item) =>
+        normalizedQuery
+          ? item.title.toLowerCase().includes(normalizedQuery)
+          : true
+      )
+      .sort((left, right) => {
+        if (sort === "title") {
+          return left.title.localeCompare(right.title);
+        }
+
+        return (
+          new Date(right.createdAt).getTime() -
+          new Date(left.createdAt).getTime()
+        );
+      });
+  }, [data, normalizedQuery, sort]);
+
+  const filteredFollowing = useMemo(() => {
+    if (!data) return [];
+
+    return [...(data.following ?? [])]
       .filter((item) =>
         normalizedQuery
           ? item.title.toLowerCase().includes(normalizedQuery)
@@ -244,6 +277,7 @@ export default function LibraryClient() {
   const empty =
     !data?.continueReading &&
     !data?.bookmarks.length &&
+    !(data?.following?.length ?? 0) &&
     !data?.history.length;
 
   if (empty) {
@@ -252,8 +286,9 @@ export default function LibraryClient() {
         <p className="eyebrow">Your library</p>
         <h2>Start building your shelf.</h2>
         <p>
-          Bookmark a manga or start reading a chapter and MangaFlux will keep
-          your place. Signed-in libraries sync through your account.
+          Bookmark or follow a manga, or start reading a chapter and MangaFlux
+          will keep your place. Following is account-only and independent from
+          bookmarks and reading progress.
         </p>
       </section>
     );
@@ -266,12 +301,14 @@ export default function LibraryClient() {
           <p className="eyebrow">Your library</p>
           <h2>Pick up where you left off.</h2>
         </div>
-        <span>{data?.bookmarks.length ?? 0} saved</span>
+        <span>
+          {data?.bookmarks.length ?? 0} bookmarked · {data?.following?.length ?? 0} following
+        </span>
       </div>
 
       <div className="library-controls">
         <div className="library-view-tabs" aria-label="Library view">
-          {(["all", "bookmarks", "history"] as const).map((item) => (
+          {(["all", "bookmarks", "following", "history"] as const).map((item) => (
             <button
               type="button"
               key={item}
@@ -283,7 +320,9 @@ export default function LibraryClient() {
                 ? "All"
                 : item === "bookmarks"
                   ? "Bookmarks"
-                  : "History"}
+                  : item === "following"
+                    ? "Following"
+                    : "History"}
             </button>
           ))}
         </div>
@@ -317,7 +356,7 @@ export default function LibraryClient() {
         </label>
       </div>
 
-      {view !== "bookmarks" && data?.continueReading ? (
+      {view !== "bookmarks" && view !== "following" && data?.continueReading ? (
         <Link
           className="continue-card"
           href={`/read/${data.continueReading.chapterId}?resume=${data.continueReading.page}`}
@@ -359,7 +398,7 @@ export default function LibraryClient() {
         </Link>
       ) : null}
 
-      {view !== "history" && filteredBookmarks.length ? (
+      {(view === "all" || view === "bookmarks") && filteredBookmarks.length ? (
         <div className="library-block">
           <div className="library-subheading">
             <h3>Bookmarks</h3>
@@ -392,7 +431,41 @@ export default function LibraryClient() {
         </div>
       ) : null}
 
-      {view !== "bookmarks" && filteredHistory.length ? (
+      {(view === "all" || view === "following") && filteredFollowing.length ? (
+        <div className="library-block">
+          <div className="library-subheading">
+            <h3>Following</h3>
+            <span>{filteredFollowing.length}</span>
+          </div>
+
+          <div className="bookmark-strip library-bookmark-grid">
+            {filteredFollowing.map((item) => (
+              <Link
+                className="bookmark-card following-card"
+                href={`/manga/${item.mangaId}`}
+                key={`follow:${item.source}:${item.mangaId}`}
+              >
+                <div className="bookmark-cover">
+                  {item.coverUrl ? (
+                    <img
+                      src={item.coverUrl}
+                      alt=""
+                      referrerPolicy="no-referrer"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="cover-placeholder">No cover</div>
+                  )}
+                </div>
+                <strong>{item.title}</strong>
+                <span>Following</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {(view === "all" || view === "history") && filteredHistory.length ? (
         <div className="library-block">
           <div className="library-subheading library-history-heading">
             <div>
@@ -477,6 +550,7 @@ export default function LibraryClient() {
       ) : null}
 
       {!filteredBookmarks.length &&
+      !filteredFollowing.length &&
       !filteredHistory.length &&
       normalizedQuery ? (
         <div className="library-no-results">
@@ -486,8 +560,8 @@ export default function LibraryClient() {
       ) : null}
 
       <p className="device-note">
-        Signed-out libraries stay on this browser. Sign in to use the same
-        bookmarks and progress across devices.
+        Signed-out bookmarks and reading progress stay on this browser.
+        Following is account-only and syncs across signed-in devices.
       </p>
 
       <ConfirmDialog

@@ -14,6 +14,7 @@ import {
   readingProgress,
   sessions,
   userBookmarks,
+  userFollows,
   userReadingProgress,
   userReaderPreferences,
   users
@@ -317,6 +318,76 @@ export async function deleteUserBookmark(
     );
 }
 
+export async function getUserFollow(
+  db: MangaFluxDatabase,
+  userId: string,
+  source: string,
+  mangaId: string
+) {
+  const [item] = await db
+    .select()
+    .from(userFollows)
+    .where(
+      and(
+        eq(userFollows.userId, userId),
+        eq(userFollows.source, source),
+        eq(userFollows.mangaId, mangaId)
+      )
+    )
+    .limit(1);
+
+  return item ?? null;
+}
+
+export async function upsertUserFollow(
+  db: MangaFluxDatabase,
+  input: {
+    userId: string;
+    source: string;
+    mangaId: string;
+    title: string;
+    coverUrl?: string;
+  }
+) {
+  const [item] = await db
+    .insert(userFollows)
+    .values({
+      ...input,
+      coverUrl: input.coverUrl ?? null
+    })
+    .onConflictDoUpdate({
+      target: [
+        userFollows.userId,
+        userFollows.source,
+        userFollows.mangaId
+      ],
+      set: {
+        title: input.title,
+        coverUrl: input.coverUrl ?? null
+      }
+    })
+    .returning();
+
+  return item;
+}
+
+export async function deleteUserFollow(
+  db: MangaFluxDatabase,
+  userId: string,
+  source: string,
+  mangaId: string
+) {
+  await db
+    .delete(userFollows)
+    .where(
+      and(
+        eq(userFollows.userId, userId),
+        eq(userFollows.source, source),
+        eq(userFollows.mangaId, mangaId)
+      )
+    );
+}
+
 export async function upsertUserProgress(
   db: MangaFluxDatabase,
   input: {
@@ -407,12 +478,18 @@ export async function getUserSummary(
   db: MangaFluxDatabase,
   userId: string
 ) {
-  const [savedBookmarks, history] = await Promise.all([
+  const [savedBookmarks, following, history] = await Promise.all([
     db
       .select()
       .from(userBookmarks)
       .where(eq(userBookmarks.userId, userId))
       .orderBy(desc(userBookmarks.createdAt))
+      .limit(100),
+    db
+      .select()
+      .from(userFollows)
+      .where(eq(userFollows.userId, userId))
+      .orderBy(desc(userFollows.createdAt))
       .limit(100),
     db
       .select()
@@ -424,6 +501,7 @@ export async function getUserSummary(
 
   return {
     bookmarks: savedBookmarks,
+    following,
     history,
     continueReading: history[0] ?? null
   };
