@@ -36,6 +36,13 @@
       "when": 1790301600000,
       "tag": "0004_v111_reader_preferences",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790305200000,
+      "tag": "0005_v112_reader_layout",
+      "breakpoints": true
     }
   ]
 }
