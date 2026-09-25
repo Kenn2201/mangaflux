@@ -190,6 +190,42 @@ export const userFollows = pgTable(
   ]
 );
 
+export const notificationEvents = pgTable(
+  "notification_events",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    type: text("type").notNull(),
+    source: text("source").notNull(),
+    mangaId: text("manga_id").notNull(),
+    mangaTitle: text("manga_title").notNull(),
+    coverUrl: text("cover_url"),
+    chapterId: text("chapter_id").notNull(),
+    chapterLabel: text("chapter_label"),
+    chapterTitle: text("chapter_title"),
+    sourcePublishedAt: timestamp("source_published_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    readAt: timestamp("read_at", { withTimezone: true })
+  },
+  (table) => [
+    uniqueIndex("notification_events_user_chapter_type_unique").on(
+      table.userId,
+      table.source,
+      table.mangaId,
+      table.chapterId,
+      table.type
+    ),
+    index("notification_events_user_created_idx").on(
+      table.userId,
+      table.createdAt
+    )
+  ]
+);
+
 export const userReadingProgress = pgTable(
   "user_reading_progress",
   {

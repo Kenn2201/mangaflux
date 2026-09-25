@@ -9,6 +9,7 @@ import type { MangaFluxDatabase } from "./client.js";
 import {
   bookmarks,
   emailVerificationTokens,
+  notificationEvents,
   passwordResetTokens,
   readerImports,
   readingProgress,
@@ -408,6 +409,73 @@ export async function deleteUserFollow(
         eq(userFollows.mangaId, mangaId)
       )
     );
+}
+
+export async function getNotificationEligibleFollows(
+  db: MangaFluxDatabase,
+  userId: string
+) {
+  return db
+    .select()
+    .from(userFollows)
+    .where(
+      and(
+        eq(userFollows.userId, userId),
+        eq(userFollows.notificationsEnabled, true)
+      )
+    )
+    .orderBy(desc(userFollows.createdAt));
+}
+
+export async function createNewChapterNotificationEvent(
+  db: MangaFluxDatabase,
+  input: {
+    userId: string;
+    source: string;
+    mangaId: string;
+    mangaTitle: string;
+    coverUrl?: string | null;
+    chapterId: string;
+    chapterLabel?: string | null;
+    chapterTitle?: string | null;
+    sourcePublishedAt?: Date | null;
+  }
+) {
+  const [event] = await db
+    .insert(notificationEvents)
+    .values({
+      ...input,
+      type: "new_chapter",
+      coverUrl: input.coverUrl ?? null,
+      chapterLabel: input.chapterLabel ?? null,
+      chapterTitle: input.chapterTitle ?? null,
+      sourcePublishedAt: input.sourcePublishedAt ?? null
+    })
+    .onConflictDoNothing({
+      target: [
+        notificationEvents.userId,
+        notificationEvents.source,
+        notificationEvents.mangaId,
+        notificationEvents.chapterId,
+        notificationEvents.type
+      ]
+    })
+    .returning();
+
+  return { created: Boolean(event), event: event ?? null };
+}
+
+export async function listNotificationEvents(
+  db: MangaFluxDatabase,
+  userId: string,
+  limit = 50
+) {
+  return db
+    .select()
+    .from(notificationEvents)
+    .where(eq(notificationEvents.userId, userId))
+    .orderBy(desc(notificationEvents.createdAt))
+    .limit(Math.max(1, Math.min(100, Math.floor(limit))));
 }
 
 export async function upsertUserProgress(
