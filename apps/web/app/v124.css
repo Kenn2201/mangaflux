@@ -1,0 +1,32 @@
+/* MangaFlux v1.2.4 — Mobile Avatar Reliability & Admin Polish */
+
+.admin-user-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(150px, auto);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.admin-user-filters input,
+.admin-user-filters select {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid #303030;
+  border-radius: 10px;
+  background: #101010;
+  color: #ededed;
+  padding: 0 11px;
+  font: inherit;
+}
+
+.admin-user-filters input:focus-visible,
+.admin-user-filters select:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+@media (max-width: 700px) {
+  .admin-user-filters {
+    grid-template-columns: 1fr;
+  }
+}

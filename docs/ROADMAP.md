@@ -16,7 +16,8 @@ v1.2.0  ████████████████████  ✅
 v1.2.1  ████████████████████  ✅
 v1.2.2  ████████████████████  ✅
 v1.2.3  ████████████████████  ✅
-v1.2.4+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
+v1.2.4  ████████████████████  ✅
+v1.2.5+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
 v1.3.x  Following & Notifications
 v1.4.x  Discovery & Personalization
 v1.5+   Product Polish
@@ -26,7 +27,7 @@ v2.x    Multi-Source + Platform Expansion
 v3.x    Advanced MangaFlux
 ~~~
 
-**v1.1.x — Library & Reading Quality is signed off.** MangaFlux is now in **v1.2.x — Profiles & Community Depth**. **v1.2.3 — Profile Privacy & Community Moderation** is complete, and v1.2.4+ continues notification/privacy groundwork and final community-depth polish.
+**v1.1.x — Library & Reading Quality is signed off.** MangaFlux is now in **v1.2.x — Profiles & Community Depth**. **v1.2.4 — Mobile Avatar Reliability & Admin Polish** is complete, and v1.2.5+ continues notification/privacy groundwork and final community-depth QA.
 
 ---
 
@@ -275,12 +276,27 @@ The v1.1.x reading-quality phase is complete. Regression-only fixes can still be
 
 ---
 
-### ➡️ v1.2.4+ — Community Depth — NEXT
+### ✅ v1.2.4 — Mobile Avatar Reliability & Admin Polish
+
+#### Mobile avatar reliability
+- WebP-first avatar encoding with JPEG fallback for mobile browser compatibility
+- Additional bounded compression sizes/qualities for difficult images
+- Server validation of actual WebP/JPEG signatures
+- Existing avatar byte and request limits remain enforced
+
+#### Admin polish
+- Search recent accounts by display name/email
+- Filter recent accounts by community active/restricted state
+- Existing restriction/restore and admin self-protection remain unchanged
+
+---
+
+### ➡️ v1.2.5+ — Community Depth — NEXT
 
 Continue the v1.2.x phase with focused slices such as:
 
 - notification/privacy preference groundwork
-- final community moderation/admin polish
+- final community-depth QA and regression fixes
 - additional profile/activity presentation improvements discovered through QA
 - keep credentials and private account information protected
 

@@ -131,14 +131,35 @@ function normalizeBio(value: unknown) {
 function normalizeAvatarDataUrl(value: unknown) {
   if (value === null || value === undefined || value === "") return null;
   if (typeof value !== "string") return undefined;
-  if (!value.startsWith("data:image/webp;base64,")) return undefined;
-  if (value.length > 280_000) return undefined;
 
-  const encoded = value.slice("data:image/webp;base64,".length);
+  const prefixes = [
+    "data:image/webp;base64,",
+    "data:image/jpeg;base64,"
+  ];
+  const prefix = prefixes.find((candidate) => value.startsWith(candidate));
+
+  if (!prefix || value.length > 280_000) return undefined;
+
+  const encoded = value.slice(prefix.length);
 
   try {
     const bytes = Buffer.from(encoded, "base64");
     if (!bytes.length || bytes.length > 200_000) return undefined;
+
+    const isWebp =
+      prefix.includes("webp") &&
+      bytes.length >= 12 &&
+      bytes.subarray(0, 4).toString("ascii") === "RIFF" &&
+      bytes.subarray(8, 12).toString("ascii") === "WEBP";
+    const isJpeg =
+      prefix.includes("jpeg") &&
+      bytes.length >= 4 &&
+      bytes[0] === 0xff &&
+      bytes[1] === 0xd8 &&
+      bytes[bytes.length - 2] === 0xff &&
+      bytes[bytes.length - 1] === 0xd9;
+
+    if (!isWebp && !isJpeg) return undefined;
   } catch {
     return undefined;
   }
@@ -669,7 +690,7 @@ export function registerAuthRoutes(
         return reply.code(400).send({
           error: "INVALID_REQUEST",
           message:
-            "Use a 2-32 character display name, a bio up to 280 characters, valid privacy settings, and a small WebP avatar."
+            "Use a 2-32 character display name, a bio up to 280 characters, valid privacy settings, and a small WebP or JPEG avatar."
         });
       }
 

@@ -93,7 +93,7 @@ export default async function Home({
       </section>
 
       <div className="landing-version">
-        v1.2.3 · Profile Privacy & Community Moderation
+        v1.2.4 · Mobile Avatar Reliability & Admin Polish
       </div>
     </main>
   );
