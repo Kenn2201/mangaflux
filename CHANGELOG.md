@@ -7,16 +7,17 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### v1.1.1 — Reading Quality Refinements
-- define a safe account-sync strategy for per-series reader preferences
-- retain browser-local reader preferences as a resilient fallback
-- improve scanlation-group selection/control
-- improve alternate-release selection while preserving scanlation-group attribution
-- remaining reader/chapter quality improvements that build naturally on v1.1.0
-- polish issues discovered during v1.1.0 testing
-- focused history-management refinements where useful
-- tablet/landscape QA for Library, Reader Settings, and chapter controls
+- define safe account synchronization for reader preferences
+- keep browser-local preferences as a fallback
+- avoid overwriting newer preference choices during synchronization
+- improve scanlation-group selection
+- add optional preferred scanlation group per manga
+- improve alternate-release selection while preserving attribution
+- continue focused reader/chapter quality refinements from v1.1.0
+- apply focused history-management improvements where useful
+- run tablet, landscape, Library, Reader Settings, and chapter-controls QA
 
-The v1.1.1 scope is intentionally focused. Additional reading-quality work remains available for later v1.1.x releases instead of being forced into one update.
+The v1.1.1 scope stays intentionally focused. Additional typography, spacing, reader-fit, history, accessibility, regression, and reading-quality work remains available for v1.1.2+.
 
 ## 1.1.0 - 2026-09-25 — Library & Reader Settings Foundation
 
