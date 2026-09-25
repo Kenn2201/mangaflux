@@ -27,7 +27,8 @@ export default function ConfirmDialog({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
-  const confirmRef = useRef<HTMLButtonElement | null>(null);
+  const dialogRef = useRef<HTMLElement | null>(null);
+  const cancelRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -38,11 +39,39 @@ export default function ConfirmDialog({
       if (event.key === "Escape" && !busy) {
         event.preventDefault();
         onCancel();
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+
+      const focusable = Array.from(
+        dialogRef.current?.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        ) ?? []
+      );
+
+      if (!focusable.length) {
+        event.preventDefault();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (
+        !event.shiftKey &&
+        document.activeElement === last
+      ) {
+        event.preventDefault();
+        first.focus();
       }
     }
 
     document.addEventListener("keydown", onKeyDown);
-    window.setTimeout(() => confirmRef.current?.focus(), 0);
+    window.setTimeout(() => cancelRef.current?.focus(), 0);
 
     return () => {
       document.removeEventListener("keydown", onKeyDown);
@@ -63,9 +92,11 @@ export default function ConfirmDialog({
       />
 
       <section
+        ref={dialogRef}
         className="confirm-dialog"
         role="alertdialog"
         aria-modal="true"
+        aria-busy={busy}
         aria-labelledby="confirm-dialog-title"
         aria-describedby="confirm-dialog-description"
       >
@@ -75,6 +106,7 @@ export default function ConfirmDialog({
 
         <div className="confirm-actions">
           <button
+            ref={cancelRef}
             type="button"
             className="secondary-button"
             disabled={busy}
@@ -83,7 +115,6 @@ export default function ConfirmDialog({
             {cancelLabel}
           </button>
           <button
-            ref={confirmRef}
             type="button"
             className={danger ? "confirm-danger" : "confirm-primary"}
             disabled={busy}

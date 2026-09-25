@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v1.1.2--Reader_Layout_Controls-indigo.svg)
+![Version](https://img.shields.io/badge/version-v1.1.3--History_Cleanup_Accessibility-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v1.1.2 — Reader Layout Controls**
+**v1.1.3 — History Cleanup & Accessibility**
 
-MangaFlux V1 remains a stable single-source MangaDex product. v1.1.2 adds focused reader-layout controls while preserving the account-synced preference foundation from v1.1.1.
+MangaFlux V1 remains a stable single-source MangaDex product. v1.1.3 adds focused history-cleanup controls and keyboard/accessibility polish without changing the reader/source architecture.
 
 ### Library improvements
 
@@ -48,13 +48,14 @@ The settings sheet is available from manga chapter lists and inside the immersiv
 - an alternate-release count is shown when duplicates are collapsed
 - readers can opt back into all alternate releases
 
-### v1.1.2 refinements
+### v1.1.3 refinements
 
-- Fit screen keeps each manga page inside the current viewport height while preserving vertical reading
-- page-spacing controls let readers keep pages seamless or add small/large visual gaps
-- the new layout preferences use the same timestamp-safe account synchronization as the existing per-series preferences
-- existing accounts receive safe migration defaults: Fit width + Seamless
-- the immersive reader's quick Data Saver control now uses the same persisted/synchronized preference path as Reader Settings
+- reading history can be cleaned by age: older than 30 days or older than 90 days
+- age cleanup works for signed-out device state and signed-in account state
+- bookmarks and newer Continue Reading progress are preserved
+- destructive confirmation dialogs now focus the safer Cancel action first and trap keyboard focus
+- interactive controls receive visible keyboard focus treatment
+- reduced-motion preferences suppress nonessential CSS animation/transition motion
 
 ### Architecture boundary
 

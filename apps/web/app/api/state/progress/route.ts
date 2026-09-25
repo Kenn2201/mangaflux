@@ -40,12 +40,15 @@ export async function PUT(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   const url = new URL(request.url);
   const all = url.searchParams.get("all");
+  const olderThanDays = url.searchParams.get("olderThanDays");
   const source = url.searchParams.get("source") ?? "mangadex";
   const mangaId = url.searchParams.get("mangaId");
 
   const query = new URLSearchParams();
 
-  if (all === "1") {
+  if (olderThanDays) {
+    query.set("olderThanDays", olderThanDays);
+  } else if (all === "1") {
     query.set("all", "1");
   } else {
     query.set("source", source);

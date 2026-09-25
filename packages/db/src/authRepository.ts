@@ -375,6 +375,24 @@ export async function clearUserProgress(
     .where(eq(userReadingProgress.userId, userId));
 }
 
+export async function clearUserProgressBefore(
+  db: MangaFluxDatabase,
+  userId: string,
+  before: Date
+) {
+  const removed = await db
+    .delete(userReadingProgress)
+    .where(
+      and(
+        eq(userReadingProgress.userId, userId),
+        lt(userReadingProgress.updatedAt, before)
+      )
+    )
+    .returning({ mangaId: userReadingProgress.mangaId });
+
+  return removed.length;
+}
+
 export async function getUserSummary(
   db: MangaFluxDatabase,
   userId: string

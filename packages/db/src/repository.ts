@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, lt } from "drizzle-orm";
 import type { MangaFluxDatabase } from "./client.js";
 import { bookmarks, readingProgress } from "./schema.js";
 
@@ -142,6 +142,24 @@ export async function clearProgress(
   await db
     .delete(readingProgress)
     .where(eq(readingProgress.readerId, readerId));
+}
+
+export async function clearProgressBefore(
+  db: MangaFluxDatabase,
+  readerId: string,
+  before: Date
+) {
+  const removed = await db
+    .delete(readingProgress)
+    .where(
+      and(
+        eq(readingProgress.readerId, readerId),
+        lt(readingProgress.updatedAt, before)
+      )
+    )
+    .returning({ mangaId: readingProgress.mangaId });
+
+  return removed.length;
 }
 
 export async function getReaderSummary(
