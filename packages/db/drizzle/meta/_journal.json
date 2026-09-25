@@ -29,6 +29,13 @@
       "when": 1790215200000,
       "tag": "0003_v072_community_profiles",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790301600000,
+      "tag": "0004_v111_reader_preferences",
+      "breakpoints": true
     }
   ]
 }
