@@ -139,11 +139,19 @@
 - [x] search recent admin users by display name/email
 - [x] filter recent admin users by community state
 
+## v1.2.5 — Notification Preference Groundwork
+
+- [x] persisted Email notifications account preference
+- [x] safe default for existing accounts
+- [x] explicit Edit profile / Save / Cancel integration
+- [x] return preference through session/profile APIs
+- [x] keep actual notification delivery out of v1.2.x
+
 ## Remaining v1.2.x
 
-- [ ] notification/privacy preference groundwork
-- [ ] final community-depth QA and regression fixes
-- [ ] additional profile/activity presentation improvements found during QA
+- [ ] final physical QA for notification preference persistence
+- [ ] final community-depth regression fixes only if QA finds issues
+- [ ] sign off v1.2.x and move to v1.3 Following & Notifications
 
 ## Future V1.x
 

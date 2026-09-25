@@ -17,7 +17,8 @@ v1.2.1  ████████████████████  ✅
 v1.2.2  ████████████████████  ✅
 v1.2.3  ████████████████████  ✅
 v1.2.4  ████████████████████  ✅
-v1.2.5+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
+v1.2.5  ████████████████████  ✅
+v1.2.6+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
 v1.3.x  Following & Notifications
 v1.4.x  Discovery & Personalization
 v1.5+   Product Polish
@@ -27,7 +28,7 @@ v2.x    Multi-Source + Platform Expansion
 v3.x    Advanced MangaFlux
 ~~~
 
-**v1.1.x — Library & Reading Quality is signed off.** MangaFlux is now in **v1.2.x — Profiles & Community Depth**. **v1.2.4 — Mobile Avatar Reliability & Admin Polish** is complete, and v1.2.5+ continues notification/privacy groundwork and final community-depth QA.
+**v1.1.x — Library & Reading Quality is signed off.** MangaFlux is now in **v1.2.x — Profiles & Community Depth**. **v1.2.5 — Notification Preference Groundwork** is complete, and v1.2.6+ is reserved for final community-depth QA/regression fixes before v1.3.x.
 
 ---
 
@@ -291,14 +292,33 @@ The v1.1.x reading-quality phase is complete. Regression-only fixes can still be
 
 ---
 
-### ➡️ v1.2.5+ — Community Depth — NEXT
+### ✅ v1.2.5 — Notification Preference Groundwork
 
-Continue the v1.2.x phase with focused slices such as:
+#### Account preference
+- Persist a per-account Email notifications preference
+- Existing accounts default safely to enabled
+- Preference uses the existing explicit Edit profile / Save / Cancel workflow
+- Saved state is returned through authenticated session/profile responses
 
-- notification/privacy preference groundwork
-- final community-depth QA and regression fixes
-- additional profile/activity presentation improvements discovered through QA
-- keep credentials and private account information protected
+#### Phase boundary
+- v1.2.5 stores preference only
+- No notification email is generated or delivered yet
+- Following, per-manga preferences, inbox/history, quiet controls, and delivery remain v1.3.x
+
+---
+
+### ➡️ v1.2.6+ — Final Community Depth QA — NEXT
+
+Use only for final v1.2.x regression fixes found through physical QA:
+
+- notification preference persistence
+- profile privacy combinations
+- public activity/profile modal behavior
+- moderation restriction/restore behavior
+- mobile avatar upload
+- discussion sorting/pagination/reactions
+
+If final QA is clean, sign off v1.2.x and move to v1.3.x — Following & Notifications.
 
 ---
 

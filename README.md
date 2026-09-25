@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v1.2.4--Mobile_Avatar_Reliability_Admin_Polish-indigo.svg)
+![Version](https://img.shields.io/badge/version-v1.2.5--Notification_Preference_Groundwork-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v1.2.4 — Mobile Avatar Reliability & Admin Polish**
+**v1.2.5 — Notification Preference Groundwork**
 
-MangaFlux V1 remains a stable single-source MangaDex product. v1.2.4 fixes mobile avatar processing across browser encoding differences and makes recent-account moderation easier to search and filter.
+MangaFlux V1 remains a stable single-source MangaDex product. v1.2.5 establishes the first persisted notification preference before v1.3 introduces Following and actual notification delivery.
 
 ### Library improvements
 
@@ -49,15 +49,14 @@ The settings sheet is available from manga chapter lists and inside the immersiv
 - an alternate-release count is shown when duplicates are collapsed
 - readers can opt back into all alternate releases
 
-### v1.2.4 refinements
+### v1.2.5 refinements
 
-- mobile avatar preparation now tries WebP first and falls back to JPEG when the browser cannot reliably encode WebP
-- avatar compression has additional smaller-size/quality fallbacks for iPhone/mobile browser reliability
-- the API validates actual WebP/JPEG file signatures instead of trusting only a data-URL label
-- avatar byte/data limits remain bounded
-- admin recent-user moderation can search by display name/email
-- admin recent-user moderation can filter Community active / Community restricted accounts
-- v1.2.3 privacy and community restriction behavior remains unchanged
+- added a persisted per-account Email notifications preference
+- the preference is explicitly groundwork for future followed-manga updates; v1.2.5 does not send notification emails
+- existing accounts default safely to notifications enabled
+- preference participates in the existing Edit profile / Save / Cancel workflow
+- saved state is returned by authenticated session/profile APIs
+- v1.2.4 avatar reliability and admin moderation polish remain unchanged
 
 ### Architecture boundary
 

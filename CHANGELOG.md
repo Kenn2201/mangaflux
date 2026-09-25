@@ -7,8 +7,17 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- v1.2.5+ notification/privacy preference groundwork and final community-depth QA
-- keep v1.3.x reserved for Following & Notifications
+- v1.2.6+ final community-depth QA/regression fixes before v1.3
+- keep actual Following and notification delivery in v1.3.x
+
+## 1.2.5 - 2026-09-26 — Notification Preference Groundwork
+
+### Notification/privacy groundwork
+- Added a persisted Email notifications account preference.
+- Existing accounts default safely to enabled.
+- Preference is editable only through the explicit profile edit flow and respects Save/Cancel behavior.
+- Session/profile responses return the saved preference so it persists across refresh/sign-in.
+- No notification emails are sent by v1.2.5; actual following, notification generation, inbox, and delivery remain v1.3.x work.
 
 ## 1.2.4 - 2026-09-25 — Mobile Avatar Reliability & Admin Polish
 

@@ -33,6 +33,7 @@ export async function PUT(request: NextRequest) {
     bio?: string | null;
     showPublicActivity?: boolean;
     showJoinedDate?: boolean;
+    notificationEmailEnabled?: boolean;
   };
 
   try {

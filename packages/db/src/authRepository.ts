@@ -49,6 +49,7 @@ export async function createUser(
       showPublicActivity: users.showPublicActivity,
       showJoinedDate: users.showJoinedDate,
       communityRestricted: users.communityRestricted,
+      notificationEmailEnabled: users.notificationEmailEnabled,
       emailVerifiedAt: users.emailVerifiedAt,
       createdAt: users.createdAt
     });
@@ -130,6 +131,7 @@ export async function getSessionUser(
       showPublicActivity: users.showPublicActivity,
       showJoinedDate: users.showJoinedDate,
       communityRestricted: users.communityRestricted,
+      notificationEmailEnabled: users.notificationEmailEnabled,
       emailVerifiedAt: users.emailVerifiedAt,
       createdAt: users.createdAt
     })
