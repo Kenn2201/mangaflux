@@ -10,6 +10,8 @@ import {
   getReaderPreferences,
   readerLanguageOptions,
   saveReaderPreferences,
+  syncReaderPreferences,
+  syncSavedReaderPreferences,
   type ReaderPreferences
 } from "../lib/readerPreferences";
 
@@ -17,12 +19,14 @@ export default function ReaderSettingsSheet({
   mangaId,
   open,
   onClose,
-  onChange
+  onChange,
+  scanlationGroups = []
 }: {
   mangaId: string;
   open: boolean;
   onClose: () => void;
   onChange?: (preferences: ReaderPreferences) => void;
+  scanlationGroups?: string[];
 }) {
   const [preferences, setPreferences] = useState<ReaderPreferences>(() =>
     getReaderPreferences(mangaId)
@@ -32,6 +36,10 @@ export default function ReaderSettingsSheet({
     if (!open) return;
 
     setPreferences(getReaderPreferences(mangaId));
+    void syncReaderPreferences(mangaId).then((next) => {
+      setPreferences(next);
+      onChange?.(next);
+    });
     const previous = document.activeElement as HTMLElement | null;
 
     function onKeyDown(event: KeyboardEvent) {
@@ -56,6 +64,7 @@ export default function ReaderSettingsSheet({
   function update(next: ReaderPreferences) {
     setPreferences(next);
     saveReaderPreferences(next, mangaId, "series");
+    syncSavedReaderPreferences(mangaId);
     onChange?.(next);
   }
 
@@ -121,6 +130,35 @@ export default function ReaderSettingsSheet({
               })
             }
           />
+        </label>
+
+        <label className="reader-setting-row">
+          <span>
+            <strong>Preferred scanlation group</strong>
+            <small>
+              When duplicate releases exist, MangaFlux prefers this group while keeping attribution visible.
+            </small>
+          </span>
+          <select
+            value={preferences.preferredScanlationGroup ?? ""}
+            onChange={(event) =>
+              update({
+                ...preferences,
+                preferredScanlationGroup:
+                  event.target.value || undefined
+              })
+            }
+          >
+            <option value="">No preference</option>
+            {Array.from(new Set(scanlationGroups))
+              .filter(Boolean)
+              .sort((a, b) => a.localeCompare(b))
+              .map((group) => (
+                <option value={group} key={group}>
+                  {group}
+                </option>
+              ))}
+          </select>
         </label>
 
         <label className="reader-setting-row reader-setting-toggle">
