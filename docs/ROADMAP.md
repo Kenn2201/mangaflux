@@ -1,144 +1,187 @@
 # MangaFlux Roadmap
 
+This is the canonical MangaFlux roadmap.
+
 ## v1.x — Stable MangaFlux product
 
-### v1.0.0 — Stable V1
+### v1.0.0 — Stable V1 — complete
 - mobile-first landing/dashboard/discovery
-- autocomplete search, genres, ranking and filtering
+- autocomplete search, genres, rankings, and filters
 - complete chapter pagination/direct lookup
-- immersive reader with resume/progress/Data Saver/chapter jump
-- verified accounts and password recovery
+- immersive reader with progress, Data Saver, chapter jump, and resume
+- verified accounts/password recovery
 - one active login session per account
 - bookmarks/history/Continue Reading
-- avatars and public community profiles
-- reactions/comments with server-side cooldowns
+- avatars/public community profiles
+- reactions/comments
 - recommendations
 - admin operations
-- status/diagnostics/caching/rate-limit/security hardening
-- release CI and accessibility foundation
+- status/diagnostics/security/reliability foundation
 
-### v1.1.x — Library & Reading Quality
-- richer library sorting/filtering
-- reading-history controls
-- per-series reading preferences
-- chapter language preference UI
-- stronger reader settings sheet
-- better duplicate/scanlation-group chapter handling
-- additional mobile/tablet polish
+### v1.1.x — Library & Reading Quality — current
+
+#### v1.1.0 — Library & Reader Settings Foundation
+- richer Library filtering/sorting
+- reading-history remove/clear controls
+- larger persisted Library views
+- per-series reader preferences
+- preferred chapter language
+- proper Reader Settings sheet
+- duplicate chapter-number collapse
+- alternate scanlation-release toggle
+- scanlation group attribution
+- mobile/tablet polish
+
+#### Remaining v1.1.x
+- decide/account-sync reader preferences safely
+- stronger per-series reading preferences
+- optional preferred scanlation-group behavior
+- additional history management
+- reader typography/spacing/fit preferences where useful
+- more tablet/landscape reader QA
 
 ### v1.2.x — Profiles & Community Depth
-- richer public profile presentation
-- optional profile bio/preferences with privacy controls
+- richer public profiles
+- optional bio/preferences with privacy controls
 - better activity browsing
 - comment/reaction UX refinements
-- account-level notification preferences
-- stronger admin community tools without exposing private credentials/data
+- notification/privacy preferences groundwork
+- stronger admin community tools without exposing credentials/private account data
 
 ### v1.3.x — Following & Notifications
-- follow series separately from bookmark/reading state
-- latest-chapter notification preferences
-- optional transactional email notifications
-- optional Discord/webhook integration for followed-series updates
+- Follow Manga separate from bookmark/reading state
+- new-chapter notification preferences
+- email notifications
 - notification inbox/history
-- quiet/disable controls and rate limits
+- optional Discord/webhook notifications
+- quiet/disable controls and notification rate limits
 
 ### v1.4.x — Discovery & Personalization
-- improved recommendation explanations
-- preference-aware recommendations based on explicit MangaFlux activity
+- better recommendation explanations
+- activity-based recommendations
 - saved discovery filters
-- recently viewed/search history controls
-- richer ranking/discovery views
-- better language/genre/status preference controls
+- recently viewed/search-history controls
+- stronger language/genre/status preferences
+- richer Hot/Popular/Trending discovery
 
-### v1.5+ — Stable-product improvements
-- PWA/app-shell improvements
-- installability and offline-safe application shell/state where appropriate
-- performance/accessibility improvements
-- operational scaling only when traffic requires it
-- shared Redis/edge rate limits only if MangaFlux becomes multi-instance
+### v1.5+ — Product polish
+- PWA/installability
+- faster application shell
+- accessibility/performance improvements
+- offline-safe shell/state where appropriate
+- scaling work only when real production traffic requires it
+- shared Redis/edge rate limiting only when MangaFlux is actually multi-instance
 
 ---
 
-## v2.x — Permitted multi-source MangaFlux
+## v2.x — Multi-source + Platform Expansion
 
-V2 changes MangaFlux from a MangaDex product into a source-federated reader architecture.
+v2.x is intentionally a large phase. MangaFlux should complete the important source/platform architecture work here before moving major scope into v3.x.
 
 ### v2.0.x — Source Platform Foundation
-- source registry and capabilities model
-- normalized manga/chapter/search interfaces
-- per-source health and configuration
-- per-source rate/cache policies
-- source attribution everywhere
+- source registry
+- capabilities model
+- normalized manga/chapter/search contracts
+- source configuration and health
+- attribution requirements
+- per-source caching/rate policies
 - official/public APIs first
 - HTML adapters only where explicitly permitted
 - no CAPTCHA/paywall/login-wall/anti-bot bypasses
 
-### v2.1.x — Unified Search
-- search multiple permitted sources
-- merged result presentation
+### v2.1.x — Unified Multi-source Search
+- query multiple permitted sources
+- normalized merged results
 - source badges
-- normalized metadata
+- source-aware metadata
 - deterministic title matching
-- duplicate candidate detection
+- source filtering
 
-### v2.2.x — Cross-Source Matching & Deduplication
+### v2.2.x — Canonical Manga Identity & Deduplication
 - canonical MangaFlux title identity
-- source-edition mapping
-- confidence-based duplicate matching
-- manual/admin correction tools
-- preserve per-source attribution and chapter provenance
+- map source editions to one canonical title
+- duplicate candidate detection
+- confidence-based matching
+- admin/manual corrections
+- preserve source provenance
 
-### v2.3.x — Source Selection & Fallback
-- choose preferred source per title
-- source availability/health awareness
+### v2.3.x — Source Selection & Safe Fallback
+- preferred source per title
+- source availability awareness
 - safe fallback when an equivalent permitted source exists
 - per-source language/quality preferences
-- migration of bookmarks/progress to canonical title identities where possible
+- explicit source switching
+- never silently hide attribution
 
-### v2.4+ — Multi-source Operations
-- adapter fixtures/test harness
-- source SDK/documentation
+### v2.4.x — Cross-source Library Migration & Provenance
+- map existing MangaDex bookmarks/progress to canonical MangaFlux titles
+- preserve original source references
+- migration confidence/status UI
+- cross-source chapter/progress reconciliation
+- safe rollback/repair tools for bad matches
+
+### v2.5.x — Adapter SDK & Testing
+- adapter fixtures
+- contract tests
+- source test harness
+- public/internal adapter documentation
+- capability validation
+- compatibility/version checks
+
+### v2.6.x — Multi-source Operations & Scale
 - source-specific diagnostics
-- queue/background jobs where needed
-- shared caching/rate limiting when multi-instance scale requires it
+- background queues/jobs where needed
+- shared caching where justified
+- distributed rate limiting when multiple API instances exist
+- source incident/degraded-state controls
+- operational/admin source controls
+
+### v2.7+ — Platform maturity before v3
+- additional permitted sources
+- migration tooling refinements
+- source quality scoring based on concrete metadata/availability signals
+- better canonical matching
+- platform stability/security work
+- only move to v3 when multi-source architecture is mature
 
 ---
 
 ## v3.x — Intelligent & Multi-client MangaFlux
 
-V3 focuses on discovery intelligence, personalization, richer social/product features, and additional clients rather than simply adding more sources.
+v3 scope stays intentionally later. New architecture/platform ideas that belong in v2 should be added to v2 first.
 
 ### v3.0.x — Semantic Discovery
-- metadata/embedding-assisted manga search
-- natural-language discovery such as “short completed mystery manga”
+- metadata/embedding-assisted search
+- natural-language discovery
 - semantic similarity recommendations
-- grounded results tied to MangaFlux/source metadata
-- explanation of why a title matched
+- grounded explanations for matches
 
 ### v3.1.x — Advanced Personalization
 - opt-in taste profile
 - custom reading lists/collections
-- recommendation controls: more/less like this, hide title/genre
-- stronger recommendation transparency
-- privacy controls and reset/delete preference history
+- more/less-like-this controls
+- hide title/genre controls
+- recommendation transparency
+- reset/delete preference history
 
 ### v3.2.x — Richer Social Layer
-- optional profile/list sharing
+- optional shareable lists
 - public/private/custom lists
 - activity controls
-- follow readers only if implemented with clear privacy controls
-- stronger anti-abuse/admin tooling before expanding social features
+- optional reader following only with privacy/anti-abuse controls
+- stronger moderation/admin tooling before social expansion
 
-### v3.3.x — PWA / Native Clients
+### v3.3.x — Native / Mature PWA
 - mature installable PWA
-- possible Flutter/native iOS/Android client using the same MangaFlux API
+- possible Flutter iOS/Android client
+- shared MangaFlux API/account
 - synchronized library/progress/preferences
-- mobile notification support
+- mobile notifications
 - accessibility parity across clients
 
 ### v3.4+ — Platform Ecosystem
-- public/source adapter SDK where appropriate
 - documented API contracts
+- user-owned data import/export
 - richer analytics/operations
-- import/export of user-owned MangaFlux data
-- future integrations and experimental interfaces without weakening V1/V2 security boundaries
+- source/adapter developer ecosystem
+- future integrations and experimental clients without weakening V1/V2 security boundaries

@@ -347,6 +347,32 @@ export async function upsertUserProgress(
   return item;
 }
 
+export async function deleteUserProgress(
+  db: MangaFluxDatabase,
+  userId: string,
+  source: string,
+  mangaId: string
+) {
+  await db
+    .delete(userReadingProgress)
+    .where(
+      and(
+        eq(userReadingProgress.userId, userId),
+        eq(userReadingProgress.source, source),
+        eq(userReadingProgress.mangaId, mangaId)
+      )
+    );
+}
+
+export async function clearUserProgress(
+  db: MangaFluxDatabase,
+  userId: string
+) {
+  await db
+    .delete(userReadingProgress)
+    .where(eq(userReadingProgress.userId, userId));
+}
+
 export async function getUserSummary(
   db: MangaFluxDatabase,
   userId: string
@@ -357,13 +383,13 @@ export async function getUserSummary(
       .from(userBookmarks)
       .where(eq(userBookmarks.userId, userId))
       .orderBy(desc(userBookmarks.createdAt))
-      .limit(12),
+      .limit(100),
     db
       .select()
       .from(userReadingProgress)
       .where(eq(userReadingProgress.userId, userId))
       .orderBy(desc(userReadingProgress.updatedAt))
-      .limit(12)
+      .limit(100)
   ]);
 
   return {

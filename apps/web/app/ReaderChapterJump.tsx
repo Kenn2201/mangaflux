@@ -18,11 +18,15 @@ type Chapter = {
 export default function ReaderChapterJump({
   mangaId,
   currentChapter,
-  querySuffix
+  querySuffix,
+  language = "en",
+  languageLabel = "English"
 }: {
   mangaId: string;
   currentChapter?: string;
   querySuffix: string;
+  language?: string;
+  languageLabel?: string;
 }) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -71,7 +75,9 @@ export default function ReaderChapterJump({
       const response = await fetch(
         `/api/manga/${encodeURIComponent(
           mangaId
-        )}/chapters?language=en&limit=100&offset=0&order=desc&chapter=${encodeURIComponent(
+        )}/chapters?language=${encodeURIComponent(
+          language
+        )}&limit=100&offset=0&order=desc&chapter=${encodeURIComponent(
           value
         )}`,
         { cache: "no-store" }
@@ -90,7 +96,9 @@ export default function ReaderChapterJump({
         payload?.items?.[0];
 
       if (!exact) {
-        setMessage(`Chapter ${value} was not found in the English feed.`);
+        setMessage(
+          `Chapter ${value} was not found in the ${languageLabel} feed.`
+        );
         return;
       }
 
