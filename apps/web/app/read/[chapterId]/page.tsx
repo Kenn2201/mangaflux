@@ -16,7 +16,9 @@ import ReaderSettingsSheet from "../../ReaderSettingsSheet";
 import {
   getReaderPreferences,
   readerLanguageOptions,
+  saveReaderPreferences,
   syncReaderPreferences,
+  syncSavedReaderPreferences,
   type ReaderPreferences
 } from "../../../lib/readerPreferences";
 
@@ -169,7 +171,9 @@ export default function ReaderPage() {
     useState<ReaderPreferences>({
       language: "en",
       dataSaver: false,
-      showAlternateReleases: false
+      showAlternateReleases: false,
+      imageFit: "width",
+      pageGap: "none"
     });
   const [searchQuery, setSearchQuery] = useState("");
   const [previousChapter, setPreviousChapter] = useState<Chapter>();
@@ -570,24 +574,23 @@ export default function ReaderPage() {
   );
 
   function toggleDataSaver() {
-    setDataSaver((current) => {
-      const next = !current;
-      const preferences = {
-        ...readerPreferences,
-        dataSaver: next
-      };
-      setReaderPreferences(preferences);
+    const next = !dataSaver;
+    const preferences: ReaderPreferences = {
+      ...readerPreferences,
+      dataSaver: next
+    };
 
-      if (data?.chapter.mangaId) {
-        window.localStorage.setItem(
-          `mangaflux:reader-series:v1:${data.chapter.mangaId}`,
-          JSON.stringify(preferences)
-        );
-      }
+    setDataSaver(next);
+    setReaderPreferences(preferences);
 
-      window.localStorage.setItem("mangaflux:data-saver", String(next));
-      return next;
-    });
+    if (data?.chapter.mangaId) {
+      saveReaderPreferences(
+        preferences,
+        data.chapter.mangaId,
+        "series"
+      );
+      syncSavedReaderPreferences(data.chapter.mangaId);
+    }
   }
 
   function toggleControls(event: MouseEvent<HTMLDivElement>) {
@@ -726,7 +729,10 @@ export default function ReaderPage() {
         </div>
       </header>
 
-      <div className="reader-pages" ref={pagesRef}>
+      <div
+        className={`reader-pages reader-fit-${readerPreferences.imageFit} reader-gap-${readerPreferences.pageGap}`}
+        ref={pagesRef}
+      >
         {data.pages.map((page) => (
           <ReaderImage
             key={page.index}

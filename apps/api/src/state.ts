@@ -45,6 +45,8 @@ type ReaderPreferencesBody = {
   dataSaver?: boolean;
   showAlternateReleases?: boolean;
   preferredScanlationGroup?: string | null;
+  imageFit?: string;
+  pageGap?: string;
   updatedAt?: string;
 };
 
@@ -64,6 +66,8 @@ function validReaderId(value: string) {
 }
 
 const LANGUAGE_RE = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i;
+const READER_IMAGE_FITS = new Set(["width", "screen"]);
+const READER_PAGE_GAPS = new Set(["none", "small", "large"]);
 
 function validMangaDexId(value: unknown): value is string {
   return typeof value === "string" && UUID_RE.test(value);
@@ -126,6 +130,28 @@ function validateReaderPreferencesBody(
     return null;
   }
 
+  if (
+    typeof body.imageFit !== "string" ||
+    !READER_IMAGE_FITS.has(body.imageFit)
+  ) {
+    reply.code(400).send({
+      error: "INVALID_REQUEST",
+      message: "imageFit is invalid"
+    });
+    return null;
+  }
+
+  if (
+    typeof body.pageGap !== "string" ||
+    !READER_PAGE_GAPS.has(body.pageGap)
+  ) {
+    reply.code(400).send({
+      error: "INVALID_REQUEST",
+      message: "pageGap is invalid"
+    });
+    return null;
+  }
+
   if (typeof body.updatedAt !== "string") {
     reply.code(400).send({
       error: "INVALID_REQUEST",
@@ -155,6 +181,8 @@ function validateReaderPreferencesBody(
     showAlternateReleases: body.showAlternateReleases,
     preferredScanlationGroup:
       body.preferredScanlationGroup?.trim() || undefined,
+    imageFit: body.imageFit,
+    pageGap: body.pageGap,
     updatedAt
   };
 }

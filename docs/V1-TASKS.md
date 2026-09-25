@@ -30,16 +30,29 @@
 - [x] keep scanlation-group attribution visible
 - [x] mobile/tablet layout pass
 
-## Remaining v1.1.x
+## v1.1.1 — Reading Quality Refinements
 
 - [x] safe account sync for per-series reader preferences
 - [x] browser-local fallback with timestamp conflict protection
 - [x] optional preferred scanlation group
 - [x] preferred-group selection for collapsed duplicate releases
 - [x] extended Reader Settings landscape QA
+
+## v1.1.2 — Reader Layout Controls
+
+- [x] per-series image-fit preference
+- [x] Fit width and Fit screen reader modes
+- [x] Seamless / Small / Large page spacing
+- [x] account/local synchronization for reader layout preferences
+- [x] migration defaults for existing reader-preference rows
+- [x] quick Data Saver control uses the synchronized preference path
+
+## Remaining v1.1.x
+
 - [ ] additional history management
-- [ ] additional reader layout/fit preferences if useful
+- [ ] reader typography refinements if real usage justifies them
 - [ ] broader accessibility/regression polish
+- [ ] final v1.1.x reading-quality QA
 
 ## Future V1.x
 

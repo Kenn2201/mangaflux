@@ -7,9 +7,27 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- v1.1.2+ remaining reading-quality work
-- reader typography, spacing, and fit controls
-- additional history and accessibility refinements based on usage
+- v1.1.3+ remaining reading-quality work
+- additional history-management controls
+- reader typography refinements if real usage justifies them
+- broader accessibility/regression polish and final v1.1.x QA
+
+## 1.1.2 - 2026-09-25 — Reader Layout Controls
+
+### Reader layout
+- Added per-series image-fit controls with Fit width and Fit screen modes.
+- Added Seamless, Small gap, and Large gap page-spacing options.
+- Fit screen constrains manga pages to the current viewport height while preserving vertical reading.
+
+### Preference persistence
+- Extended account-synced reader preferences with image-fit and page-spacing values.
+- Added safe migration defaults for existing preference rows.
+- Kept browser-local fallback and timestamp conflict protection.
+- Routed the immersive reader's quick Data Saver toggle through the same persisted/synchronized preference path.
+
+### Development workflow
+- Moved incremental implementation work to temporary `kenn/work-*` branches.
+- Keep `kenn/develop` clean during implementation and open one final release PR to `main` to avoid repeated deployment churn.
 
 ## 1.1.1 - 2026-09-25 — Reading Quality Refinements
 
@@ -57,9 +75,6 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 
 ### Responsive UX
 - Added dedicated tablet/mobile layouts for library controls, history actions, reader settings, and chapter controls.
-
-### Development workflow
-- Standardized future ChatGPT-assisted development on a single persistent `kenn/develop` branch.
 
 ## 1.0.0 - 2026-09-24 — Stable V1
 ## 0.9.1 - 2026-09-24 — RC UX & Account Hardening

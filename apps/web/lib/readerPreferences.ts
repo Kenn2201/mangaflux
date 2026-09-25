@@ -1,8 +1,13 @@
+export type ReaderImageFit = "width" | "screen";
+export type ReaderPageGap = "none" | "small" | "large";
+
 export type ReaderPreferences = {
   language: string;
   dataSaver: boolean;
   showAlternateReleases: boolean;
   preferredScanlationGroup?: string;
+  imageFit: ReaderImageFit;
+  pageGap: ReaderPageGap;
 };
 
 type StoredReaderPreferences = ReaderPreferences & {
@@ -15,17 +20,37 @@ type SyncedReaderPreferences = {
   dataSaver: boolean;
   showAlternateReleases: boolean;
   preferredScanlationGroup?: string | null;
+  imageFit: ReaderImageFit;
+  pageGap: ReaderPageGap;
   updatedAt: string;
 };
 
 const DEFAULTS: ReaderPreferences = {
   language: "en",
   dataSaver: false,
-  showAlternateReleases: false
+  showAlternateReleases: false,
+  imageFit: "width",
+  pageGap: "none"
 };
 
 const GLOBAL_KEY = "mangaflux:reader-defaults:v1";
 const SERIES_PREFIX = "mangaflux:reader-series:v1:";
+
+function normalizeImageFit(
+  value: unknown
+): ReaderImageFit | undefined {
+  return value === "width" || value === "screen"
+    ? value
+    : undefined;
+}
+
+function normalizePageGap(
+  value: unknown
+): ReaderPageGap | undefined {
+  return value === "none" || value === "small" || value === "large"
+    ? value
+    : undefined;
+}
 
 export const readerLanguageOptions = [
   ["en", "English"],
@@ -67,6 +92,8 @@ function parse(value: string | null): Partial<StoredReaderPreferences> {
         parsed.preferredScanlationGroup.length <= 120
           ? parsed.preferredScanlationGroup
           : undefined,
+      imageFit: normalizeImageFit(parsed.imageFit),
+      pageGap: normalizePageGap(parsed.pageGap),
       updatedAt:
         typeof parsed.updatedAt === "string" &&
         !Number.isNaN(Date.parse(parsed.updatedAt))
@@ -110,7 +137,15 @@ export function getReaderPreferences(mangaId?: string): ReaderPreferences {
       DEFAULTS.showAlternateReleases,
     preferredScanlationGroup:
       series.preferredScanlationGroup ??
-      global.preferredScanlationGroup
+      global.preferredScanlationGroup,
+    imageFit:
+      series.imageFit ??
+      global.imageFit ??
+      DEFAULTS.imageFit,
+    pageGap:
+      series.pageGap ??
+      global.pageGap ??
+      DEFAULTS.pageGap
   };
 }
 
@@ -214,7 +249,9 @@ export async function syncReaderPreferences(
       showAlternateReleases:
         payload.item.showAlternateReleases,
       preferredScanlationGroup:
-        payload.item.preferredScanlationGroup || undefined
+        payload.item.preferredScanlationGroup || undefined,
+      imageFit: normalizeImageFit(payload.item.imageFit) ?? DEFAULTS.imageFit,
+      pageGap: normalizePageGap(payload.item.pageGap) ?? DEFAULTS.pageGap
     };
 
     persistReaderPreferences(

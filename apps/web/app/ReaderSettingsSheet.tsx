@@ -134,6 +134,49 @@ export default function ReaderSettingsSheet({
 
         <label className="reader-setting-row">
           <span>
+            <strong>Image fit</strong>
+            <small>
+              Fill the reader width or keep each page inside the current screen height.
+            </small>
+          </span>
+          <select
+            value={preferences.imageFit}
+            onChange={(event) =>
+              update({
+                ...preferences,
+                imageFit: event.target.value as ReaderPreferences["imageFit"]
+              })
+            }
+          >
+            <option value="width">Fit width</option>
+            <option value="screen">Fit screen</option>
+          </select>
+        </label>
+
+        <label className="reader-setting-row">
+          <span>
+            <strong>Page spacing</strong>
+            <small>
+              Control the visual gap between consecutive manga pages.
+            </small>
+          </span>
+          <select
+            value={preferences.pageGap}
+            onChange={(event) =>
+              update({
+                ...preferences,
+                pageGap: event.target.value as ReaderPreferences["pageGap"]
+              })
+            }
+          >
+            <option value="none">Seamless</option>
+            <option value="small">Small gap</option>
+            <option value="large">Large gap</option>
+          </select>
+        </label>
+
+        <label className="reader-setting-row">
+          <span>
             <strong>Preferred scanlation group</strong>
             <small>
               When duplicate releases exist, MangaFlux prefers this group while keeping attribution visible.
