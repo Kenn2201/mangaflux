@@ -2,6 +2,7 @@
 
 import {
   useEffect,
+  useRef,
   useState
 } from "react";
 import { createPortal } from "react-dom";
@@ -31,6 +32,8 @@ export default function ReaderSettingsSheet({
   const [preferences, setPreferences] = useState<ReaderPreferences>(() =>
     getReaderPreferences(mangaId)
   );
+  const sheetRef = useRef<HTMLElement | null>(null);
+  const closeRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -46,11 +49,40 @@ export default function ReaderSettingsSheet({
       if (event.key === "Escape") {
         event.preventDefault();
         onClose();
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+
+      const focusable = Array.from(
+        sheetRef.current?.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        ) ?? []
+      );
+
+      if (!focusable.length) {
+        event.preventDefault();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (
+        !event.shiftKey &&
+        document.activeElement === last
+      ) {
+        event.preventDefault();
+        first.focus();
       }
     }
 
     document.addEventListener("keydown", onKeyDown);
     document.body.classList.add("reader-settings-open");
+    window.setTimeout(() => closeRef.current?.focus(), 0);
 
     return () => {
       document.removeEventListener("keydown", onKeyDown);
@@ -78,6 +110,7 @@ export default function ReaderSettingsSheet({
       />
 
       <section
+        ref={sheetRef}
         className="reader-settings-sheet"
         role="dialog"
         aria-modal="true"
@@ -88,7 +121,12 @@ export default function ReaderSettingsSheet({
             <p className="eyebrow">Per-series settings</p>
             <h2 id="reader-settings-title">Reader settings</h2>
           </div>
-          <button type="button" onClick={onClose} aria-label="Close settings">
+          <button
+            ref={closeRef}
+            type="button"
+            onClick={onClose}
+            aria-label="Close settings"
+          >
             ×
           </button>
         </div>
@@ -172,6 +210,28 @@ export default function ReaderSettingsSheet({
             <option value="none">Seamless</option>
             <option value="small">Small gap</option>
             <option value="large">Large gap</option>
+          </select>
+        </label>
+
+        <label className="reader-setting-row">
+          <span>
+            <strong>Reader UI text</strong>
+            <small>
+              Adjust labels and controls without changing manga page artwork.
+            </small>
+          </span>
+          <select
+            value={preferences.textSize}
+            onChange={(event) =>
+              update({
+                ...preferences,
+                textSize: event.target.value as ReaderPreferences["textSize"]
+              })
+            }
+          >
+            <option value="small">Small</option>
+            <option value="standard">Standard</option>
+            <option value="large">Large</option>
           </select>
         </label>
 

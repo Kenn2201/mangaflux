@@ -43,6 +43,13 @@
       "when": 1790305200000,
       "tag": "0005_v112_reader_layout",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790308800000,
+      "tag": "0006_v114_reader_typography",
+      "breakpoints": true
     }
   ]
 }

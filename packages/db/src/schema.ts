@@ -193,6 +193,7 @@ export const userReaderPreferences = pgTable(
     preferredScanlationGroup: text("preferred_scanlation_group"),
     imageFit: text("image_fit").notNull().default("width"),
     pageGap: text("page_gap").notNull().default("none"),
+    textSize: text("text_size").notNull().default("standard"),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
   },

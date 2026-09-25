@@ -173,7 +173,8 @@ export default function ReaderPage() {
       dataSaver: false,
       showAlternateReleases: false,
       imageFit: "width",
-      pageGap: "none"
+      pageGap: "none",
+      textSize: "standard"
     });
   const [searchQuery, setSearchQuery] = useState("");
   const [previousChapter, setPreviousChapter] = useState<Chapter>();
@@ -624,7 +625,7 @@ export default function ReaderPage() {
     <main
       id="reader-content"
       tabIndex={-1}
-      className={`reader reader-immersive ${
+      className={`reader reader-immersive reader-text-${readerPreferences.textSize} ${
         controlsVisible ? "controls-visible" : "controls-hidden"
       }`}
       onClick={toggleControls}
@@ -640,7 +641,12 @@ export default function ReaderPage() {
         <span style={{ width: `${progress}%` }} />
       </div>
 
-      <div className="reader-page-hud" aria-live="polite">
+      <div
+        className="reader-page-hud"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
         {pageLabel}
       </div>
 

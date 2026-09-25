@@ -1,5 +1,6 @@
 export type ReaderImageFit = "width" | "screen";
 export type ReaderPageGap = "none" | "small" | "large";
+export type ReaderTextSize = "small" | "standard" | "large";
 
 export type ReaderPreferences = {
   language: string;
@@ -8,6 +9,7 @@ export type ReaderPreferences = {
   preferredScanlationGroup?: string;
   imageFit: ReaderImageFit;
   pageGap: ReaderPageGap;
+  textSize: ReaderTextSize;
 };
 
 type StoredReaderPreferences = ReaderPreferences & {
@@ -22,6 +24,7 @@ type SyncedReaderPreferences = {
   preferredScanlationGroup?: string | null;
   imageFit: ReaderImageFit;
   pageGap: ReaderPageGap;
+  textSize: ReaderTextSize;
   updatedAt: string;
 };
 
@@ -30,7 +33,8 @@ const DEFAULTS: ReaderPreferences = {
   dataSaver: false,
   showAlternateReleases: false,
   imageFit: "width",
-  pageGap: "none"
+  pageGap: "none",
+  textSize: "standard"
 };
 
 const GLOBAL_KEY = "mangaflux:reader-defaults:v1";
@@ -48,6 +52,16 @@ function normalizePageGap(
   value: unknown
 ): ReaderPageGap | undefined {
   return value === "none" || value === "small" || value === "large"
+    ? value
+    : undefined;
+}
+
+function normalizeTextSize(
+  value: unknown
+): ReaderTextSize | undefined {
+  return value === "small" ||
+    value === "standard" ||
+    value === "large"
     ? value
     : undefined;
 }
@@ -94,6 +108,7 @@ function parse(value: string | null): Partial<StoredReaderPreferences> {
           : undefined,
       imageFit: normalizeImageFit(parsed.imageFit),
       pageGap: normalizePageGap(parsed.pageGap),
+      textSize: normalizeTextSize(parsed.textSize),
       updatedAt:
         typeof parsed.updatedAt === "string" &&
         !Number.isNaN(Date.parse(parsed.updatedAt))
@@ -145,7 +160,11 @@ export function getReaderPreferences(mangaId?: string): ReaderPreferences {
     pageGap:
       series.pageGap ??
       global.pageGap ??
-      DEFAULTS.pageGap
+      DEFAULTS.pageGap,
+    textSize:
+      series.textSize ??
+      global.textSize ??
+      DEFAULTS.textSize
   };
 }
 
@@ -251,7 +270,8 @@ export async function syncReaderPreferences(
       preferredScanlationGroup:
         payload.item.preferredScanlationGroup || undefined,
       imageFit: normalizeImageFit(payload.item.imageFit) ?? DEFAULTS.imageFit,
-      pageGap: normalizePageGap(payload.item.pageGap) ?? DEFAULTS.pageGap
+      pageGap: normalizePageGap(payload.item.pageGap) ?? DEFAULTS.pageGap,
+      textSize: normalizeTextSize(payload.item.textSize) ?? DEFAULTS.textSize
     };
 
     persistReaderPreferences(

@@ -449,6 +449,7 @@ export async function upsertUserReaderPreferences(
     preferredScanlationGroup?: string;
     imageFit: string;
     pageGap: string;
+    textSize: string;
     updatedAt: Date;
   }
 ) {
@@ -471,6 +472,7 @@ export async function upsertUserReaderPreferences(
           input.preferredScanlationGroup ?? null,
         imageFit: input.imageFit,
         pageGap: input.pageGap,
+        textSize: input.textSize,
         updatedAt: input.updatedAt
       },
       setWhere: lt(userReaderPreferences.updatedAt, input.updatedAt)
