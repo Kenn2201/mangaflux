@@ -6,7 +6,8 @@ import type {
 import {
   deleteCommunityCommentAsAdmin,
   deleteUserSessions,
-  getAdminOverview
+  getAdminOverview,
+  setUserCommunityRestricted
 } from "@mangaflux/db";
 import type { MangaFluxDatabase } from "@mangaflux/db";
 import { authenticateSession } from "./auth.js";
@@ -164,6 +165,63 @@ export function registerAdminRoutes(
       return {
         ok: true,
         message: "Comment removed by administrator."
+      };
+    }
+  );
+
+  app.post<{
+    Params: { userId: string };
+    Body: { restricted?: boolean };
+  }>(
+    "/api/admin/users/:userId/community-restriction",
+    { preHandler: limits.write },
+    async (request, reply) => {
+      const session = await requireAdmin(
+        request,
+        reply,
+        database,
+        authProxySecret
+      );
+
+      if (!session || !database) return;
+
+      if (
+        !UUID_RE.test(request.params.userId) ||
+        typeof request.body?.restricted !== "boolean"
+      ) {
+        return reply.code(400).send({
+          error: "INVALID_REQUEST",
+          message: "Invalid community restriction request."
+        });
+      }
+
+      if (request.params.userId === session.userId) {
+        return reply.code(400).send({
+          error: "SELF_RESTRICTION_BLOCKED",
+          message:
+            "The active administrator cannot restrict their own community access."
+        });
+      }
+
+      const user = await setUserCommunityRestricted(
+        database,
+        request.params.userId,
+        request.body.restricted
+      );
+
+      if (!user) {
+        return reply.code(404).send({
+          error: "NOT_FOUND",
+          message: "User not found."
+        });
+      }
+
+      return {
+        ok: true,
+        communityRestricted: user.communityRestricted,
+        message: user.communityRestricted
+          ? "Community posting and reactions are restricted for that account."
+          : "Community access has been restored for that account."
       };
     }
   );

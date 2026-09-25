@@ -68,6 +68,7 @@ type ProfileBody = {
   avatarDataUrl?: string | null;
   bio?: string | null;
   showPublicActivity?: boolean;
+  showJoinedDate?: boolean;
 };
 
 function normalizeEmail(value: unknown) {
@@ -610,6 +611,8 @@ export function registerAuthRoutes(
           avatarDataUrl: session.avatarDataUrl,
           bio: session.bio,
           showPublicActivity: session.showPublicActivity,
+          showJoinedDate: session.showJoinedDate,
+          communityRestricted: session.communityRestricted,
           emailVerifiedAt: session.emailVerifiedAt,
           createdAt: session.createdAt,
           role: roleForEmail(session.email)
@@ -649,17 +652,24 @@ export function registerAuthRoutes(
           : typeof request.body.showPublicActivity === "boolean"
             ? request.body.showPublicActivity
             : undefined;
+      const showJoinedDate =
+        request.body?.showJoinedDate === undefined
+          ? session.showJoinedDate ?? true
+          : typeof request.body.showJoinedDate === "boolean"
+            ? request.body.showJoinedDate
+            : undefined;
 
       if (
         displayName === undefined ||
         avatarDataUrl === undefined ||
         bio === undefined ||
-        showPublicActivity === undefined
+        showPublicActivity === undefined ||
+        showJoinedDate === undefined
       ) {
         return reply.code(400).send({
           error: "INVALID_REQUEST",
           message:
-            "Use a 2-32 character display name, a bio up to 280 characters, a valid activity visibility setting, and a small WebP avatar."
+            "Use a 2-32 character display name, a bio up to 280 characters, valid privacy settings, and a small WebP avatar."
         });
       }
 
@@ -670,7 +680,8 @@ export function registerAuthRoutes(
           displayName,
           avatarDataUrl,
           bio,
-          showPublicActivity
+          showPublicActivity,
+          showJoinedDate
         }
       );
 

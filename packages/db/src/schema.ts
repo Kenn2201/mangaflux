@@ -65,6 +65,12 @@ export const users = pgTable(
     showPublicActivity: boolean("show_public_activity")
       .notNull()
       .default(true),
+    showJoinedDate: boolean("show_joined_date")
+      .notNull()
+      .default(true),
+    communityRestricted: boolean("community_restricted")
+      .notNull()
+      .default(false),
     emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()

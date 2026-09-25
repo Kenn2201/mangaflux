@@ -32,6 +32,7 @@ export async function PUT(request: NextRequest) {
     avatarDataUrl?: string | null;
     bio?: string | null;
     showPublicActivity?: boolean;
+    showJoinedDate?: boolean;
   };
 
   try {

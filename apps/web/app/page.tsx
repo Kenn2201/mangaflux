@@ -93,7 +93,7 @@ export default async function Home({
       </section>
 
       <div className="landing-version">
-        v1.2.2 · Activity Browsing & Discussion UX
+        v1.2.3 · Profile Privacy & Community Moderation
       </div>
     </main>
   );

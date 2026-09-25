@@ -57,6 +57,13 @@
       "when": 1790312400000,
       "tag": "0007_v120_profile_depth",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790316000000,
+      "tag": "0008_v123_community_controls",
+      "breakpoints": true
     }
   ]
 }

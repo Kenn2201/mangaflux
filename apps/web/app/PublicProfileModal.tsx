@@ -22,7 +22,7 @@ type PublicProfile = {
     displayName?: string | null;
     avatarDataUrl?: string | null;
     bio?: string | null;
-    createdAt: string;
+    createdAt?: string | null;
   };
   activityVisible: boolean;
   stats: {
@@ -337,7 +337,11 @@ export default function PublicProfileModal({
 
               <div>
                 <h2 id="public-profile-title">{name}</h2>
-                <span>{formatJoined(data.user.createdAt)}</span>
+                {data.user.createdAt ? (
+                  <span>{formatJoined(data.user.createdAt)}</span>
+                ) : (
+                  <span>Joined date hidden</span>
+                )}
               </div>
             </div>
 

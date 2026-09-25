@@ -25,6 +25,7 @@ type AdminUser = {
   email: string;
   displayName?: string | null;
   avatarDataUrl?: string | null;
+  communityRestricted?: boolean;
   emailVerifiedAt?: string | null;
   createdAt: string;
 };
@@ -89,6 +90,11 @@ type Diagnostics = {
 type PendingAdminAction =
   | { type: "remove-comment"; id: string }
   | { type: "revoke-sessions"; id: string }
+  | {
+      type: "community-restriction";
+      id: string;
+      restricted: boolean;
+    }
   | null;
 
 type Overview = {
@@ -241,6 +247,59 @@ export default function AdminClient() {
         tone: "success",
         title: "Comment removed",
         message: "The comment was removed from MangaFlux community."
+      });
+
+      await loadOverview();
+    } catch (error) {
+      notify({
+        tone: "error",
+        title: "Admin action failed",
+        message:
+          error instanceof Error ? error.message : "Try again shortly."
+      });
+    } finally {
+      setBusyId("");
+    }
+  }
+
+  async function setCommunityRestriction(
+    userId: string,
+    restricted: boolean
+  ) {
+    if (busyId) return;
+    setBusyId(userId);
+
+    try {
+      const response = await fetch(
+        `/api/admin/users/${encodeURIComponent(
+          userId
+        )}/community-restriction`,
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "x-mangaflux-client": "web"
+          },
+          body: JSON.stringify({ restricted })
+        }
+      );
+
+      const payload = (await response.json().catch(() => null)) as
+        | { message?: string }
+        | null;
+
+      if (!response.ok) {
+        throw new Error(
+          payload?.message ?? "Community access could not be updated."
+        );
+      }
+
+      notify({
+        tone: "success",
+        title: restricted
+          ? "Community restricted"
+          : "Community restored",
+        message: payload?.message
       });
 
       await loadOverview();
@@ -510,7 +569,9 @@ export default function AdminClient() {
                       {user.displayName ? <span>{user.email}</span> : null}
                       <small>
                         {user.emailVerifiedAt ? "Verified" : "Unverified"} ·{" "}
-                        joined {formatDate(user.createdAt)}
+                        {user.communityRestricted
+                          ? "Community restricted"
+                          : "Community active"} · joined {formatDate(user.createdAt)}
                       </small>
                     </div>
 
@@ -521,6 +582,32 @@ export default function AdminClient() {
                         onClick={() => setProfileUserId(user.id)}
                       >
                         View profile
+                      </button>
+
+                      <button
+                        type="button"
+                        className={
+                          user.communityRestricted
+                            ? "admin-community-restore"
+                            : "admin-community-restrict"
+                        }
+                        disabled={
+                          busyId !== "" ||
+                          user.id === overview.admin.id
+                        }
+                        onClick={() =>
+                          setPendingAction({
+                            type: "community-restriction",
+                            id: user.id,
+                            restricted: !user.communityRestricted
+                          })
+                        }
+                      >
+                        {user.id === overview.admin.id
+                          ? "Admin protected"
+                          : user.communityRestricted
+                            ? "Restore community"
+                            : "Restrict community"}
                       </button>
 
                       <button
@@ -600,8 +687,9 @@ export default function AdminClient() {
             <h2>Intentionally limited.</h2>
             <p>
               This console can inspect aggregate operations, review recent
-              accounts/comments, remove community comments, revoke another
-              user&apos;s active sessions, and open system status. It cannot
+              accounts/comments, remove community comments, restrict or restore
+              another user&apos;s commenting/reaction access, revoke active
+              sessions, and open system status. It cannot
               view passwords, reset passwords for users, reveal session tokens,
               read API keys, run SQL, or change deployment secrets.
             </p>
@@ -619,17 +707,29 @@ export default function AdminClient() {
         title={
           pendingAction?.type === "remove-comment"
             ? "Remove this community comment?"
-            : "Revoke this user's sessions?"
+            : pendingAction?.type === "community-restriction"
+              ? pendingAction.restricted
+                ? "Restrict this user's community access?"
+                : "Restore this user's community access?"
+              : "Revoke this user's sessions?"
         }
         description={
           pendingAction?.type === "remove-comment"
             ? "The comment will be removed from MangaFlux community. The user's account remains intact."
-            : "Every active session for this user will be invalidated. They can sign in again afterward."
+            : pendingAction?.type === "community-restriction"
+              ? pendingAction.restricted
+                ? "The user can still sign in, read manga, and manage their account, but they will not be able to post comments or reactions until restored."
+                : "The user will be able to post comments and reactions again."
+              : "Every active session for this user will be invalidated. They can sign in again afterward."
         }
         confirmLabel={
           pendingAction?.type === "remove-comment"
             ? "Remove comment"
-            : "Revoke sessions"
+            : pendingAction?.type === "community-restriction"
+              ? pendingAction.restricted
+                ? "Restrict community"
+                : "Restore community"
+              : "Revoke sessions"
         }
         danger
         busy={busyId !== ""}
@@ -640,6 +740,11 @@ export default function AdminClient() {
 
           if (action?.type === "remove-comment") {
             void deleteComment(action.id);
+          } else if (action?.type === "community-restriction") {
+            void setCommunityRestriction(
+              action.id,
+              action.restricted
+            );
           } else if (action?.type === "revoke-sessions") {
             void revokeSessions(action.id);
           }

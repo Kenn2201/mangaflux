@@ -15,7 +15,8 @@ v1.1.5  ████████████████████  ✅
 v1.2.0  ████████████████████  ✅
 v1.2.1  ████████████████████  ✅
 v1.2.2  ████████████████████  ✅
-v1.2.3+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
+v1.2.3  ████████████████████  ✅
+v1.2.4+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
 v1.3.x  Following & Notifications
 v1.4.x  Discovery & Personalization
 v1.5+   Product Polish
@@ -25,7 +26,7 @@ v2.x    Multi-Source + Platform Expansion
 v3.x    Advanced MangaFlux
 ~~~
 
-**v1.1.x — Library & Reading Quality is signed off.** MangaFlux is now in **v1.2.x — Profiles & Community Depth**. **v1.2.2 — Activity Browsing & Discussion UX** is complete, and v1.2.3+ continues the remaining profile/privacy/administration work.
+**v1.1.x — Library & Reading Quality is signed off.** MangaFlux is now in **v1.2.x — Profiles & Community Depth**. **v1.2.3 — Profile Privacy & Community Moderation** is complete, and v1.2.4+ continues notification/privacy groundwork and final community-depth polish.
 
 ---
 
@@ -253,14 +254,34 @@ The v1.1.x reading-quality phase is complete. Regression-only fixes can still be
 
 ---
 
-### ➡️ v1.2.3+ — Community Depth — NEXT
+### ✅ v1.2.3 — Profile Privacy & Community Moderation
+
+#### Profile privacy
+- Show / hide joined date on public community profiles
+- Hide the timestamp at the server response layer, not only in CSS
+- Existing accounts default safely to joined date visible
+
+#### Community moderation
+- Admin can restrict or restore community posting/reactions per account
+- Restriction keeps reading, library, authentication, and profile management available
+- API enforcement covers both comment and reaction mutations
+- Admin cannot restrict the currently active admin account
+- Admin account list exposes community-active / restricted state
+
+#### Restricted-account UX
+- Restricted users see a clear account notice
+- Reaction controls are disabled
+- Comment composer is replaced with a restriction explanation
+
+---
+
+### ➡️ v1.2.4+ — Community Depth — NEXT
 
 Continue the v1.2.x phase with focused slices such as:
 
-- broader user/privacy preferences
 - notification/privacy preference groundwork
-- stronger community administration and moderation
-- additional activity presentation improvements discovered through QA
+- final community moderation/admin polish
+- additional profile/activity presentation improvements discovered through QA
 - keep credentials and private account information protected
 
 ---

@@ -7,8 +7,27 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- v1.2.3+ broader user/privacy preferences and community administration
+- v1.2.4+ notification/privacy preference groundwork and final community-depth polish
 - keep v1.3.x reserved for Following & Notifications
+
+## 1.2.3 - 2026-09-25 — Profile Privacy & Community Moderation
+
+### Profile privacy
+- Added a Show joined date privacy control to community profile editing.
+- Public profile responses omit the membership timestamp when joined-date visibility is disabled.
+- Existing accounts default safely to joined-date visible.
+
+### Community moderation
+- Added an administrator control to restrict or restore a user's commenting and reaction access.
+- Community restrictions are enforced by the API for both comment and reaction mutations.
+- Restricted users can still sign in, read manga, manage their library, and edit their account/profile.
+- Admin self-restriction is blocked.
+- Admin overview shows whether each recent account has active or restricted community access.
+
+### Restricted-account UX
+- Discussion reaction controls are disabled for restricted accounts.
+- Comment composer is replaced by a clear restriction notice.
+- Account profile summary also reports an active community restriction.
 
 ## 1.2.2 - 2026-09-25 — Activity Browsing & Discussion UX
 
