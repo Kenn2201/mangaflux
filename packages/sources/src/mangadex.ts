@@ -22,7 +22,7 @@ import type {
 const BASE = process.env.MANGADEX_BASE_URL ?? "https://api.mangadex.org";
 const HOSTS = ["api.mangadex.org"];
 const COVER_BASE = "https://uploads.mangadex.org/covers";
-const USER_AGENT = "MangaFlux/1.4.4 (+https://manga.kenncode.me)";
+const USER_AGENT = "MangaFlux/1.4.5 (+https://manga.kenncode.me)";
 const MANIFEST_TTL_MS = 60_000;
 const SEARCH_TTL_MS = 30_000;
 const DETAILS_TTL_MS = 5 * 60_000;
@@ -353,11 +353,14 @@ function appendCommonMangaFilters(
   url: URL,
   options: Pick<
     DiscoveryOptions,
-    "tagId" | "year" | "creatorId" | "status"
+    "tagId" | "year" | "creatorId" | "status" | "language"
   > = {}
 ) {
   url.searchParams.append("includes[]", "cover_art");
-  url.searchParams.append("availableTranslatedLanguage[]", "en");
+  url.searchParams.append(
+    "availableTranslatedLanguage[]",
+    options.language?.trim().toLowerCase() || "en"
+  );
   url.searchParams.set("hasAvailableChapters", "true");
 
   if (options.tagId) {
@@ -393,6 +396,7 @@ async function fetchOrderedManga(
       : undefined;
   const creatorId = options.creatorId?.trim() || undefined;
   const status = options.status;
+  const language = options.language?.trim().toLowerCase() || "en";
   const cacheKey = [
     kind,
     limit,
@@ -400,7 +404,8 @@ async function fetchOrderedManga(
     tagId ?? "all",
     year ?? "any-year",
     creatorId ?? "any-creator",
-    status ?? "any-status"
+    status ?? "any-status",
+    language
   ].join(":");
 
   const cached = readCache(discoveryCache, cacheKey);
@@ -421,7 +426,8 @@ async function fetchOrderedManga(
     tagId,
     year,
     creatorId,
-    status
+    status,
+    language
   });
 
   const response = await mangaDexFetch(url.toString());
@@ -450,7 +456,8 @@ async function buildHotPool(
     options.tagId?.trim() || "all",
     options.year ?? "any-year",
     options.creatorId?.trim() || "any-creator",
-    options.status ?? "any-status"
+    options.status ?? "any-status",
+    options.language?.trim().toLowerCase() || "en"
   ].join(":");
   const cached = readCache(hotPoolCache, cacheKey);
   if (cached) return cached;
@@ -462,7 +469,8 @@ async function buildHotPool(
       tagId: options.tagId,
       year: options.year,
       creatorId: options.creatorId,
-      status: options.status
+      status: options.status,
+      language: options.language
     }),
     fetchOrderedManga("popular", {
       limit: 100,
@@ -470,7 +478,8 @@ async function buildHotPool(
       tagId: options.tagId,
       year: options.year,
       creatorId: options.creatorId,
-      status: options.status
+      status: options.status,
+      language: options.language
     })
   ]);
 

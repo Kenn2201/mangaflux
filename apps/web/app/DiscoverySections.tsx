@@ -9,6 +9,11 @@ import MangaTile, {
   type MangaTileItem
 } from "./MangaTile";
 import { reliableFetch } from "../lib/reliableFetch";
+import {
+  discoveryLanguageLabel,
+  discoveryLanguageOptions
+} from "../lib/discoveryPreferences";
+import { useDiscoveryLanguage } from "../lib/useDiscoveryLanguage";
 
 type DiscoveryPage = {
   items: MangaTileItem[];
@@ -60,14 +65,17 @@ export default function DiscoverySections({
 }) {
   const [data, setData] = useState<Payload | null>(null);
   const [failed, setFailed] = useState(false);
+  const { language, setLanguage } = useDiscoveryLanguage();
 
   useEffect(() => {
     let cancelled = false;
+    setData(null);
+    setFailed(false);
 
     async function load() {
       try {
         const response = await reliableFetch(
-          "/api/discovery/home",
+          `/api/discovery/home?language=${encodeURIComponent(language)}`,
           { cache: "no-store" }
         );
 
@@ -84,7 +92,7 @@ export default function DiscoverySections({
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [language]);
 
   if (failed) {
     return (
@@ -106,6 +114,26 @@ export default function DiscoverySections({
       className={`discovery-stack ${compact ? "is-compact" : ""}`}
       id="discover"
     >
+      <div className="discovery-language-bar">
+        <div className="discovery-language-copy">
+          <strong>Discovery language</strong>
+          <span>
+            Showing manga with {discoveryLanguageLabel(language)} chapters available.
+          </span>
+        </div>
+        <select
+          aria-label="Discovery language"
+          value={language}
+          onChange={(event) => setLanguage(event.target.value)}
+        >
+          {discoveryLanguageOptions.map(([value, label]) => (
+            <option value={value} key={value}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </div>
+
       {sections.map((section) => {
         const page = data?.sections[section.key];
 

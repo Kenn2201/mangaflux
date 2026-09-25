@@ -20,6 +20,7 @@ import {
   type ReaderPreferences
 } from "../../../lib/readerPreferences";
 import { recordRecentlyViewed } from "../../../lib/recentlyViewed";
+import { useDiscoveryLanguage } from "../../../lib/useDiscoveryLanguage";
 
 type MangaDetails = {
   id: string;
@@ -90,6 +91,7 @@ export default function MangaPage() {
   const [followAvailable, setFollowAvailable] = useState(true);
   const [readerSettingsOpen, setReaderSettingsOpen] = useState(false);
   const [surpriseBusy, setSurpriseBusy] = useState(false);
+  const { language: discoveryLanguage } = useDiscoveryLanguage();
   const [readerPreferences, setReaderPreferences] =
     useState<ReaderPreferences>({
       language: "en",
@@ -579,19 +581,21 @@ export default function MangaPage() {
         (tag, index) =>
           `/api/discovery?kind=${
             index === 0 ? "popular" : "top"
-          }&limit=18&tag=${encodeURIComponent(tag.id)}`
+          }&limit=18&tag=${encodeURIComponent(
+            tag.id
+          )}&language=${encodeURIComponent(discoveryLanguage)}`
       );
 
       if (creator) {
         requests.push(
           `/api/discovery?kind=popular&limit=18&creator=${encodeURIComponent(
             creator.id
-          )}`
+          )}&language=${encodeURIComponent(discoveryLanguage)}`
         );
       }
 
       if (!requests.length) {
-        requests.push("/api/discovery?kind=popular&limit=24");
+        requests.push(`/api/discovery?kind=popular&limit=24&language=${encodeURIComponent(discoveryLanguage)}`);
       }
 
       const groups = await Promise.all(

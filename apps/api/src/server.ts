@@ -28,7 +28,7 @@ import type {
   MangaSummary
 } from "@mangaflux/sources";
 
-const APP_VERSION = "1.4.4";
+const APP_VERSION = "1.4.5";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LANGUAGE_RE = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i;
@@ -43,6 +43,21 @@ const MANGA_STATUSES = new Set([
   "completed",
   "hiatus",
   "cancelled"
+]);
+const DISCOVERY_LANGUAGES = new Set([
+  "en",
+  "ja",
+  "ko",
+  "zh",
+  "zh-hk",
+  "es",
+  "fr",
+  "de",
+  "it",
+  "pt-br",
+  "id",
+  "vi",
+  "th"
 ]);
 
 const app = Fastify({
@@ -699,6 +714,7 @@ app.get<{
     year?: string;
     creator?: string;
     status?: string;
+    language?: string;
   };
 }>(
   "/api/discovery",
@@ -710,6 +726,8 @@ app.get<{
     const tagId = request.query.tag?.trim();
     const creatorId = request.query.creator?.trim();
     const status = request.query.status?.trim();
+    const language =
+      request.query.language?.trim().toLowerCase() || "en";
     const year =
       request.query.year === undefined
         ? undefined
@@ -722,12 +740,13 @@ app.get<{
       year === null ||
       (tagId && !UUID_RE.test(tagId)) ||
       (creatorId && !UUID_RE.test(creatorId)) ||
-      (status && !MANGA_STATUSES.has(status))
+      (status && !MANGA_STATUSES.has(status)) ||
+      !DISCOVERY_LANGUAGES.has(language)
     ) {
       return reply.code(400).send({
         error: "INVALID_REQUEST",
         message:
-          "Invalid discovery kind, pagination, genre tag, year, creator, or status."
+          "Invalid discovery kind, pagination, genre tag, year, creator, status, or language."
       });
     }
 
@@ -742,7 +761,8 @@ app.get<{
         | "completed"
         | "hiatus"
         | "cancelled"
-        | undefined
+        | undefined,
+      language
     });
 
     reply.header(
@@ -758,14 +778,26 @@ app.get<{
   }
 );
 
-app.get(
+app.get<{
+  Querystring: { language?: string };
+}>(
   "/api/discovery/home",
   { preHandler: discoveryRateLimit },
-  async (_request, reply) => {
+  async (request, reply) => {
+    const language =
+      request.query.language?.trim().toLowerCase() || "en";
+
+    if (!DISCOVERY_LANGUAGES.has(language)) {
+      return reply.code(400).send({
+        error: "INVALID_REQUEST",
+        message: "Invalid discovery language."
+      });
+    }
+
     const [popular, top, latest] = await Promise.all([
-      mangaDexSource.discover("popular", { limit: 16 }),
-      mangaDexSource.discover("top", { limit: 16 }),
-      mangaDexSource.discover("latest", { limit: 16 })
+      mangaDexSource.discover("popular", { limit: 16, language }),
+      mangaDexSource.discover("top", { limit: 16, language }),
+      mangaDexSource.discover("latest", { limit: 16, language })
     ]);
 
     const hot = buildHomeHot(popular.items, latest.items, 10);
@@ -777,6 +809,7 @@ app.get(
 
     return {
       source: mangaDexSource.id,
+      language,
       sections: {
         hot: {
           items: hot,

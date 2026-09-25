@@ -7,8 +7,19 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- stronger language, genre, and manga-status preferences
+- stronger genre and manga-status preferences
 - improved Hot / Popular / Trending discovery
+
+## 1.4.5 - 2026-09-26 — Discovery Language Preference
+
+### Discovery preferences
+- Accepted physical QA sign-off for v1.4.4 Search History Controls.
+- Replaced the MangaDex adapter's hard-coded English discovery filter with a validated language option.
+- Added a device-local Discovery language preference using the existing supported chapter-language set.
+- Apply the preference to Home/Dashboard discovery, Browse, personalized recommendations, similar-title recommendations, and Surprise me.
+- Include language in discovery and Hot-pool cache keys so cached results stay isolated by preference.
+- Keep per-series reader chapter language independent from discovery language.
+- No database migration is required.
 
 ## 1.4.4 - 2026-09-26 — Search History Controls
 

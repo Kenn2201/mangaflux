@@ -12,6 +12,7 @@ import MangaTile, {
 import { SearchSkeleton } from "./Skeletons";
 import { reliableFetch } from "../lib/reliableFetch";
 import BrowseFilters from "./BrowseFilters";
+import { useDiscoveryLanguage } from "../lib/useDiscoveryLanguage";
 
 type DiscoveryKind = "hot" | "popular" | "top" | "latest";
 
@@ -72,6 +73,7 @@ export default function BrowseClient({
   const [data, setData] = useState<PagePayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const { language } = useDiscoveryLanguage();
 
   useEffect(() => {
     const controller = new AbortController();
@@ -92,6 +94,7 @@ export default function BrowseClient({
       if (year) params.set("year", String(year));
       if (creatorId) params.set("creator", creatorId);
       if (status) params.set("status", status);
+      params.set("language", language);
 
       try {
         const response = await reliableFetch(
@@ -123,7 +126,7 @@ export default function BrowseClient({
 
     void load();
     return () => controller.abort();
-  }, [kind, page, tagId, year, creatorId, status]);
+  }, [kind, page, tagId, year, creatorId, status, language]);
 
   const label = labels[kind];
   const totalPages = data

@@ -8,6 +8,8 @@ import {
 import { useRouter } from "next/navigation";
 import { reliableFetch } from "../lib/reliableFetch";
 import { notify } from "../lib/toast";
+import { discoveryLanguageOptions } from "../lib/discoveryPreferences";
+import { useDiscoveryLanguage } from "../lib/useDiscoveryLanguage";
 
 type DiscoveryKind = "hot" | "popular" | "top" | "latest";
 
@@ -163,6 +165,7 @@ export default function BrowseFilters({
   creatorName?: string;
 }) {
   const router = useRouter();
+  const { language, setLanguage } = useDiscoveryLanguage();
   const [selectedKind, setSelectedKind] = useState<DiscoveryKind>(kind);
   const [selectedTag, setSelectedTag] = useState(tagId ?? "");
   const [selectedYear, setSelectedYear] = useState(year ? String(year) : "");
@@ -386,6 +389,29 @@ export default function BrowseFilters({
             value={selectedYear}
             onChange={(event) => setSelectedYear(event.target.value)}
           />
+        </label>
+
+        <label>
+          <span>Language</span>
+          <select
+            value={language}
+            title="Only show manga with chapters available in this language."
+            onChange={(event) => {
+              if (!setLanguage(event.target.value)) {
+                notify({
+                  tone: "error",
+                  title: "Could not save language",
+                  message: "Browser storage is unavailable."
+                });
+              }
+            }}
+          >
+            {discoveryLanguageOptions.map(([value, label]) => (
+              <option value={value} key={value}>
+                {label}
+              </option>
+            ))}
+          </select>
         </label>
 
         <div className="browse-filter-actions">

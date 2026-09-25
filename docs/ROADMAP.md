@@ -31,8 +31,9 @@ v1.4.0  ████████████████████  ✅ QA
 v1.4.1  ████████████████████  ✅ QA
 v1.4.2  ████████████████████  ✅ QA
 v1.4.3  ████████████████████  ✅ QA
-v1.4.4  ████████████████████  🧪 CURRENT
-v1.4.5+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT AFTER QA
+v1.4.4  ████████████████████  ✅ QA
+v1.4.5  ████████████████████  🧪 CURRENT
+v1.4.6+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT AFTER QA
 v1.4.x  Discovery & Personalization
 v1.5+   Product Polish
          ↓
@@ -41,7 +42,7 @@ v2.x    Multi-Source + Platform Expansion
 v3.x    Advanced MangaFlux
 ~~~
 
-**v1.1.x — Library & Reading Quality**, **v1.2.x — Profiles & Community Depth**, and **v1.3.x — Following & Notifications** are signed off after physical QA. Optional Discord/webhook delivery is deferred. **v1.4.0 — Recommendation Explanations**, **v1.4.1 — Activity-Based Recommendations**, **v1.4.2 — Saved Discovery Filters**, and **v1.4.3 — Recently Viewed Controls** have also passed physical QA. MangaFlux is now implementing **v1.4.4 — Search History Controls** inside **v1.4.x — Discovery & Personalization**.
+**v1.1.x — Library & Reading Quality**, **v1.2.x — Profiles & Community Depth**, and **v1.3.x — Following & Notifications** are signed off after physical QA. Optional Discord/webhook delivery is deferred. **v1.4.0 — Recommendation Explanations**, **v1.4.1 — Activity-Based Recommendations**, **v1.4.2 — Saved Discovery Filters**, **v1.4.3 — Recently Viewed Controls**, and **v1.4.4 — Search History Controls** have also passed physical QA. MangaFlux is now implementing **v1.4.5 — Discovery Language Preference** inside **v1.4.x — Discovery & Personalization**.
 
 ---
 
@@ -476,7 +477,7 @@ Make discovery increasingly personalized.
 - Physical production QA passed
 - No new database migration
 
-### 🧪 v1.4.4 — Search History Controls — CURRENT
+### ✅ v1.4.4 — Search History Controls — QA SIGNED OFF
 
 - Remember up to 10 unique explicit search terms on the current device
 - Record submitted searches, selected search suggestions, and visited results queries
@@ -485,11 +486,23 @@ Make discovery increasingly personalized.
 - Show recent searches when the header search is focused and empty
 - Re-run, remove one, or clear all recent searches
 - Keep search history separate from Recently viewed, reading history, and account data
+- Physical production QA passed
 - No new database migration
 
-### ➡️ v1.4.5+ — Remaining Personalization Depth — NEXT AFTER QA
+### 🧪 v1.4.5 — Discovery Language Preference — CURRENT
 
-- Stronger language preferences
+- Replace English-only discovery chapter availability with a validated language preference
+- Store the discovery language on the current device
+- Reuse MangaFlux's supported reader-language set
+- Apply the preference to Home/Dashboard Hot, Popular, Top, and Latest discovery
+- Apply the preference to Browse and discovery-driven recommendation surfaces
+- Apply the preference to Surprise me
+- Keep discovery language separate from per-series reader chapter language
+- Include language in MangaDex discovery cache keys
+- No new database migration
+
+### ➡️ v1.4.6+ — Remaining Personalization Depth — NEXT AFTER QA
+
 - Genre preferences
 - Manga-status preferences
 - Better Hot discovery

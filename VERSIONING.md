@@ -4,7 +4,7 @@ MangaFlux follows Semantic Versioning.
 
 ## Current version
 
-**v1.4.4 — Search History Controls**
+**v1.4.5 — Discovery Language Preference**
 
 - `PATCH` = compatible bug/security/reliability fixes and focused compatible release slices
 - `MINOR` = compatible larger feature milestones

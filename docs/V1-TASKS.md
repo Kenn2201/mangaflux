@@ -304,10 +304,25 @@
 - [x] show recent-search controls on the empty Search page
 - [x] re-run, remove one, and clear all recent searches
 - [x] no new database migration
+- [x] physical production QA signed off
+
+## v1.4.5 — Discovery Language Preference
+
+- [x] replace hard-coded English discovery availability with a validated language option
+- [x] store discovery language on the current device
+- [x] expose the language selector on Home/Dashboard discovery
+- [x] expose the language selector in Browse filters
+- [x] apply language to Browse pagination/discovery requests
+- [x] apply language to personalized recommendation discovery requests
+- [x] apply language to similar-title recommendation discovery requests
+- [x] apply language to Surprise me discovery requests
+- [x] include language in ordered-discovery and Hot-pool cache keys
+- [x] keep per-series reader language separate
+- [x] no new database migration
 
 ## Remaining v1.4.x
 
-- [ ] stronger language/genre/status preferences
+- [ ] stronger genre/status preferences
 - [ ] improve Hot / Popular / Trending
 
 ## Future V1.x

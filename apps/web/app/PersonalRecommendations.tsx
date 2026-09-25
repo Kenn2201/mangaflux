@@ -8,6 +8,7 @@ import MangaTile, {
   type MangaTileItem
 } from "./MangaTile";
 import { reliableFetch } from "../lib/reliableFetch";
+import { useDiscoveryLanguage } from "../lib/useDiscoveryLanguage";
 
 type Bookmark = {
   mangaId: string;
@@ -102,6 +103,7 @@ export default function PersonalRecommendations() {
   const [items, setItems] = useState<Recommendation[]>([]);
   const [seedTitles, setSeedTitles] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const { language } = useDiscoveryLanguage();
 
   useEffect(() => {
     const controller = new AbortController();
@@ -239,7 +241,9 @@ export default function PersonalRecommendations() {
               key: `creator:${primaryCreator.id}`,
               url:
                 "/api/discovery?kind=popular&limit=12&creator=" +
-                encodeURIComponent(primaryCreator.id),
+                encodeURIComponent(primaryCreator.id) +
+                "&language=" +
+                encodeURIComponent(language),
               activityWeight,
               signalWeight: 3,
               reason: `Same creator as ${seed.title}: ${primaryCreator.name}`
@@ -253,7 +257,9 @@ export default function PersonalRecommendations() {
                 `/api/discovery?kind=${
                   tagIndex === 0 ? "popular" : "top"
                 }&limit=12&tag=` +
-                encodeURIComponent(tag.id),
+                encodeURIComponent(tag.id) +
+                "&language=" +
+                encodeURIComponent(language),
               activityWeight,
               signalWeight: tagIndex === 0 ? 4 : 3,
               reason: `Shares ${tag.name} with ${seed.title}`
@@ -265,7 +271,9 @@ export default function PersonalRecommendations() {
               key: `year:${details.year}`,
               url:
                 "/api/discovery?kind=top&limit=12&year=" +
-                encodeURIComponent(String(details.year)),
+                encodeURIComponent(String(details.year)) +
+                "&language=" +
+                encodeURIComponent(language),
               activityWeight,
               signalWeight: 1,
               reason: `Same release year as ${seed.title}: ${details.year}`
@@ -339,7 +347,7 @@ export default function PersonalRecommendations() {
     void load();
 
     return () => controller.abort();
-  }, []);
+  }, [language]);
 
   if (!loading && !items.length) return null;
 

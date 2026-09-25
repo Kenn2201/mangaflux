@@ -9,6 +9,7 @@ import MangaTile, {
   type MangaTileItem
 } from "./MangaTile";
 import { reliableFetch } from "../lib/reliableFetch";
+import { useDiscoveryLanguage } from "../lib/useDiscoveryLanguage";
 
 type MangaTag = {
   id: string;
@@ -55,6 +56,7 @@ export default function MangaRecommendations({
   const [related, setRelated] = useState<RelatedItem[]>([]);
   const [similar, setSimilar] = useState<MangaTileItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const { language } = useDiscoveryLanguage();
 
   const seedTags = useMemo(() => usefulTags(tags), [tags]);
   const primaryCreator = useMemo(
@@ -113,7 +115,7 @@ export default function MangaRecommendations({
             fetchPage(
               `/api/discovery?kind=popular&limit=12&creator=${encodeURIComponent(
                 primaryCreator.id
-              )}`
+              )}&language=${encodeURIComponent(language)}`
             )
           );
         }
@@ -123,7 +125,9 @@ export default function MangaRecommendations({
             fetchPage(
               `/api/discovery?kind=${
                 index === 0 ? "popular" : "top"
-              }&limit=12&tag=${encodeURIComponent(tag.id)}`
+              }&limit=12&tag=${encodeURIComponent(
+                tag.id
+              )}&language=${encodeURIComponent(language)}`
             )
           );
         });
@@ -133,7 +137,7 @@ export default function MangaRecommendations({
             fetchPage(
               `/api/discovery?kind=top&limit=12&year=${encodeURIComponent(
                 String(year)
-              )}`
+              )}&language=${encodeURIComponent(language)}`
             )
           );
         }
@@ -196,7 +200,8 @@ export default function MangaRecommendations({
     mangaId,
     creatorId,
     tagKey,
-    year
+    year,
+    language
   ]);
 
   if (!loading && !related.length && !similar.length) {
