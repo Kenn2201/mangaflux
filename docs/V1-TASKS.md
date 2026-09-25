@@ -266,10 +266,22 @@
 - [x] tie recommendation explanations to contributing recent titles
 - [x] preserve bookmark/history exclusions
 - [x] no new database migration
+- [x] physical production QA signed off
+
+## v1.4.2 — Saved Discovery Filters
+
+- [x] save up to five Browse filter presets on the current device
+- [x] preserve sort/genre/status/year filter state
+- [x] preserve creator context when saving a creator-filtered view
+- [x] one-tap apply for saved presets
+- [x] independent remove control for saved presets
+- [x] reject duplicate presets
+- [x] clearly label presets as device-local
+- [x] preserve existing URL-based filtering/pagination behavior
+- [x] no new database migration
 
 ## Remaining v1.4.x
 
-- [ ] saved discovery filters
 - [ ] recently viewed controls
 - [ ] search-history controls
 - [ ] stronger language/genre/status preferences

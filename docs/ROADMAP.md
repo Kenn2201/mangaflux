@@ -28,8 +28,9 @@ v1.3.6  ████████████████████  ✅
 v1.3.7  ████████████████████  ✅
 v1.3.x  ████████████████████  ✅ COMPLETE
 v1.4.0  ████████████████████  ✅ QA
-v1.4.1  ████████████████████  🧪 CURRENT
-v1.4.2+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT AFTER QA
+v1.4.1  ████████████████████  ✅ QA
+v1.4.2  ████████████████████  🧪 CURRENT
+v1.4.3+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT AFTER QA
 v1.4.x  Discovery & Personalization
 v1.5+   Product Polish
          ↓
@@ -38,7 +39,7 @@ v2.x    Multi-Source + Platform Expansion
 v3.x    Advanced MangaFlux
 ~~~
 
-**v1.1.x — Library & Reading Quality**, **v1.2.x — Profiles & Community Depth**, and **v1.3.x — Following & Notifications** are signed off after physical QA. Optional Discord/webhook delivery is deferred. **v1.4.0 — Recommendation Explanations** has also passed physical QA. MangaFlux is now implementing **v1.4.1 — Activity-Based Recommendations** inside **v1.4.x — Discovery & Personalization**.
+**v1.1.x — Library & Reading Quality**, **v1.2.x — Profiles & Community Depth**, and **v1.3.x — Following & Notifications** are signed off after physical QA. Optional Discord/webhook delivery is deferred. **v1.4.0 — Recommendation Explanations** and **v1.4.1 — Activity-Based Recommendations** have also passed physical QA. MangaFlux is now implementing **v1.4.2 — Saved Discovery Filters** inside **v1.4.x — Discovery & Personalization**.
 
 ---
 
@@ -437,7 +438,7 @@ Make discovery increasingly personalized.
 - Physical production QA passed
 - No new database migration
 
-### 🧪 v1.4.1 — Activity-Based Recommendations — CURRENT
+### ✅ v1.4.1 — Activity-Based Recommendations — QA SIGNED OFF
 
 - Blend up to three recent reading/bookmark activity seeds
 - Rank recent activity more strongly than older activity
@@ -446,11 +447,22 @@ Make discovery increasingly personalized.
 - Cap discovery work at eight ranked signals to keep upstream requests bounded
 - Tie explanation text back to the recent title that contributed each signal
 - Preserve existing bookmark/history exclusions
+- Physical production QA passed
 - No new database migration
 
-### ➡️ v1.4.2+ — Remaining Personalization Depth — NEXT AFTER QA
+### 🧪 v1.4.2 — Saved Discovery Filters — CURRENT
 
-- Saved discovery filters
+- Save up to five discovery filter presets on the current device
+- Preserve sort, genre, status, year, and creator context in each preset
+- Reapply a saved preset in one tap
+- Remove saved presets independently
+- Reject duplicate presets and enforce the five-preset limit
+- Label saved presets clearly as device-local
+- Preserve URL-based Browse filtering and pagination
+- No new database migration
+
+### ➡️ v1.4.3+ — Remaining Personalization Depth — NEXT AFTER QA
+
 - Recently viewed controls
 - Search-history controls
 - Stronger language preferences

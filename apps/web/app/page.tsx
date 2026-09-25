@@ -93,7 +93,7 @@ export default async function Home({
       </section>
 
       <div className="landing-version">
-        v1.4.1 · Activity-Based Recommendations
+        v1.4.2 · Saved Discovery Filters
       </div>
     </main>
   );
