@@ -2,7 +2,8 @@ import {
   and,
   desc,
   eq,
-  gt
+  gt,
+  lt
 } from "drizzle-orm";
 import type { MangaFluxDatabase } from "./client.js";
 import {
@@ -14,6 +15,7 @@ import {
   sessions,
   userBookmarks,
   userReadingProgress,
+  userReaderPreferences,
   users
 } from "./schema.js";
 
@@ -397,6 +399,62 @@ export async function getUserSummary(
     history,
     continueReading: history[0] ?? null
   };
+}
+
+export async function getUserReaderPreferences(
+  db: MangaFluxDatabase,
+  userId: string,
+  mangaId: string
+) {
+  const [item] = await db
+    .select()
+    .from(userReaderPreferences)
+    .where(
+      and(
+        eq(userReaderPreferences.userId, userId),
+        eq(userReaderPreferences.mangaId, mangaId)
+      )
+    )
+    .limit(1);
+
+  return item ?? null;
+}
+
+export async function upsertUserReaderPreferences(
+  db: MangaFluxDatabase,
+  input: {
+    userId: string;
+    mangaId: string;
+    language: string;
+    dataSaver: boolean;
+    showAlternateReleases: boolean;
+    preferredScanlationGroup?: string;
+    updatedAt: Date;
+  }
+) {
+  await db
+    .insert(userReaderPreferences)
+    .values({
+      ...input,
+      preferredScanlationGroup: input.preferredScanlationGroup ?? null
+    })
+    .onConflictDoUpdate({
+      target: [
+        userReaderPreferences.userId,
+        userReaderPreferences.mangaId
+      ],
+      set: {
+        language: input.language,
+        dataSaver: input.dataSaver,
+        showAlternateReleases: input.showAlternateReleases,
+        preferredScanlationGroup:
+          input.preferredScanlationGroup ?? null,
+        updatedAt: input.updatedAt
+      },
+      setWhere: lt(userReaderPreferences.updatedAt, input.updatedAt)
+    });
+
+  return getUserReaderPreferences(db, input.userId, input.mangaId);
 }
 
 export async function importReaderState(

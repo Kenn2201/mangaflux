@@ -32,11 +32,14 @@
 
 ## Remaining v1.1.x
 
-- [ ] evaluate account sync for reader preferences
-- [ ] optional preferred scanlation group
+- [x] safe account sync for per-series reader preferences
+- [x] browser-local fallback with timestamp conflict protection
+- [x] optional preferred scanlation group
+- [x] preferred-group selection for collapsed duplicate releases
+- [x] extended Reader Settings landscape QA
 - [ ] additional history management
 - [ ] additional reader layout/fit preferences if useful
-- [ ] extended tablet/landscape QA
+- [ ] broader accessibility/regression polish
 
 ## Future V1.x
 

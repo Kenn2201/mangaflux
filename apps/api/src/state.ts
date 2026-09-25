@@ -13,11 +13,13 @@ import {
   getBookmark,
   getReaderSummary,
   getUserBookmark,
+  getUserReaderPreferences,
   getUserSummary,
   upsertBookmark,
   upsertProgress,
   upsertUserBookmark,
-  upsertUserProgress
+  upsertUserProgress,
+  upsertUserReaderPreferences
 } from "@mangaflux/db";
 import type { MangaFluxDatabase } from "@mangaflux/db";
 import { authenticateSession } from "./auth.js";
@@ -37,6 +39,15 @@ type BookmarkBody = {
   coverUrl?: string | null;
 };
 
+type ReaderPreferencesBody = {
+  mangaId?: string;
+  language?: string;
+  dataSaver?: boolean;
+  showAlternateReleases?: boolean;
+  preferredScanlationGroup?: string | null;
+  updatedAt?: string;
+};
+
 type ProgressBody = {
   source?: string;
   mangaId?: string;
@@ -52,6 +63,8 @@ function validReaderId(value: string) {
   return UUID_RE.test(value);
 }
 
+const LANGUAGE_RE = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i;
+
 function validMangaDexId(value: unknown): value is string {
   return typeof value === "string" && UUID_RE.test(value);
 }
@@ -62,6 +75,88 @@ function validText(value: unknown, min: number, max: number): value is string {
     value.trim().length >= min &&
     value.trim().length <= max
   );
+}
+
+function validateReaderPreferencesBody(
+  body: ReaderPreferencesBody,
+  reply: FastifyReply
+) {
+  if (!validMangaDexId(body.mangaId)) {
+    reply.code(400).send({
+      error: "INVALID_REQUEST",
+      message: "mangaId must be a valid MangaDex UUID"
+    });
+    return null;
+  }
+
+  if (
+    typeof body.language !== "string" ||
+    !LANGUAGE_RE.test(body.language)
+  ) {
+    reply.code(400).send({
+      error: "INVALID_REQUEST",
+      message: "language is invalid"
+    });
+    return null;
+  }
+
+  if (
+    typeof body.dataSaver !== "boolean" ||
+    typeof body.showAlternateReleases !== "boolean"
+  ) {
+    reply.code(400).send({
+      error: "INVALID_REQUEST",
+      message: "reader preference toggles are invalid"
+    });
+    return null;
+  }
+
+  if (
+    body.preferredScanlationGroup !== undefined &&
+    body.preferredScanlationGroup !== null &&
+    (
+      typeof body.preferredScanlationGroup !== "string" ||
+      body.preferredScanlationGroup.trim().length > 120
+    )
+  ) {
+    reply.code(400).send({
+      error: "INVALID_REQUEST",
+      message: "preferredScanlationGroup is invalid"
+    });
+    return null;
+  }
+
+  if (typeof body.updatedAt !== "string") {
+    reply.code(400).send({
+      error: "INVALID_REQUEST",
+      message: "updatedAt is required"
+    });
+    return null;
+  }
+
+  const updatedAt = new Date(body.updatedAt);
+  const now = Date.now();
+
+  if (
+    Number.isNaN(updatedAt.getTime()) ||
+    updatedAt.getTime() > now + 5 * 60_000
+  ) {
+    reply.code(400).send({
+      error: "INVALID_REQUEST",
+      message: "updatedAt is invalid"
+    });
+    return null;
+  }
+
+  return {
+    mangaId: body.mangaId,
+    language: body.language.toLowerCase(),
+    dataSaver: body.dataSaver,
+    showAlternateReleases: body.showAlternateReleases,
+    preferredScanlationGroup:
+      body.preferredScanlationGroup?.trim() || undefined,
+    updatedAt
+  };
 }
 
 function normalizeCoverUrl(value: unknown) {
@@ -390,6 +485,101 @@ export function registerStateRoutes(
       );
 
       return { removed: true };
+    }
+  );
+
+  app.get<{
+    Params: { readerId: string };
+    Querystring: { mangaId?: string };
+  }>(
+    "/api/state/:readerId/reader-preferences",
+    { preHandler: limits.read },
+    async (request, reply) => {
+      if (!validateIdentity(request.params.readerId, reply)) return;
+      if (!validMangaDexId(request.query.mangaId)) {
+        return reply.code(400).send({
+          error: "INVALID_REQUEST",
+          message: "mangaId must be a valid MangaDex UUID"
+        });
+      }
+
+      return { synced: false, item: null };
+    }
+  );
+
+  app.put<{
+    Params: { readerId: string };
+    Body: ReaderPreferencesBody;
+  }>(
+    "/api/state/:readerId/reader-preferences",
+    { preHandler: limits.write },
+    async (request, reply) => {
+      if (!validateIdentity(request.params.readerId, reply)) return;
+      const body = validateReaderPreferencesBody(
+        request.body ?? {},
+        reply
+      );
+      if (!body) return;
+
+      return { synced: false, item: null };
+    }
+  );
+
+  app.get<{
+    Querystring: { mangaId?: string };
+  }>(
+    "/api/account/state/reader-preferences",
+    { preHandler: limits.read },
+    async (request, reply) => {
+      const session = await authenticateSession(
+        request,
+        reply,
+        database,
+        authProxySecret
+      );
+      if (!session || !database) return;
+
+      if (!validMangaDexId(request.query.mangaId)) {
+        return reply.code(400).send({
+          error: "INVALID_REQUEST",
+          message: "mangaId must be a valid MangaDex UUID"
+        });
+      }
+
+      const item = await getUserReaderPreferences(
+        database,
+        session.userId,
+        request.query.mangaId
+      );
+
+      return { synced: true, item };
+    }
+  );
+
+  app.put<{ Body: ReaderPreferencesBody }>(
+    "/api/account/state/reader-preferences",
+    { preHandler: limits.write },
+    async (request, reply) => {
+      const session = await authenticateSession(
+        request,
+        reply,
+        database,
+        authProxySecret
+      );
+      if (!session || !database) return;
+
+      const body = validateReaderPreferencesBody(
+        request.body ?? {},
+        reply
+      );
+      if (!body) return;
+
+      const item = await upsertUserReaderPreferences(database, {
+        userId: session.userId,
+        ...body
+      });
+
+      return { synced: true, item };
     }
   );
 

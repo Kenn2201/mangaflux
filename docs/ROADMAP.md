@@ -7,7 +7,8 @@ This is the canonical MangaFlux roadmap.
 ~~~text
 v1.0.0  ████████████████████  ✅
 v1.1.0  ████████████████████  ✅
-v1.1.1  ░░░░░░░░░░░░░░░░░░░░  ← NEXT
+v1.1.1  ████████████████████  ✅
+v1.1.2+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
 v1.2.x  Profiles & Community
 v1.3.x  Following & Notifications
 v1.4.x  Discovery & Personalization
@@ -18,7 +19,7 @@ v2.x    Multi-Source + Platform Expansion
 v3.x    Advanced MangaFlux
 ~~~
 
-We are not rushing toward v2 or v3. The immediate target is **v1.1.1 — Reading Quality Refinements**, followed by whatever additional **v1.1.x** releases are justified before the Library & Reading Quality phase is declared complete.
+We are not rushing toward v2 or v3. **v1.1.1 — Reading Quality Refinements is complete.** The immediate target is now **v1.1.2+ — Remaining Reading Quality** until the Library & Reading Quality phase is satisfactory.
 
 ---
 
@@ -91,7 +92,7 @@ Already completed and on `main`.
 
 ---
 
-### ➡️ v1.1.1 — Reading Quality Refinements — NEXT
+### ✅ v1.1.1 — Reading Quality Refinements
 
 This is the immediate development target.
 
@@ -122,7 +123,7 @@ This is the immediate development target.
 
 ---
 
-### v1.1.2+ — Remaining Reading Quality
+### ➡️ v1.1.2+ — Remaining Reading Quality — NEXT
 
 Room remains for additional v1.1.x releases.
 
