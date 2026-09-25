@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v1.1.5--Reader_Navigation_Resume_Fixes-indigo.svg)
+![Version](https://img.shields.io/badge/version-v1.2.0--Profile_Bio_Privacy_Foundation-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v1.1.5 — Reader Navigation & Resume Fixes**
+**v1.2.0 — Profile Bio & Privacy Foundation**
 
-MangaFlux V1 remains a stable single-source MangaDex product. v1.1.5 applies the final reader-navigation and resume fixes discovered during physical QA without changing the source architecture.
+MangaFlux V1 remains a stable single-source MangaDex product. v1.2.0 begins Profiles & Community Depth with richer public identity and privacy controls while keeping the existing reader/source architecture.
 
 ### Library improvements
 
@@ -49,15 +49,15 @@ The settings sheet is available from manga chapter lists and inside the immersiv
 - an alternate-release count is shown when duplicates are collapsed
 - readers can opt back into all alternate releases
 
-### v1.1.5 refinements
+### v1.2.0 refinements
 
-- Continue Reading now holds the saved page while earlier lazy-loaded images settle instead of drifting to a later page
-- pages through the resume target are loaded eagerly, normal page observation is paused during resume, and progress saving resumes only after the target is anchored
-- Jump Chapter is now a scrollable chapter list with the current chapter highlighted as Reading now
-- the chapter list loads toward the current position and continues loading older chapters as you scroll
-- the reader Back control now offers Library, Discover more, and a similarity-based Surprise me roulette action
-- the reader Home icon explicitly opens the current manga page
-- common interactive controls now provide a small visual press response while respecting reduced-motion preferences
+- community profiles support an optional bio up to 280 characters
+- readers can hide profile activity totals and recent-comment history while keeping their public identity available
+- profile privacy is enforced server-side when public profile data is assembled
+- existing accounts default to showing public activity so the migration is backward-compatible
+- Library, Discover more, and similarity-based Surprise me controls now live on the manga details page
+- inside the immersive reader, both Back and Home return to the current manga page
+- existing v1.1.5 resume stability, chapter-list jump, and press feedback remain unchanged
 
 ### Architecture boundary
 

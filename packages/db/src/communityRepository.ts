@@ -68,6 +68,8 @@ export async function getCommunityProfile(
           id: users.id,
           displayName: users.displayName,
           avatarDataUrl: users.avatarDataUrl,
+          bio: users.bio,
+          showPublicActivity: users.showPublicActivity,
           createdAt: users.createdAt
         })
         .from(users)
@@ -97,13 +99,27 @@ export async function getCommunityProfile(
 
   if (!profile[0]) return null;
 
+  const activityVisible = profile[0].showPublicActivity;
+
   return {
-    user: profile[0],
-    stats: {
-      comments: Number(commentCountRows[0]?.value ?? 0),
-      reactions: Number(reactionCountRows[0]?.value ?? 0)
+    user: {
+      id: profile[0].id,
+      displayName: profile[0].displayName,
+      avatarDataUrl: profile[0].avatarDataUrl,
+      bio: profile[0].bio,
+      createdAt: profile[0].createdAt
     },
-    recentComments
+    activityVisible,
+    stats: activityVisible
+      ? {
+          comments: Number(commentCountRows[0]?.value ?? 0),
+          reactions: Number(reactionCountRows[0]?.value ?? 0)
+        }
+      : {
+          comments: 0,
+          reactions: 0
+        },
+    recentComments: activityVisible ? recentComments : []
   };
 }
 

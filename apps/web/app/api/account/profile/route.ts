@@ -30,6 +30,8 @@ export async function PUT(request: NextRequest) {
   let payload: {
     displayName?: string | null;
     avatarDataUrl?: string | null;
+    bio?: string | null;
+    showPublicActivity?: boolean;
   };
 
   try {

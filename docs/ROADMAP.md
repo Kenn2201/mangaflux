@@ -12,8 +12,8 @@ v1.1.2  ████████████████████  ✅
 v1.1.3  ████████████████████  ✅
 v1.1.4  ████████████████████  ✅
 v1.1.5  ████████████████████  ✅
-v1.1.6+ ░░░░░░░░░░░░░░░░░░░░  ← FINAL QA ONLY
-v1.2.x  Profiles & Community
+v1.2.0  ████████████████████  ✅
+v1.2.1+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
 v1.3.x  Following & Notifications
 v1.4.x  Discovery & Personalization
 v1.5+   Product Polish
@@ -23,7 +23,7 @@ v2.x    Multi-Source + Platform Expansion
 v3.x    Advanced MangaFlux
 ~~~
 
-We are not rushing toward v2 or v3. **v1.1.5 — Reader Navigation & Resume Fixes is complete.** The remaining v1.1.x space is reserved only for final physical-device regression fixes before MangaFlux moves to v1.2.x.
+**v1.1.x — Library & Reading Quality is now signed off.** MangaFlux has moved into **v1.2.x — Profiles & Community Depth**, beginning with **v1.2.0 — Profile Bio & Privacy Foundation**.
 
 ---
 
@@ -53,7 +53,7 @@ The original stable MangaFlux foundation:
 
 ---
 
-## ➡️ v1.1.x — Library & Reading Quality — CURRENT
+## ✅ v1.1.x — Library & Reading Quality — COMPLETE
 
 ### ✅ v1.1.0 — Library + Reader Settings Foundation
 
@@ -189,39 +189,43 @@ The original stable MangaFlux foundation:
 
 ---
 
-### ➡️ v1.1.6+ — Final Sign-off Only
-
-No new feature family is planned here.
-
-Use this only if final physical-device testing finds a regression:
-
-- resume-page verification on slow image loading
-- chapter-list scrolling on long manga
-- reader navigation/back-menu checks
-- portrait and landscape regression checks
-- keyboard/screen-reader regression checks
-- move to v1.2.x once the Library & Reading Quality phase is signed off
-
-Once the entire Library & Reading Quality phase is satisfactory, move forward to v1.2.x.
+The v1.1.x reading-quality phase is complete. Regression-only fixes can still be patched if discovered, but new work now belongs to later roadmap phases.
 
 ---
 
-## v1.2.x — Profiles & Community Depth
+## ➡️ v1.2.x — Profiles & Community Depth — CURRENT
 
-Focus shifts from reading to MangaFlux's community system.
+### ✅ v1.2.0 — Profile Bio & Privacy Foundation
 
-- Richer public profiles
-- Optional profile bio
-- User preferences
-- Privacy controls
-- Better activity browsing
-- Improved activity/history display
-- Better comment UX
-- Better reaction UX
-- Notification/privacy preference groundwork
-- Stronger community administration
-- More moderation/admin tools
-- Keep credentials and private account information protected
+#### Richer identity
+- Optional public profile bio
+- Bio editing from the account page
+- Bio rendering in community profile previews
+- Public profile output continues to exclude email and private credentials
+
+#### Privacy foundation
+- Per-account Show public activity control
+- Hide comment/reaction totals from the public profile when disabled
+- Hide recent public-comment history from the public profile when disabled
+- Existing accounts default safely to visible activity
+
+#### Navigation correction carried with the minor transition
+- Library / Discover more / Surprise me live on the manga details page
+- Reader Back returns to the current manga page
+- Reader Home returns to the current manga page
+
+### ➡️ v1.2.1+ — Community Depth — NEXT
+
+Continue the v1.2.x phase with focused slices such as:
+
+- better profile activity browsing
+- improved activity/history presentation
+- better comment UX
+- better reaction UX
+- broader user/privacy preferences
+- notification/privacy preference groundwork
+- stronger community administration and moderation
+- keep credentials and private account information protected
 
 ---
 

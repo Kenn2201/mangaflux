@@ -50,6 +50,13 @@
       "when": 1790308800000,
       "tag": "0006_v114_reader_typography",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790312400000,
+      "tag": "0007_v120_profile_depth",
+      "breakpoints": true
     }
   ]
 }
