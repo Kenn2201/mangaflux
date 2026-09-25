@@ -140,6 +140,10 @@ export async function getSessionUser(
       showJoinedDate: users.showJoinedDate,
       communityRestricted: users.communityRestricted,
       notificationEmailEnabled: users.notificationEmailEnabled,
+      notificationQuietHoursEnabled: users.notificationQuietHoursEnabled,
+      notificationQuietHoursStart: users.notificationQuietHoursStart,
+      notificationQuietHoursEnd: users.notificationQuietHoursEnd,
+      notificationTimeZone: users.notificationTimeZone,
       emailVerifiedAt: users.emailVerifiedAt,
       createdAt: users.createdAt
     })
