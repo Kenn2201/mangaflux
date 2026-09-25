@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v1.3.7--Notification_Quiet_Hours-indigo.svg)
+![Version](https://img.shields.io/badge/version-v1.4.0--Recommendation_Explanations-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v1.3.7 — Notification Quiet Hours**
+**v1.4.0 — Recommendation Explanations**
 
-MangaFlux V1 remains a stable single-source MangaDex product. v1.3.7 adds account-level, time-zone-aware quiet hours that preserve durable inbox notifications while suppressing new-chapter email during the configured local window.
+MangaFlux V1 remains a stable single-source MangaDex product. v1.4.0 begins Discovery & Personalization by making dashboard recommendations explain the creator, genre/theme, and year signals that caused each title to rank.
 
 ### Library improvements
 
@@ -49,16 +49,15 @@ The settings sheet is available from manga chapter lists and inside the immersiv
 - an alternate-release count is shown when duplicates are collapsed
 - readers can opt back into all alternate releases
 
-### v1.3.7 refinements
+### v1.4.0 refinements
 
-- added persisted account-level notification quiet hours
-- users can configure local start/end times and an IANA time zone
-- the web account editor can adopt the current device time zone
-- quiet hours suppress new-chapter email while durable inbox events still remain available
-- cross-midnight windows such as 22:00–07:00 are supported
-- checker reports emailQuietHours separately from skipped, failed, sent, and rate-limited outcomes
-- migration 0013 adds quiet-hour preferences with safe defaults disabled for existing accounts
-- optional external notification integrations remain outside this release
+- closed v1.3.x Following & Notifications after successful physical QA through quiet hours
+- kept Discord/webhook delivery out of the core roadmap for now
+- dashboard recommendations now preserve the actual matching signals used during ranking
+- each recommended title can explain matching creator, genre/theme, and release-year signals
+- explanations remain grounded in the existing MangaDex discovery queries rather than generated guesses
+- existing recommendation exclusions and ranking behavior remain intact
+- no new database migration is required
 
 ### Architecture boundary
 

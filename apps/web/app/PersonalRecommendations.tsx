@@ -44,10 +44,16 @@ type Details = {
 type RankedItem = {
   item: MangaTileItem;
   score: number;
+  reasons: Set<string>;
+};
+
+type Recommendation = {
+  item: MangaTileItem;
+  reasons: string[];
 };
 
 export default function PersonalRecommendations() {
-  const [items, setItems] = useState<MangaTileItem[]>([]);
+  const [items, setItems] = useState<Recommendation[]>([]);
   const [seedTitle, setSeedTitle] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -136,39 +142,50 @@ export default function PersonalRecommendations() {
             (creator) => creator.role === "author"
           ) ?? details.creators?.[0];
 
-        const requests: Array<Promise<MangaTileItem[]>> = [];
+        const requests: Array<{
+          reason: string;
+          load: Promise<MangaTileItem[]>;
+        }> = [];
 
         if (primaryCreator) {
-          requests.push(
-            fetchItems(
+          requests.push({
+            reason: `Same creator: ${primaryCreator.name}`,
+            load: fetchItems(
               `/api/discovery?kind=popular&limit=12&creator=${encodeURIComponent(
                 primaryCreator.id
               )}`
             )
-          );
+          });
         }
 
         seedTags.forEach((tag, index) => {
-          requests.push(
-            fetchItems(
+          requests.push({
+            reason: `Matches ${tag.name}`,
+            load: fetchItems(
               `/api/discovery?kind=${
                 index === 0 ? "popular" : "top"
               }&limit=12&tag=${encodeURIComponent(tag.id)}`
             )
-          );
+          });
         });
 
         if (details.year) {
-          requests.push(
-            fetchItems(
+          requests.push({
+            reason: `From around ${details.year}`,
+            load: fetchItems(
               `/api/discovery?kind=top&limit=12&year=${encodeURIComponent(
                 String(details.year)
               )}`
             )
-          );
+          });
         }
 
-        const groups = await Promise.all(requests);
+        const groups = await Promise.all(
+          requests.map(async (request) => ({
+            reason: request.reason,
+            items: await request.load
+          }))
+        );
         const excluded = new Set<string>([
           seedId,
           ...summary.bookmarks.map((item) => item.mangaId),
@@ -177,7 +194,7 @@ export default function PersonalRecommendations() {
         const ranked = new Map<string, RankedItem>();
 
         groups.forEach((group, groupIndex) => {
-          group.forEach((item, itemIndex) => {
+          group.items.forEach((item, itemIndex) => {
             if (excluded.has(item.id)) return;
 
             const current = ranked.get(item.id);
@@ -185,12 +202,16 @@ export default function PersonalRecommendations() {
             const positionWeight =
               Math.max(0, 12 - itemIndex) / 12;
 
+            const reasons = new Set(current?.reasons ?? []);
+            reasons.add(group.reason);
+
             ranked.set(item.id, {
               item,
               score:
                 (current?.score ?? 0) +
                 signalWeight +
-                positionWeight
+                positionWeight,
+              reasons
             });
           });
         });
@@ -199,7 +220,10 @@ export default function PersonalRecommendations() {
           [...ranked.values()]
             .sort((left, right) => right.score - left.score)
             .slice(0, 12)
-            .map((entry) => entry.item)
+            .map((entry) => ({
+              item: entry.item,
+              reasons: [...entry.reasons].slice(0, 2)
+            }))
         );
       } catch (error) {
         if ((error as Error).name !== "AbortError") {
@@ -246,12 +270,19 @@ export default function PersonalRecommendations() {
                 />
               </div>
             ))
-          : items.map((item) => (
-              <MangaTile
-                item={item}
-                key={item.id}
-                className="recommendation-card"
-              />
+          : items.map((recommendation) => (
+              <div
+                className="recommendation-explained"
+                key={recommendation.item.id}
+              >
+                <MangaTile
+                  item={recommendation.item}
+                  className="recommendation-card"
+                />
+                <p className="recommendation-reason">
+                  {recommendation.reasons.join(" · ")}
+                </p>
+              </div>
             ))}
       </div>
     </section>

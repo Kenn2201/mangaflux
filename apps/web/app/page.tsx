@@ -93,7 +93,7 @@ export default async function Home({
       </section>
 
       <div className="landing-version">
-        v1.3.7 · Notification Quiet Hours
+        v1.4.0 · Recommendation Explanations
       </div>
     </main>
   );
