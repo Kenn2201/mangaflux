@@ -2,7 +2,11 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import {
   createDatabase,
-  probeDatabase
+  createNewChapterNotificationEvent,
+  getNotificationCheckpoint,
+  getNotificationEligibleFollows,
+  probeDatabase,
+  upsertNotificationCheckpoint
 } from "@mangaflux/db";
 import { registerAdminRoutes } from "./admin.js";
 import { isAdminConfigured } from "./adminAccess.js";
@@ -180,6 +184,11 @@ const adminWriteRateLimit = makeRateLimit(
   "admin-write",
   20,
   5 * 60_000
+);
+const notificationCheckRateLimit = makeRateLimit(
+  "notification-check",
+  4,
+  10 * 60_000
 );
 
 function requireUuid(value: string, reply: any, field = "id") {
@@ -410,6 +419,160 @@ registerAdminRoutes(app, database, authProxySecret, {
   read: adminReadRateLimit,
   write: adminWriteRateLimit
 });
+
+app.post(
+  "/api/internal/notifications/check",
+  { preHandler: notificationCheckRateLimit },
+  async (request, reply) => {
+    const configuredSecret =
+      process.env.NOTIFICATION_CRON_SECRET?.trim() ?? "";
+    const suppliedSecret =
+      typeof request.headers.authorization === "string" &&
+      request.headers.authorization.startsWith("Bearer ")
+        ? request.headers.authorization.slice(7).trim()
+        : "";
+
+    if (
+      !database ||
+      !configuredSecret ||
+      suppliedSecret !== configuredSecret
+    ) {
+      return reply.code(404).send({ error: "NOT_FOUND" });
+    }
+
+    const users = await database.query.users.findMany({
+      columns: { id: true }
+    });
+
+    let eligible = 0;
+    let seeded = 0;
+    let unchanged = 0;
+    let created = 0;
+    let advanced = 0;
+    let skipped = 0;
+    let failed = 0;
+
+    for (const user of users) {
+      const follows = await getNotificationEligibleFollows(
+        database,
+        user.id
+      );
+
+      for (const follow of follows) {
+        eligible += 1;
+
+        if (follow.source !== "mangadex") {
+          skipped += 1;
+          continue;
+        }
+
+        try {
+          const page = await mangaDexSource.chapterPage(
+            follow.mangaId,
+            {
+              language: "en",
+              limit: 1,
+              offset: 0,
+              order: "desc"
+            }
+          );
+          const latest = page.items[0];
+
+          if (!latest) {
+            skipped += 1;
+            continue;
+          }
+
+          const publishedAt = latest.publishedAt
+            ? new Date(latest.publishedAt)
+            : null;
+          const sourcePublishedAt =
+            publishedAt && !Number.isNaN(publishedAt.getTime())
+              ? publishedAt
+              : null;
+          const checkpoint = await getNotificationCheckpoint(
+            database,
+            user.id,
+            follow.source,
+            follow.mangaId
+          );
+
+          if (!checkpoint) {
+            await upsertNotificationCheckpoint(database, {
+              userId: user.id,
+              source: follow.source,
+              mangaId: follow.mangaId,
+              lastChapterId: latest.id,
+              lastPublishedAt: sourcePublishedAt
+            });
+            seeded += 1;
+            continue;
+          }
+
+          if (checkpoint.lastChapterId === latest.id) {
+            await upsertNotificationCheckpoint(database, {
+              userId: user.id,
+              source: follow.source,
+              mangaId: follow.mangaId,
+              lastChapterId: latest.id,
+              lastPublishedAt: sourcePublishedAt
+            });
+            unchanged += 1;
+            continue;
+          }
+
+          const result = await createNewChapterNotificationEvent(
+            database,
+            {
+              userId: user.id,
+              source: follow.source,
+              mangaId: follow.mangaId,
+              mangaTitle: follow.title,
+              coverUrl: follow.coverUrl,
+              chapterId: latest.id,
+              chapterLabel: latest.chapter ?? latest.title,
+              chapterTitle: latest.title,
+              sourcePublishedAt
+            }
+          );
+
+          await upsertNotificationCheckpoint(database, {
+            userId: user.id,
+            source: follow.source,
+            mangaId: follow.mangaId,
+            lastChapterId: latest.id,
+            lastPublishedAt: sourcePublishedAt
+          });
+
+          if (result.created) created += 1;
+          advanced += 1;
+        } catch (error) {
+          failed += 1;
+          request.log.warn(
+            {
+              err: error,
+              userId: user.id,
+              mangaId: follow.mangaId
+            },
+            "Notification chapter check failed"
+          );
+        }
+      }
+    }
+
+    return {
+      ok: failed === 0,
+      users: users.length,
+      eligible,
+      seeded,
+      unchanged,
+      created,
+      advanced,
+      skipped,
+      failed
+    };
+  }
+);
 
 app.get(
   "/api/sources",

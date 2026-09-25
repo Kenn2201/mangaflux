@@ -190,6 +190,28 @@ export const userFollows = pgTable(
   ]
 );
 
+export const notificationCheckpoints = pgTable(
+  "notification_checkpoints",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    source: text("source").notNull(),
+    mangaId: text("manga_id").notNull(),
+    lastChapterId: text("last_chapter_id").notNull(),
+    lastPublishedAt: timestamp("last_published_at", { withTimezone: true }),
+    checkedAt: timestamp("checked_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+  },
+  (table) => [
+    primaryKey({
+      columns: [table.userId, table.source, table.mangaId]
+    }),
+    index("notification_checkpoints_checked_idx").on(table.checkedAt)
+  ]
+);
+
 export const notificationEvents = pgTable(
   "notification_events",
   {

@@ -182,9 +182,19 @@
 - [x] repository primitives for event creation/listing
 - [x] keep polling/inbox/email delivery out of v1.3.2
 
+## v1.3.3 — Controlled Notification Generation
+
+- [x] per-user/per-manga notification checkpoint schema
+- [x] seed first observation without generating historical alerts
+- [x] generate one idempotent event when latest chapter changes
+- [x] advance checkpoint after changed-chapter observation
+- [x] check only per-manga Alerts on follows
+- [x] fail-closed secret-protected internal checker
+- [x] conservative checker rate limit and aggregate counters
+- [x] keep inbox/email delivery out of v1.3.3
+
 ## Remaining v1.3.x
 
-- [ ] controlled new-chapter event generation/checkpointing
 - [ ] notification inbox/history
 - [ ] global email preference integration
 - [ ] quiet/disable controls and rate limiting

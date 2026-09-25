@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v1.3.2--Notification_Event_Foundation-indigo.svg)
+![Version](https://img.shields.io/badge/version-v1.3.3--Controlled_Notification_Generation-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v1.3.2 — Notification Event Foundation**
+**v1.3.3 — Controlled Notification Generation**
 
-MangaFlux V1 remains a stable single-source MangaDex product. v1.3.2 adds the durable, idempotent new-chapter notification event model and eligible-follow query needed before event generation and inbox delivery are exposed.
+MangaFlux V1 remains a stable single-source MangaDex product. v1.3.3 adds authenticated internal notification checks with per-user/manga checkpoints: the first observation seeds state without backfilling alerts, while a later chapter change creates one idempotent event.
 
 ### Library improvements
 
@@ -49,14 +49,15 @@ The settings sheet is available from manga chapter lists and inside the immersiv
 - an alternate-release count is shown when duplicates are collapsed
 - readers can opt back into all alternate releases
 
-### v1.3.2 refinements
+### v1.3.3 refinements
 
-- added durable notification event storage for future new-chapter alerts
-- events retain manga/chapter identity, source publication time, creation time, and future read state
-- unique user/source/manga/chapter/type identity makes event creation idempotent
-- added an eligible-follow query that only returns followed manga with per-manga alerts enabled
-- added repository primitives for creating and listing notification events
-- no polling job, inbox UI, or email delivery is enabled yet; those remain later v1.3.x slices
+- added per-user/per-manga notification checkpoints
+- first eligible check seeds the current latest chapter without generating a historical alert
+- later latest-chapter changes create an idempotent new-chapter event and advance the checkpoint
+- only Follow rows with Alerts on participate
+- internal check endpoint is fail-closed behind NOTIFICATION_CRON_SECRET
+- check endpoint is rate-limited and returns aggregate operational counters only
+- inbox UI and email delivery remain later v1.3.x slices
 
 ### Architecture boundary
 
