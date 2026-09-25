@@ -1,0 +1,52 @@
+/* MangaFlux v1.2.3 — Profile Privacy & Community Moderation */
+
+.community-restriction-notice,
+.community-restriction-banner {
+  display: grid;
+  gap: 5px;
+  padding: 13px 14px;
+  border: 1px solid #4a3535;
+  border-radius: 14px;
+  background: #171010;
+}
+
+.community-restriction-notice strong,
+.community-restriction-banner strong {
+  color: #d6b0b0;
+  font-size: 11px;
+}
+
+.community-restriction-notice span,
+.community-restriction-banner span {
+  color: #8f7474;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.community-restriction-banner {
+  margin-top: 12px;
+}
+
+.admin-user-actions {
+  flex-wrap: wrap;
+}
+
+.admin-user-actions .admin-community-restrict {
+  border-color: #4c3535;
+  color: #c99;
+}
+
+.admin-user-actions .admin-community-restore {
+  border-color: #35503c;
+  color: #a9c9ae;
+}
+
+@media (max-width: 700px) {
+  .admin-user-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .community-restriction-banner {
+    margin-top: 14px;
+  }
+}

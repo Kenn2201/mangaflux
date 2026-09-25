@@ -10,6 +10,7 @@ export async function updateUserProfile(
     avatarDataUrl: string | null;
     bio: string | null;
     showPublicActivity: boolean;
+    showJoinedDate: boolean;
   }
 ) {
   const [user] = await db
@@ -19,6 +20,7 @@ export async function updateUserProfile(
       avatarDataUrl: input.avatarDataUrl,
       bio: input.bio,
       showPublicActivity: input.showPublicActivity,
+      showJoinedDate: input.showJoinedDate,
       updatedAt: new Date()
     })
     .where(eq(users.id, userId))
@@ -29,6 +31,8 @@ export async function updateUserProfile(
       avatarDataUrl: users.avatarDataUrl,
       bio: users.bio,
       showPublicActivity: users.showPublicActivity,
+      showJoinedDate: users.showJoinedDate,
+      communityRestricted: users.communityRestricted,
       emailVerifiedAt: users.emailVerifiedAt,
       createdAt: users.createdAt
     });

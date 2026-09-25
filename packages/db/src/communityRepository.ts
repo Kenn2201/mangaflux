@@ -76,6 +76,7 @@ export async function getCommunityProfile(
           avatarDataUrl: users.avatarDataUrl,
           bio: users.bio,
           showPublicActivity: users.showPublicActivity,
+          showJoinedDate: users.showJoinedDate,
           createdAt: users.createdAt
         })
         .from(users)
@@ -113,7 +114,9 @@ export async function getCommunityProfile(
       displayName: profile[0].displayName,
       avatarDataUrl: profile[0].avatarDataUrl,
       bio: profile[0].bio,
-      createdAt: profile[0].createdAt
+      createdAt: profile[0].showJoinedDate
+        ? profile[0].createdAt
+        : null
     },
     activityVisible,
     stats: activityVisible

@@ -44,6 +44,7 @@ export async function getAdminOverview(
         email: users.email,
         displayName: users.displayName,
         avatarDataUrl: users.avatarDataUrl,
+        communityRestricted: users.communityRestricted,
         emailVerifiedAt: users.emailVerifiedAt,
         createdAt: users.createdAt
       })
@@ -92,4 +93,24 @@ export async function deleteCommunityCommentAsAdmin(
     .returning({ id: communityComments.id });
 
   return deleted.length > 0;
+}
+
+export async function setUserCommunityRestricted(
+  db: MangaFluxDatabase,
+  userId: string,
+  restricted: boolean
+) {
+  const [user] = await db
+    .update(users)
+    .set({
+      communityRestricted: restricted,
+      updatedAt: new Date()
+    })
+    .where(eq(users.id, userId))
+    .returning({
+      id: users.id,
+      communityRestricted: users.communityRestricted
+    });
+
+  return user ?? null;
 }

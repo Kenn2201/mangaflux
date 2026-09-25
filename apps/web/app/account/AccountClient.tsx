@@ -21,6 +21,8 @@ type Session = {
     avatarDataUrl?: string | null;
     bio?: string | null;
     showPublicActivity?: boolean;
+    showJoinedDate?: boolean;
+    communityRestricted?: boolean;
     emailVerifiedAt?: string | null;
     createdAt: string;
     role?: "user" | "admin";
@@ -149,6 +151,7 @@ export default function AccountClient() {
   const [profileName, setProfileName] = useState("");
   const [profileBio, setProfileBio] = useState("");
   const [showPublicActivity, setShowPublicActivity] = useState(true);
+  const [showJoinedDate, setShowJoinedDate] = useState(true);
   const [avatarDraft, setAvatarDraft] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [needsVerification, setNeedsVerification] = useState(false);
@@ -190,6 +193,7 @@ export default function AccountClient() {
       setProfileName("");
       setProfileBio("");
       setShowPublicActivity(true);
+      setShowJoinedDate(true);
       setAvatarDraft(null);
       return;
     }
@@ -198,6 +202,7 @@ export default function AccountClient() {
     setProfileName(user.displayName ?? "");
     setProfileBio(user.bio ?? "");
     setShowPublicActivity(user.showPublicActivity ?? true);
+    setShowJoinedDate(user.showJoinedDate ?? true);
     setAvatarDraft(user.avatarDataUrl ?? null);
   }, [session]);
 
@@ -375,6 +380,7 @@ export default function AccountClient() {
     setProfileName(user.displayName ?? "");
     setProfileBio(user.bio ?? "");
     setShowPublicActivity(user.showPublicActivity ?? true);
+    setShowJoinedDate(user.showJoinedDate ?? true);
     setAvatarDraft(user.avatarDataUrl ?? null);
     setProfileEditing(true);
   }
@@ -385,6 +391,7 @@ export default function AccountClient() {
     setProfileName(user.displayName ?? "");
     setProfileBio(user.bio ?? "");
     setShowPublicActivity(user.showPublicActivity ?? true);
+    setShowJoinedDate(user.showJoinedDate ?? true);
     setAvatarDraft(user.avatarDataUrl ?? null);
     setProfileEditing(false);
   }
@@ -435,7 +442,8 @@ export default function AccountClient() {
           displayName: profileName.trim() || null,
           avatarDataUrl: avatarDraft,
           bio: profileBio.trim() || null,
-          showPublicActivity
+          showPublicActivity,
+          showJoinedDate
         })
       });
 
@@ -695,6 +703,22 @@ export default function AccountClient() {
                   />
                 </label>
 
+                <label className="profile-privacy-toggle">
+                  <span>
+                    <strong>Show joined date</strong>
+                    <small>
+                      Show when you joined MangaFlux on your public community profile.
+                    </small>
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={showJoinedDate}
+                    onChange={(event) =>
+                      setShowJoinedDate(event.target.checked)
+                    }
+                  />
+                </label>
+
                 <p className="device-note">
                   Images are cropped and progressively compressed into a small
                   WebP for mobile upload. Your email is never shown publicly.
@@ -751,6 +775,29 @@ export default function AccountClient() {
                       : "Visible"}
                   </strong>
                 </div>
+
+                <div className="profile-readonly-privacy">
+                  <span>
+                    <strong>Joined date</strong>
+                    <small>
+                      Membership date on your public profile
+                    </small>
+                  </span>
+                  <strong>
+                    {user.showJoinedDate === false
+                      ? "Hidden"
+                      : "Visible"}
+                  </strong>
+                </div>
+
+                {user.communityRestricted ? (
+                  <div className="community-restriction-notice" role="status">
+                    <strong>Community access restricted</strong>
+                    <span>
+                      Reading and account features still work, but posting comments and reactions is currently unavailable.
+                    </span>
+                  </div>
+                ) : null}
 
                 <p className="device-note">
                   Use Edit profile to change your public identity or privacy.

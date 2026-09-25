@@ -34,6 +34,7 @@ type CommunityPayload = {
   viewerReaction?: string | null;
   viewerUserId?: string | null;
   authenticated: boolean;
+  communityRestricted?: boolean;
 };
 
 const REACTIONS = [
@@ -357,7 +358,7 @@ export default function CommunityThread({
               aria-label={`${reaction.label}, ${count} reaction${
                 count === 1 ? "" : "s"
               }`}
-              disabled={busy}
+              disabled={busy || data?.communityRestricted}
               onClick={() => void react(reaction.key)}
             >
               <span aria-hidden="true">{reaction.emoji}</span>
@@ -369,14 +370,23 @@ export default function CommunityThread({
 
       <p className="reaction-summary" role="status" aria-live="polite">
         {reactionTotal} reaction{reactionTotal === 1 ? "" : "s"}
-        {selectedReaction
-          ? ` · You reacted ${selectedReaction.emoji} ${selectedReaction.label}`
-          : data?.authenticated
-            ? " · Choose one to react"
-            : ""}
+        {data?.communityRestricted
+          ? " · Community access restricted"
+          : selectedReaction
+            ? ` · You reacted ${selectedReaction.emoji} ${selectedReaction.label}`
+            : data?.authenticated
+              ? " · Choose one to react"
+              : ""}
       </p>
 
-      {data?.authenticated ? (
+      {data?.communityRestricted ? (
+        <div className="community-restriction-banner" role="status">
+          <strong>Community access restricted</strong>
+          <span>
+            You can keep reading and using your account, but comments and reactions are currently unavailable.
+          </span>
+        </div>
+      ) : data?.authenticated ? (
         <form className="comment-composer" onSubmit={submit}>
           <textarea
             value={body}

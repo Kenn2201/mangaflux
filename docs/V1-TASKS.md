@@ -119,12 +119,22 @@
 - [x] mark signed-in reader comments with You
 - [x] show accessible total/selected reaction status
 
+## v1.2.3 — Profile Privacy & Community Moderation
+
+- [x] public joined-date visibility preference
+- [x] omit hidden joined date from public profile API output
+- [x] admin community restrict / restore control
+- [x] block restricted accounts from posting comments
+- [x] block restricted accounts from reactions
+- [x] preserve reading/account/profile access while restricted
+- [x] prevent active admin from self-restricting
+- [x] show restriction state in account and admin UX
+
 ## Remaining v1.2.x
 
-- [ ] broader user/privacy preferences
 - [ ] notification/privacy preference groundwork
-- [ ] stronger community moderation/admin tools
-- [ ] additional activity presentation improvements found during QA
+- [ ] final community moderation/admin polish
+- [ ] additional profile/activity presentation improvements found during QA
 
 ## Future V1.x
 

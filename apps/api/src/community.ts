@@ -70,7 +70,8 @@ async function optionalSession(
 async function requiredSession(
   request: FastifyRequest,
   reply: FastifyReply,
-  database: MangaFluxDatabase
+  database: MangaFluxDatabase,
+  allowRestricted = false
 ) {
   const session = await optionalSession(request, database);
 
@@ -86,6 +87,15 @@ async function requiredSession(
     reply.code(403).send({
       error: "EMAIL_NOT_VERIFIED",
       message: "Verify your email before posting."
+    });
+    return null;
+  }
+
+  if (session.communityRestricted && !allowRestricted) {
+    reply.code(403).send({
+      error: "COMMUNITY_RESTRICTED",
+      message:
+        "Community posting and reactions are restricted for this account. Reading and account access are still available."
     });
     return null;
   }
@@ -244,7 +254,8 @@ export function registerCommunityRoutes(
         reactions,
         viewerReaction,
         viewerUserId: session?.userId ?? null,
-        authenticated: Boolean(session)
+        authenticated: Boolean(session),
+        communityRestricted: Boolean(session?.communityRestricted)
       };
     }
   );
@@ -343,7 +354,12 @@ export function registerCommunityRoutes(
         });
       }
 
-      const session = await requiredSession(request, reply, database);
+      const session = await requiredSession(
+        request,
+        reply,
+        database,
+        true
+      );
       if (!session) return;
 
       const deleted = await deleteOwnCommunityComment(

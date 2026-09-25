@@ -47,6 +47,8 @@ export async function createUser(
       avatarDataUrl: users.avatarDataUrl,
       bio: users.bio,
       showPublicActivity: users.showPublicActivity,
+      showJoinedDate: users.showJoinedDate,
+      communityRestricted: users.communityRestricted,
       emailVerifiedAt: users.emailVerifiedAt,
       createdAt: users.createdAt
     });
@@ -126,6 +128,8 @@ export async function getSessionUser(
       avatarDataUrl: users.avatarDataUrl,
       bio: users.bio,
       showPublicActivity: users.showPublicActivity,
+      showJoinedDate: users.showJoinedDate,
+      communityRestricted: users.communityRestricted,
       emailVerifiedAt: users.emailVerifiedAt,
       createdAt: users.createdAt
     })
