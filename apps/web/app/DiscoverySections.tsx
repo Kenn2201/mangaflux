@@ -14,6 +14,8 @@ import {
   discoveryLanguageOptions
 } from "../lib/discoveryPreferences";
 import { useDiscoveryLanguage } from "../lib/useDiscoveryLanguage";
+import GenrePreferences from "./GenrePreferences";
+import PreferredGenreRecommendations from "./PreferredGenreRecommendations";
 
 type DiscoveryPage = {
   items: MangaTileItem[];
@@ -133,6 +135,9 @@ export default function DiscoverySections({
           ))}
         </select>
       </div>
+
+      <GenrePreferences compact={compact} />
+      <PreferredGenreRecommendations />
 
       {sections.map((section) => {
         const page = data?.sections[section.key];

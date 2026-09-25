@@ -7,8 +7,21 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- stronger genre and manga-status preferences
+- stronger manga-status preferences
 - improved Hot / Popular / Trending discovery
+
+## 1.4.6 - 2026-09-26 — Genre Preferences
+
+### Discovery preferences
+- Accepted physical QA sign-off for v1.4.5 Discovery Language Preference.
+- Added up to three explicit device-local preferred genres.
+- Keep preferred genres independent from saved Browse filter presets.
+- Added add, remove-one, and clear controls.
+- Added a dedicated From your preferred genres recommendation rail.
+- Merge duplicate manga across preferred-genre result groups and rank them once.
+- Respect the current Discovery language while building preferred-genre recommendations.
+- Preserve normal Hot / Popular / Top / Latest rankings.
+- No database migration is required.
 
 ## 1.4.5 - 2026-09-26 — Discovery Language Preference
 

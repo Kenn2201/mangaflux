@@ -32,8 +32,9 @@ v1.4.1  ████████████████████  ✅ QA
 v1.4.2  ████████████████████  ✅ QA
 v1.4.3  ████████████████████  ✅ QA
 v1.4.4  ████████████████████  ✅ QA
-v1.4.5  ████████████████████  🧪 CURRENT
-v1.4.6+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT AFTER QA
+v1.4.5  ████████████████████  ✅ QA
+v1.4.6  ████████████████████  🧪 CURRENT
+v1.4.7+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT AFTER QA
 v1.4.x  Discovery & Personalization
 v1.5+   Product Polish
          ↓
@@ -42,7 +43,7 @@ v2.x    Multi-Source + Platform Expansion
 v3.x    Advanced MangaFlux
 ~~~
 
-**v1.1.x — Library & Reading Quality**, **v1.2.x — Profiles & Community Depth**, and **v1.3.x — Following & Notifications** are signed off after physical QA. Optional Discord/webhook delivery is deferred. **v1.4.0 — Recommendation Explanations**, **v1.4.1 — Activity-Based Recommendations**, **v1.4.2 — Saved Discovery Filters**, **v1.4.3 — Recently Viewed Controls**, and **v1.4.4 — Search History Controls** have also passed physical QA. MangaFlux is now implementing **v1.4.5 — Discovery Language Preference** inside **v1.4.x — Discovery & Personalization**.
+**v1.1.x — Library & Reading Quality**, **v1.2.x — Profiles & Community Depth**, and **v1.3.x — Following & Notifications** are signed off after physical QA. Optional Discord/webhook delivery is deferred. **v1.4.0 — Recommendation Explanations**, **v1.4.1 — Activity-Based Recommendations**, **v1.4.2 — Saved Discovery Filters**, **v1.4.3 — Recently Viewed Controls**, **v1.4.4 — Search History Controls**, and **v1.4.5 — Discovery Language Preference** have also passed physical QA. MangaFlux is now implementing **v1.4.6 — Genre Preferences** inside **v1.4.x — Discovery & Personalization**.
 
 ---
 
@@ -489,7 +490,7 @@ Make discovery increasingly personalized.
 - Physical production QA passed
 - No new database migration
 
-### 🧪 v1.4.5 — Discovery Language Preference — CURRENT
+### ✅ v1.4.5 — Discovery Language Preference — QA SIGNED OFF
 
 - Replace English-only discovery chapter availability with a validated language preference
 - Store the discovery language on the current device
@@ -499,11 +500,23 @@ Make discovery increasingly personalized.
 - Apply the preference to Surprise me
 - Keep discovery language separate from per-series reader chapter language
 - Include language in MangaDex discovery cache keys
+- Physical production QA passed
 - No new database migration
 
-### ➡️ v1.4.6+ — Remaining Personalization Depth — NEXT AFTER QA
+### 🧪 v1.4.6 — Genre Preferences — CURRENT
 
-- Genre preferences
+- Choose up to three explicit preferred genres on the current device
+- Keep genre preferences separate from saved Browse filter presets
+- Add and remove preferred genres independently
+- Clear all genre preferences
+- Build a dedicated preferred-genre recommendation rail
+- Merge duplicate manga across preferred-genre discovery groups
+- Rank explicit preferences while preserving normal global discovery rankings
+- Respect the current Discovery language
+- No new database migration
+
+### ➡️ v1.4.7+ — Remaining Personalization Depth — NEXT AFTER QA
+
 - Manga-status preferences
 - Better Hot discovery
 - Better Popular discovery
