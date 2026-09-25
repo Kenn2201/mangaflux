@@ -7,8 +7,19 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- v1.3.1+ per-manga notification preferences and notification event foundation
-- later v1.3.x notification inbox/history and delivery controls
+- v1.3.2+ new-chapter notification event foundation
+- notification inbox/history after event generation is stable
+- integrate global Email notifications as a delivery gate
+
+## 1.3.1 - 2026-09-26 — Per-Manga Notification Preferences
+
+### Following preferences
+- Added Alerts on / Alerts off for each followed manga.
+- Persisted the preference on the existing follow row.
+- Added controls on manga details and the Following Library shelf.
+- New follows default safely to alerts enabled.
+- Kept per-manga alert eligibility separate from the account-level Email notifications delivery preference.
+- No notification event is generated or delivered yet.
 
 ## 1.3.0 - 2026-09-26 — Following Foundation
 

@@ -111,6 +111,42 @@ export async function PUT(request: NextRequest) {
   });
 }
 
+export async function PATCH(request: NextRequest) {
+  let payload: {
+    source?: string;
+    mangaId?: string;
+    notificationsEnabled?: boolean;
+  };
+
+  try {
+    payload = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "INVALID_REQUEST", message: "Invalid JSON body" },
+      { status: 400 }
+    );
+  }
+
+  if (
+    !payload.mangaId?.trim() ||
+    typeof payload.notificationsEnabled !== "boolean"
+  ) {
+    return NextResponse.json(
+      {
+        error: "INVALID_REQUEST",
+        message: "mangaId and notificationsEnabled are required."
+      },
+      { status: 400 }
+    );
+  }
+
+  return forward(request, "/api/account/state/follow", {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+}
+
 export async function DELETE(request: NextRequest) {
   const path = queryPath(request);
 

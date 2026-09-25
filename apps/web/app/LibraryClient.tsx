@@ -257,6 +257,55 @@ export default function LibraryClient() {
     }
   }
 
+  async function setFollowNotifications(
+    item: Follow,
+    notificationsEnabled: boolean
+  ) {
+    try {
+      const response = await fetch("/api/state/follow", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          source: item.source,
+          mangaId: item.mangaId,
+          notificationsEnabled
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("Notification preference update failed.");
+      }
+
+      setData((current) =>
+        current
+          ? {
+              ...current,
+              following: (current.following ?? []).map((follow) =>
+                follow.source === item.source &&
+                follow.mangaId === item.mangaId
+                  ? { ...follow, notificationsEnabled }
+                  : follow
+              )
+            }
+          : current
+      );
+
+      notify({
+        tone: "success",
+        title: notificationsEnabled
+          ? "Manga notifications on"
+          : "Manga notifications off",
+        message: `${item.title} chapter alerts are ${notificationsEnabled ? "enabled" : "muted"}.`
+      });
+    } catch {
+      notify({
+        tone: "error",
+        title: "Notification setting failed",
+        message: "Try again shortly."
+      });
+    }
+  }
+
   if (loading) {
     return <LibrarySkeleton />;
   }
@@ -440,26 +489,45 @@ export default function LibraryClient() {
 
           <div className="bookmark-strip library-bookmark-grid">
             {filteredFollowing.map((item) => (
-              <Link
-                className="bookmark-card following-card"
-                href={`/manga/${item.mangaId}`}
+              <article
+                className="following-card-wrap"
                 key={`follow:${item.source}:${item.mangaId}`}
               >
-                <div className="bookmark-cover">
-                  {item.coverUrl ? (
-                    <img
-                      src={item.coverUrl}
-                      alt=""
-                      referrerPolicy="no-referrer"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="cover-placeholder">No cover</div>
-                  )}
-                </div>
-                <strong>{item.title}</strong>
-                <span>Following</span>
-              </Link>
+                <Link
+                  className="bookmark-card following-card"
+                  href={`/manga/${item.mangaId}`}
+                >
+                  <div className="bookmark-cover">
+                    {item.coverUrl ? (
+                      <img
+                        src={item.coverUrl}
+                        alt=""
+                        referrerPolicy="no-referrer"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="cover-placeholder">No cover</div>
+                    )}
+                  </div>
+                  <strong>{item.title}</strong>
+                  <span>Following</span>
+                </Link>
+                <button
+                  type="button"
+                  className={`following-alert-toggle ${item.notificationsEnabled ? "is-active" : ""}`}
+                  aria-pressed={item.notificationsEnabled}
+                  onClick={() =>
+                    void setFollowNotifications(
+                      item,
+                      !item.notificationsEnabled
+                    )
+                  }
+                >
+                  {item.notificationsEnabled
+                    ? "🔔 Alerts on"
+                    : "🔕 Alerts off"}
+                </button>
+              </article>
             ))}
           </div>
         </div>
