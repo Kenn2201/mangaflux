@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v1.4.0--Recommendation_Explanations-indigo.svg)
+![Version](https://img.shields.io/badge/version-v1.4.1--Activity_Based_Recommendations-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v1.4.0 — Recommendation Explanations**
+**v1.4.1 — Activity-Based Recommendations**
 
-MangaFlux V1 remains a stable single-source MangaDex product. v1.4.0 begins Discovery & Personalization by making dashboard recommendations explain the creator, genre/theme, and year signals that caused each title to rank.
+MangaFlux V1 remains a stable single-source MangaDex product. After v1.4.0 Recommendation Explanations passed physical QA, v1.4.1 broadens personalized discovery from a single seed title to a bounded blend of recent reading and library activity.
 
 ### Library improvements
 
@@ -49,14 +49,15 @@ The settings sheet is available from manga chapter lists and inside the immersiv
 - an alternate-release count is shown when duplicates are collapsed
 - readers can opt back into all alternate releases
 
-### v1.4.0 refinements
+### v1.4.1 refinements
 
-- closed v1.3.x Following & Notifications after successful physical QA through quiet hours
-- kept Discord/webhook delivery out of the core roadmap for now
-- dashboard recommendations now preserve the actual matching signals used during ranking
-- each recommended title can explain matching creator, genre/theme, and release-year signals
-- explanations remain grounded in the existing MangaDex discovery queries rather than generated guesses
-- existing recommendation exclusions and ranking behavior remain intact
+- v1.4.0 Recommendation Explanations passed physical QA and is signed off
+- recommendations now blend up to three recent reading/bookmark activity seeds instead of relying on one title
+- more recent activity receives greater ranking weight
+- repeated creator/tag/year signals are deduplicated and strengthened across activity seeds
+- discovery work is capped at eight ranked signals to keep MangaDex/API traffic bounded
+- explanations identify which recent title contributed each creator, genre/theme, or year signal
+- existing bookmark/history exclusions remain intact
 - no new database migration is required
 
 ### Architecture boundary

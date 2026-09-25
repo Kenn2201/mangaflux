@@ -27,8 +27,9 @@ v1.3.5  ████████████████████  ✅
 v1.3.6  ████████████████████  ✅
 v1.3.7  ████████████████████  ✅
 v1.3.x  ████████████████████  ✅ COMPLETE
-v1.4.0  ████████████████████  ✅
-v1.4.1+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
+v1.4.0  ████████████████████  ✅ QA
+v1.4.1  ████████████████████  🧪 CURRENT
+v1.4.2+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT AFTER QA
 v1.4.x  Discovery & Personalization
 v1.5+   Product Polish
          ↓
@@ -37,7 +38,7 @@ v2.x    Multi-Source + Platform Expansion
 v3.x    Advanced MangaFlux
 ~~~
 
-**v1.1.x — Library & Reading Quality**, **v1.2.x — Profiles & Community Depth**, and **v1.3.x — Following & Notifications** are signed off after physical QA. Optional Discord/webhook delivery is deferred. MangaFlux is now in **v1.4.x — Discovery & Personalization** with **v1.4.0 — Recommendation Explanations** as the first focused release.
+**v1.1.x — Library & Reading Quality**, **v1.2.x — Profiles & Community Depth**, and **v1.3.x — Following & Notifications** are signed off after physical QA. Optional Discord/webhook delivery is deferred. **v1.4.0 — Recommendation Explanations** has also passed physical QA. MangaFlux is now implementing **v1.4.1 — Activity-Based Recommendations** inside **v1.4.x — Discovery & Personalization**.
 
 ---
 
@@ -427,18 +428,28 @@ Discord/webhook delivery is intentionally deferred and is not required to close 
 
 Make discovery increasingly personalized.
 
-### ✅ v1.4.0 — Recommendation Explanations
+### ✅ v1.4.0 — Recommendation Explanations — QA SIGNED OFF
 
 - Preserve the actual creator, genre/theme, and year signals used by dashboard recommendation ranking
 - Show concise per-title explanations for why each recommendation appeared
 - Keep explanations grounded in real discovery signals rather than generated guesses
 - Preserve existing ranking and already-read/library exclusion behavior
+- Physical production QA passed
 - No new database migration
 
-### ➡️ v1.4.1+ — Personalization Depth — NEXT
+### 🧪 v1.4.1 — Activity-Based Recommendations — CURRENT
 
-- Activity-based recommendations
-- Activity-based recommendations
+- Blend up to three recent reading/bookmark activity seeds
+- Rank recent activity more strongly than older activity
+- Deduplicate repeated creator, genre/theme, and year signals across seeds
+- Let shared signals reinforce recommendation ranking
+- Cap discovery work at eight ranked signals to keep upstream requests bounded
+- Tie explanation text back to the recent title that contributed each signal
+- Preserve existing bookmark/history exclusions
+- No new database migration
+
+### ➡️ v1.4.2+ — Remaining Personalization Depth — NEXT AFTER QA
+
 - Saved discovery filters
 - Recently viewed controls
 - Search-history controls

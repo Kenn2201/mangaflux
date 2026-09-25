@@ -7,9 +7,20 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- v1.4.x activity-based recommendations and saved discovery controls
+- v1.4.x saved discovery and history controls
 - stronger language, genre, and manga-status preferences
 - improved Hot / Popular / Trending discovery
+
+## 1.4.1 - 2026-09-26 — Activity-Based Recommendations
+
+### Discovery & personalization
+- Accepted physical QA sign-off for v1.4.0 Recommendation Explanations.
+- Blend up to three recent reading/bookmark activity seeds for dashboard recommendations.
+- Weight newer activity more strongly while allowing repeated signals across seeds to reinforce ranking.
+- Deduplicate creator, genre/theme, and year discovery signals and cap discovery work at eight requests.
+- Keep recommendation explanations grounded in the specific recent title that contributed each signal.
+- Preserve bookmark/history exclusions so already-saved or already-read manga do not re-enter the recommendation set.
+- No database migration is required.
 
 ## 1.4.0 - 2026-09-26 — Recommendation Explanations
 
