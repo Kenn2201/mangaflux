@@ -1,4 +1,5 @@
 import {
+  boolean,
   index,
   integer,
   pgTable,
@@ -171,6 +172,31 @@ export const userReadingProgress = pgTable(
   (table) => [
     primaryKey({ columns: [table.userId, table.source, table.mangaId] }),
     index("user_reading_progress_user_updated_idx").on(
+      table.userId,
+      table.updatedAt
+    )
+  ]
+);
+
+export const userReaderPreferences = pgTable(
+  "user_reader_preferences",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    mangaId: text("manga_id").notNull(),
+    language: text("language").notNull(),
+    dataSaver: boolean("data_saver").notNull().default(false),
+    showAlternateReleases: boolean("show_alternate_releases")
+      .notNull()
+      .default(false),
+    preferredScanlationGroup: text("preferred_scanlation_group"),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+  },
+  (table) => [
+    primaryKey({ columns: [table.userId, table.mangaId] }),
+    index("user_reader_preferences_user_updated_idx").on(
       table.userId,
       table.updatedAt
     )
