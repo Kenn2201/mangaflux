@@ -7,8 +7,21 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- v1.2.1+ richer profile/activity browsing and community UX
+- v1.2.2+ richer profile activity browsing and community UX
 - keep v1.3.x reserved for Following & Notifications
+
+## 1.2.1 - 2026-09-25 — Profile Editing & Mobile Modal Polish
+
+### Profile editing flow
+- Community profile settings are now read-only until Edit profile is selected.
+- Saving exits edit mode and returns to the saved read-only profile summary.
+- Cancel restores the current saved profile and discards draft name, avatar, bio, and privacy changes.
+- Preview profile remains available from the read-only profile state.
+
+### Mobile public profile return
+- Preserve the underlying page scroll position while a public profile modal is open.
+- Restore the exact scroll position when the modal closes.
+- Restore keyboard focus with preventScroll so mobile browsers do not jump away from the originating comment.
 
 ## 1.2.0 - 2026-09-25 — Profile Bio & Privacy Foundation
 

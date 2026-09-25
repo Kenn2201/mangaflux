@@ -98,6 +98,16 @@
 - [x] move Library / Discover more / Surprise me to manga details
 - [x] reader Back and Home both return to current manga
 
+## v1.2.1 — Profile Editing & Mobile Modal Polish
+
+- [x] read-only community profile by default
+- [x] explicit Edit profile entry point
+- [x] Save exits edit mode
+- [x] Cancel discards unsaved profile drafts
+- [x] preserve mobile page scroll while public profile modal is open
+- [x] restore exact scroll position on modal close
+- [x] restore originating comment focus without scrolling
+
 ## Remaining v1.2.x
 
 - [ ] richer activity browsing and presentation

@@ -145,6 +145,7 @@ export default function AccountClient() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [profileBusy, setProfileBusy] = useState(false);
+  const [profileEditing, setProfileEditing] = useState(false);
   const [profileName, setProfileName] = useState("");
   const [profileBio, setProfileBio] = useState("");
   const [showPublicActivity, setShowPublicActivity] = useState(true);
@@ -185,6 +186,7 @@ export default function AccountClient() {
     const user = session?.authenticated ? session.user : null;
 
     if (!user) {
+      setProfileEditing(false);
       setProfileName("");
       setProfileBio("");
       setShowPublicActivity(true);
@@ -192,6 +194,7 @@ export default function AccountClient() {
       return;
     }
 
+    setProfileEditing(false);
     setProfileName(user.displayName ?? "");
     setProfileBio(user.bio ?? "");
     setShowPublicActivity(user.showPublicActivity ?? true);
@@ -366,6 +369,26 @@ export default function AccountClient() {
     }
   }
 
+  function beginProfileEdit() {
+    if (!user) return;
+
+    setProfileName(user.displayName ?? "");
+    setProfileBio(user.bio ?? "");
+    setShowPublicActivity(user.showPublicActivity ?? true);
+    setAvatarDraft(user.avatarDataUrl ?? null);
+    setProfileEditing(true);
+  }
+
+  function cancelProfileEdit() {
+    if (!user || profileBusy) return;
+
+    setProfileName(user.displayName ?? "");
+    setProfileBio(user.bio ?? "");
+    setShowPublicActivity(user.showPublicActivity ?? true);
+    setAvatarDraft(user.avatarDataUrl ?? null);
+    setProfileEditing(false);
+  }
+
   async function chooseAvatar(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = "";
@@ -429,6 +452,7 @@ export default function AccountClient() {
         authenticated: true,
         user: body.user
       });
+      setProfileEditing(false);
 
       notify({
         tone: "success",
@@ -511,8 +535,8 @@ export default function AccountClient() {
           <section className="panel account-panel profile-card">
             <div className="profile-identity">
               <div className="profile-avatar profile-avatar-image" aria-hidden="true">
-                {avatarDraft ? (
-                  <img src={avatarDraft} alt="" />
+                {user.avatarDataUrl ? (
+                  <img src={user.avatarDataUrl} alt="" />
                 ) : (
                   initial
                 )}
@@ -572,106 +596,168 @@ export default function AccountClient() {
           </section>
 
           <section className="panel account-panel community-profile-card">
-            <div className="section-heading">
+            <div className="section-heading profile-section-heading">
               <div>
                 <p className="eyebrow">Community profile</p>
-                <h2>Identity & privacy</h2>
+                <h2>{profileEditing ? "Edit profile" : "Identity & privacy"}</h2>
               </div>
 
-              <button
-                className="profile-preview-button"
-                type="button"
-                onClick={() => setProfilePreviewOpen(true)}
-              >
-                Preview profile
-              </button>
+              {!profileEditing ? (
+                <div className="profile-heading-actions">
+                  <button
+                    className="profile-preview-button"
+                    type="button"
+                    onClick={() => setProfilePreviewOpen(true)}
+                  >
+                    Preview profile
+                  </button>
+                  <button
+                    className="profile-edit-button"
+                    type="button"
+                    onClick={beginProfileEdit}
+                  >
+                    Edit profile
+                  </button>
+                </div>
+              ) : null}
             </div>
 
-            <form className="profile-editor" onSubmit={saveProfile}>
-              <div className="profile-avatar-editor">
-                <div className="profile-avatar profile-avatar-image">
-                  {avatarDraft ? (
-                    <img src={avatarDraft} alt="Profile preview" />
-                  ) : (
-                    initial
-                  )}
+            {profileEditing ? (
+              <form className="profile-editor" onSubmit={saveProfile}>
+                <div className="profile-avatar-editor">
+                  <div className="profile-avatar profile-avatar-image">
+                    {avatarDraft ? (
+                      <img src={avatarDraft} alt="Profile preview" />
+                    ) : (
+                      initial
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="avatar-upload-button">
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        onChange={chooseAvatar}
+                        disabled={profileBusy}
+                      />
+                      Choose image
+                    </label>
+
+                    {avatarDraft ? (
+                      <button
+                        className="profile-text-button"
+                        type="button"
+                        disabled={profileBusy}
+                        onClick={() => setAvatarDraft(null)}
+                      >
+                        Remove avatar
+                      </button>
+                    ) : null}
+                  </div>
                 </div>
 
-                <div>
-                  <label className="avatar-upload-button">
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      onChange={chooseAvatar}
-                      disabled={profileBusy}
-                    />
-                    Choose image
-                  </label>
+                <label className="profile-name-field">
+                  <span>Display name</span>
+                  <input
+                    value={profileName}
+                    minLength={2}
+                    maxLength={32}
+                    placeholder="How readers will see you"
+                    onChange={(event) => setProfileName(event.target.value)}
+                  />
+                </label>
 
-                  {avatarDraft ? (
-                    <button
-                      className="profile-text-button"
-                      type="button"
-                      disabled={profileBusy}
-                      onClick={() => setAvatarDraft(null)}
-                    >
-                      Remove avatar
-                    </button>
-                  ) : null}
+                <label className="profile-bio-field">
+                  <span>Bio</span>
+                  <textarea
+                    value={profileBio}
+                    maxLength={280}
+                    placeholder="A short intro for your MangaFlux community profile"
+                    onChange={(event) => setProfileBio(event.target.value)}
+                  />
+                  <small>{profileBio.length} / 280</small>
+                </label>
+
+                <label className="profile-privacy-toggle">
+                  <span>
+                    <strong>Show public activity</strong>
+                    <small>
+                      Let readers see your comment/reaction totals and recent public comments.
+                    </small>
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={showPublicActivity}
+                    onChange={(event) =>
+                      setShowPublicActivity(event.target.checked)
+                    }
+                  />
+                </label>
+
+                <p className="device-note">
+                  Images are cropped and progressively compressed into a small
+                  WebP for mobile upload. Your email is never shown publicly.
+                </p>
+
+                <div className="profile-editor-actions">
+                  <button
+                    className="secondary-button"
+                    type="button"
+                    disabled={profileBusy}
+                    onClick={cancelProfileEdit}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="account-submit"
+                    type="submit"
+                    disabled={profileBusy}
+                  >
+                    {profileBusy ? "Saving…" : "Save profile"}
+                  </button>
                 </div>
+              </form>
+            ) : (
+              <div className="profile-readonly">
+                <div className="profile-readonly-identity">
+                  <div className="profile-avatar profile-avatar-image">
+                    {user.avatarDataUrl ? (
+                      <img src={user.avatarDataUrl} alt="" />
+                    ) : (
+                      initial
+                    )}
+                  </div>
+                  <div>
+                    <strong>
+                      {user.displayName || "MangaFlux Reader"}
+                    </strong>
+                    <span>
+                      {user.bio || "No bio added yet."}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="profile-readonly-privacy">
+                  <span>
+                    <strong>Public activity</strong>
+                    <small>
+                      Comment/reaction totals and recent comments
+                    </small>
+                  </span>
+                  <strong>
+                    {user.showPublicActivity === false
+                      ? "Private"
+                      : "Visible"}
+                  </strong>
+                </div>
+
+                <p className="device-note">
+                  Use Edit profile to change your public identity or privacy.
+                  Your email is never shown publicly.
+                </p>
               </div>
-
-              <label className="profile-name-field">
-                <span>Display name</span>
-                <input
-                  value={profileName}
-                  minLength={2}
-                  maxLength={32}
-                  placeholder="How readers will see you"
-                  onChange={(event) => setProfileName(event.target.value)}
-                />
-              </label>
-
-              <label className="profile-bio-field">
-                <span>Bio</span>
-                <textarea
-                  value={profileBio}
-                  maxLength={280}
-                  placeholder="A short intro for your MangaFlux community profile"
-                  onChange={(event) => setProfileBio(event.target.value)}
-                />
-                <small>{profileBio.length} / 280</small>
-              </label>
-
-              <label className="profile-privacy-toggle">
-                <span>
-                  <strong>Show public activity</strong>
-                  <small>
-                    Let readers see your comment/reaction totals and recent public comments.
-                  </small>
-                </span>
-                <input
-                  type="checkbox"
-                  checked={showPublicActivity}
-                  onChange={(event) =>
-                    setShowPublicActivity(event.target.checked)
-                  }
-                />
-              </label>
-
-              <p className="device-note">
-                Images are cropped and progressively compressed into a small
-                WebP for mobile upload. Your email is never shown publicly.
-              </p>
-
-              <button
-                className="account-submit"
-                type="submit"
-                disabled={profileBusy}
-              >
-                {profileBusy ? "Saving…" : "Save community profile"}
-              </button>
-            </form>
+            )}
           </section>
 
           <section className="panel account-panel security-card">

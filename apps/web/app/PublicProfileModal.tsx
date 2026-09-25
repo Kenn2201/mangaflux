@@ -73,10 +73,27 @@ export default function PublicProfileModal({
     const selectedUserId = userId;
     const previous = document.activeElement as HTMLElement | null;
     const controller = new AbortController();
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    const body = document.body;
+    const previousBodyStyles = {
+      position: body.style.position,
+      top: body.style.top,
+      left: body.style.left,
+      right: body.style.right,
+      width: body.style.width,
+      overflow: body.style.overflow
+    };
 
     setLoading(true);
     setMessage("");
-    document.body.classList.add("profile-modal-open");
+    body.classList.add("profile-modal-open");
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.left = `-${scrollX}px`;
+    body.style.right = "0";
+    body.style.width = "100%";
+    body.style.overflow = "hidden";
 
     async function load() {
       try {
@@ -126,8 +143,24 @@ export default function PublicProfileModal({
     return () => {
       controller.abort();
       document.removeEventListener("keydown", onKeyDown);
-      document.body.classList.remove("profile-modal-open");
-      previous?.focus?.();
+
+      body.classList.remove("profile-modal-open");
+      body.style.position = previousBodyStyles.position;
+      body.style.top = previousBodyStyles.top;
+      body.style.left = previousBodyStyles.left;
+      body.style.right = previousBodyStyles.right;
+      body.style.width = previousBodyStyles.width;
+      body.style.overflow = previousBodyStyles.overflow;
+
+      window.scrollTo(scrollX, scrollY);
+
+      if (previous?.isConnected) {
+        previous.focus({ preventScroll: true });
+      }
+
+      window.requestAnimationFrame(() => {
+        window.scrollTo(scrollX, scrollY);
+      });
     };
   }, [userId]);
 
