@@ -18,7 +18,8 @@ v1.2.2  ████████████████████  ✅
 v1.2.3  ████████████████████  ✅
 v1.2.4  ████████████████████  ✅
 v1.2.5  ████████████████████  ✅
-v1.2.6+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
+v1.3.0  ████████████████████  ✅
+v1.3.1+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
 v1.3.x  Following & Notifications
 v1.4.x  Discovery & Personalization
 v1.5+   Product Polish
@@ -28,7 +29,7 @@ v2.x    Multi-Source + Platform Expansion
 v3.x    Advanced MangaFlux
 ~~~
 
-**v1.1.x — Library & Reading Quality is signed off.** MangaFlux is now in **v1.2.x — Profiles & Community Depth**. **v1.2.5 — Notification Preference Groundwork** is complete, and v1.2.6+ is reserved for final community-depth QA/regression fixes before v1.3.x.
+**v1.1.x — Library & Reading Quality** and **v1.2.x — Profiles & Community Depth** are signed off after physical QA. MangaFlux is now in **v1.3.x — Following & Notifications**. **v1.3.0 — Following Foundation** is complete, and v1.3.1+ continues notification preferences and event groundwork.
 
 ---
 
@@ -198,7 +199,7 @@ The v1.1.x reading-quality phase is complete. Regression-only fixes can still be
 
 ---
 
-## ➡️ v1.2.x — Profiles & Community Depth — CURRENT
+## ✅ v1.2.x — Profiles & Community Depth — COMPLETE
 
 ### ✅ v1.2.0 — Profile Bio & Privacy Foundation
 
@@ -307,36 +308,41 @@ The v1.1.x reading-quality phase is complete. Regression-only fixes can still be
 
 ---
 
-### ➡️ v1.2.6+ — Final Community Depth QA — NEXT
+### ✅ v1.2.x — Physical QA Sign-off
 
-Use only for final v1.2.x regression fixes found through physical QA:
-
-- notification preference persistence
-- profile privacy combinations
-- public activity/profile modal behavior
-- moderation restriction/restore behavior
-- mobile avatar upload
-- discussion sorting/pagination/reactions
-
-If final QA is clean, sign off v1.2.x and move to v1.3.x — Following & Notifications.
+- Notification preference persistence passed
+- Profile/privacy/community features passed
+- Mobile avatar reliability passed
+- Moderation restriction/restore behavior passed
+- Discussion/activity regressions passed
+- Profiles & Community Depth phase closed
 
 ---
 
-## v1.3.x — Following & Notifications
+## ➡️ v1.3.x — Following & Notifications — CURRENT
 
 Introduce a proper following system separate from bookmarks.
 
-- Follow Manga
-- Following independent from bookmark/read state
-- New-chapter notifications
-- Per-manga notification preferences
-- Email notifications
-- Notification inbox
-- Notification history
-- Optional Discord/webhook notifications
-- Quiet controls
-- Disable notification controls
-- Notification rate limiting
+### ✅ v1.3.0 — Following Foundation
+
+- Account-only Follow / Unfollow Manga
+- Following independent from bookmarks and reading progress
+- Account-synced Following shelf in Library
+- Dedicated Following Library view
+- Signed-out readers are prompted to sign in
+- Follow rows carry a notification-enabled field for later v1.3.x controls
+
+### ➡️ v1.3.1+ — Notification System — NEXT
+
+Continue in focused slices:
+
+- per-manga notification preferences
+- new-chapter notification event foundation
+- notification inbox and history
+- global Email notifications preference integration
+- quiet / disable controls
+- notification rate limiting
+- optional Discord/webhook notifications only after core delivery is stable
 
 ---
 

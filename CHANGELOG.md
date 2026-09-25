@@ -7,8 +7,21 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- v1.2.6+ final community-depth QA/regression fixes before v1.3
-- keep actual Following and notification delivery in v1.3.x
+- v1.3.1+ per-manga notification preferences and notification event foundation
+- later v1.3.x notification inbox/history and delivery controls
+
+## 1.3.0 - 2026-09-26 — Following Foundation
+
+### Following
+- Added account-synced manga Following independent from bookmarks and reading progress.
+- Added Follow / Following controls to manga details.
+- Added a dedicated Following view and shelf in Library.
+- Signed-out readers are asked to sign in before Following is available.
+- Follow rows include a per-manga notification-enabled field for later v1.3.x notification work.
+
+### Phase transition
+- v1.2.x Profiles & Community Depth passed physical QA and is signed off.
+- v1.3.x Following & Notifications is now the active phase.
 
 ## 1.2.5 - 2026-09-26 — Notification Preference Groundwork
 

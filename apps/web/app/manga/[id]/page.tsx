@@ -82,6 +82,9 @@ export default function MangaPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [bookmarked, setBookmarked] = useState<boolean | null>(null);
   const [bookmarkBusy, setBookmarkBusy] = useState(false);
+  const [followed, setFollowed] = useState<boolean | null>(null);
+  const [followBusy, setFollowBusy] = useState(false);
+  const [followAvailable, setFollowAvailable] = useState(true);
   const [readerSettingsOpen, setReaderSettingsOpen] = useState(false);
   const [surpriseBusy, setSurpriseBusy] = useState(false);
   const [readerPreferences, setReaderPreferences] =
@@ -253,6 +256,48 @@ export default function MangaPage() {
     };
   }, [id, manga]);
 
+  useEffect(() => {
+    if (!manga) return;
+
+    let cancelled = false;
+
+    async function loadFollow() {
+      try {
+        const response = await fetch(
+          `/api/state/follow?source=mangadex&mangaId=${encodeURIComponent(id)}`,
+          { cache: "no-store" }
+        );
+
+        if (response.status === 401) {
+          if (!cancelled) {
+            setFollowAvailable(false);
+            setFollowed(false);
+          }
+          return;
+        }
+
+        if (!response.ok) return;
+
+        const payload = (await response.json()) as {
+          followed: boolean;
+        };
+
+        if (!cancelled) {
+          setFollowAvailable(true);
+          setFollowed(payload.followed);
+        }
+      } catch {
+        // Following is account-only and optional to basic reading.
+      }
+    }
+
+    void loadFollow();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id, manga]);
+
   async function toggleBookmark() {
     if (!manga || bookmarkBusy) return;
 
@@ -300,6 +345,63 @@ export default function MangaPage() {
       });
     } finally {
       setBookmarkBusy(false);
+    }
+  }
+
+  async function toggleFollow() {
+    if (!manga || followBusy || !followAvailable) return;
+
+    setFollowBusy(true);
+
+    try {
+      const response = followed
+        ? await fetch(
+            `/api/state/follow?source=mangadex&mangaId=${encodeURIComponent(id)}`,
+            { method: "DELETE" }
+          )
+        : await fetch("/api/state/follow", {
+            method: "PUT",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              source: "mangadex",
+              mangaId: id,
+              title: manga.title,
+              coverUrl: manga.coverUrl
+            })
+          });
+
+      if (response.status === 401) {
+        setFollowAvailable(false);
+        notify({
+          tone: "error",
+          title: "Sign in to follow",
+          message: "Following syncs with your MangaFlux account."
+        });
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error("Follow update failed");
+      }
+
+      const nextFollowed = !followed;
+      setFollowed(nextFollowed);
+
+      notify({
+        tone: "success",
+        title: nextFollowed ? "Following manga" : "Unfollowed manga",
+        message: nextFollowed
+          ? `${manga.title} is now in Following.`
+          : `${manga.title} was removed from Following.`
+      });
+    } catch {
+      notify({
+        tone: "error",
+        title: "Follow update failed",
+        message: "Try again shortly."
+      });
+    } finally {
+      setFollowBusy(false);
     }
   }
 
@@ -633,6 +735,27 @@ export default function MangaPage() {
                 : bookmarked
                   ? "★ Bookmarked"
                   : "☆ Bookmark"}
+            </button>
+
+            <button
+              className={`follow-button ${followed ? "is-active" : ""}`}
+              type="button"
+              onClick={() => void toggleFollow()}
+              disabled={followBusy || followed === null || !followAvailable}
+              aria-pressed={followed === true}
+              title={
+                followAvailable
+                  ? "Following is separate from bookmarks and reading progress."
+                  : "Sign in to follow manga."
+              }
+            >
+              {!followAvailable
+                ? "Sign in to follow"
+                : followBusy
+                  ? "Saving…"
+                  : followed
+                    ? "✓ Following"
+                    : "+ Follow"}
             </button>
 
             {manga.externalUrl ? (

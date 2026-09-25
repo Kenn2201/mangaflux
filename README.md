@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v1.2.5--Notification_Preference_Groundwork-indigo.svg)
+![Version](https://img.shields.io/badge/version-v1.3.0--Following_Foundation-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v1.2.5 — Notification Preference Groundwork**
+**v1.3.0 — Following Foundation**
 
-MangaFlux V1 remains a stable single-source MangaDex product. v1.2.5 establishes the first persisted notification preference before v1.3 introduces Following and actual notification delivery.
+MangaFlux V1 remains a stable single-source MangaDex product. v1.3.0 introduces account-synced Following as a distinct relationship from bookmarks and reading progress, establishing the foundation for chapter notifications.
 
 ### Library improvements
 
@@ -49,14 +49,14 @@ The settings sheet is available from manga chapter lists and inside the immersiv
 - an alternate-release count is shown when duplicates are collapsed
 - readers can opt back into all alternate releases
 
-### v1.2.5 refinements
+### v1.3.0 refinements
 
-- added a persisted per-account Email notifications preference
-- the preference is explicitly groundwork for future followed-manga updates; v1.2.5 does not send notification emails
-- existing accounts default safely to notifications enabled
-- preference participates in the existing Edit profile / Save / Cancel workflow
-- saved state is returned by authenticated session/profile APIs
-- v1.2.4 avatar reliability and admin moderation polish remain unchanged
+- added account-only Follow / Following controls on manga details
+- Following persists independently from bookmarks and reading progress
+- Library adds a dedicated Following view and Following shelf
+- signed-out readers are prompted to sign in before following
+- follow records carry a per-manga notification flag for the next notification-preference slice
+- v1.2.x Profiles & Community Depth is physically QA-signed-off and closed
 
 ### Architecture boundary
 

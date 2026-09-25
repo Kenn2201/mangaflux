@@ -11,15 +11,18 @@ import {
   deleteBookmark,
   deleteProgress,
   deleteUserBookmark,
+  deleteUserFollow,
   deleteUserProgress,
   getBookmark,
   getReaderSummary,
   getUserBookmark,
+  getUserFollow,
   getUserReaderPreferences,
   getUserSummary,
   upsertBookmark,
   upsertProgress,
   upsertUserBookmark,
+  upsertUserFollow,
   upsertUserProgress,
   upsertUserReaderPreferences
 } from "@mangaflux/db";
@@ -784,6 +787,93 @@ export function registerStateRoutes(
       );
 
       return { bookmarked: false };
+    }
+  );
+
+  app.get<{
+    Querystring: { source?: string; mangaId?: string };
+  }>(
+    "/api/account/state/follow",
+    { preHandler: limits.read },
+    async (request, reply) => {
+      const session = await authenticateSession(
+        request,
+        reply,
+        database,
+        authProxySecret
+      );
+      if (!session || !database) return;
+
+      const source = request.query.source ?? "mangadex";
+      const mangaId = request.query.mangaId;
+
+      if (!validateSourceAndManga(source, mangaId, reply)) return;
+
+      const item = await getUserFollow(
+        database,
+        session.userId,
+        source,
+        mangaId!
+      );
+
+      return {
+        followed: Boolean(item),
+        item
+      };
+    }
+  );
+
+  app.put<{ Body: BookmarkBody }>(
+    "/api/account/state/follow",
+    { preHandler: limits.write },
+    async (request, reply) => {
+      const session = await authenticateSession(
+        request,
+        reply,
+        database,
+        authProxySecret
+      );
+      if (!session || !database) return;
+
+      const body = validateBookmarkBody(request.body ?? {}, reply);
+      if (!body) return;
+
+      const item = await upsertUserFollow(database, {
+        userId: session.userId,
+        ...body
+      });
+
+      return { followed: true, item };
+    }
+  );
+
+  app.delete<{
+    Querystring: { source?: string; mangaId?: string };
+  }>(
+    "/api/account/state/follow",
+    { preHandler: limits.write },
+    async (request, reply) => {
+      const session = await authenticateSession(
+        request,
+        reply,
+        database,
+        authProxySecret
+      );
+      if (!session || !database) return;
+
+      const source = request.query.source ?? "mangadex";
+      const mangaId = request.query.mangaId;
+
+      if (!validateSourceAndManga(source, mangaId, reply)) return;
+
+      await deleteUserFollow(
+        database,
+        session.userId,
+        source,
+        mangaId!
+      );
+
+      return { followed: false };
     }
   );
 

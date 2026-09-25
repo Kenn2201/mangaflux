@@ -164,6 +164,32 @@ export const userBookmarks = pgTable(
   ]
 );
 
+export const userFollows = pgTable(
+  "user_follows",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    source: text("source").notNull(),
+    mangaId: text("manga_id").notNull(),
+    title: text("title").notNull(),
+    coverUrl: text("cover_url"),
+    notificationsEnabled: boolean("notifications_enabled")
+      .notNull()
+      .default(true),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+  },
+  (table) => [
+    primaryKey({ columns: [table.userId, table.source, table.mangaId] }),
+    index("user_follows_user_created_idx").on(
+      table.userId,
+      table.createdAt
+    )
+  ]
+);
+
 export const userReadingProgress = pgTable(
   "user_reading_progress",
   {
