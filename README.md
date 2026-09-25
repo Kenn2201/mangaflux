@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v1.1.0--Library_Reader_Settings-indigo.svg)
+![Version](https://img.shields.io/badge/version-v1.1.1--Reading_Quality_Refinements-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v1.1.0 — Library & Reader Settings Foundation**
+**v1.1.1 — Reading Quality Refinements**
 
-MangaFlux V1 remains a stable single-source MangaDex product. v1.1 starts the Library & Reading Quality phase without changing the source architecture.
+MangaFlux V1 remains a stable single-source MangaDex product. v1.1.1 deepens reading quality without changing the source architecture.
 
 ### Library improvements
 
@@ -43,6 +43,15 @@ The settings sheet is available from manga chapter lists and inside the immersiv
 - scanlation group attribution remains visible
 - an alternate-release count is shown when duplicates are collapsed
 - readers can opt back into all alternate releases
+
+### v1.1.1 refinements
+
+- signed-in per-series reader preferences synchronize through the MangaFlux account
+- browser-local preferences remain the signed-out/offline fallback
+- timestamp conflict resolution prevents an older device choice from overwriting a newer preference
+- optional preferred scanlation group per manga
+- collapsed duplicate releases prefer the selected group when available
+- landscape Reader Settings layout is hardened for short viewports
 
 ### Architecture boundary
 
