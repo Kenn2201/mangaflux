@@ -4,7 +4,7 @@ MangaFlux follows Semantic Versioning.
 
 ## Current version
 
-**v1.1.0 — Library & Reader Settings Foundation**
+**v1.1.1 — Reading Quality Refinements**
 
 - `PATCH` = compatible bug/security/reliability fixes
 - `MINOR` = compatible new features
