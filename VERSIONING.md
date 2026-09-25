@@ -4,10 +4,10 @@ MangaFlux follows Semantic Versioning.
 
 ## Current version
 
-**v1.1.1 — Reading Quality Refinements**
+**v1.1.2 — Reader Layout Controls**
 
-- `PATCH` = compatible bug/security/reliability fixes
-- `MINOR` = compatible new features
+- `PATCH` = compatible bug/security/reliability fixes and focused compatible release slices
+- `MINOR` = compatible larger feature milestones
 - `MAJOR` = deliberate platform/architecture changes that may require migrations or compatibility work
 
 ## Stable release gate
@@ -30,23 +30,28 @@ Before merging into `main`:
 
 ## Branch workflow
 
-MangaFlux development now uses:
+MangaFlux development uses:
 
-- `main`: deployable production.
-- `kenn/develop`: the single persistent ChatGPT-assisted development branch.
+- `main`: deployable production and the PR target.
+- `kenn/develop`: a clean development baseline that is synchronized to merged `main`, not a branch for repeated incremental pushes.
+- temporary `kenn/work-*` branches: isolated in-progress implementation branches.
 
 Workflow:
 
 ~~~text
 main
- ↓
-kenn/develop
- ↓
-PR + CI
- ↓
+  ↓
+temporary kenn/work-* branch
+  ↓
+complete implementation + fixes + docs
+  ↓
+one final PR to main
+  ↓
+CI gate
+  ↓
 main
- ↓
-reset kenn/develop to main
+  ↓
+sync kenn/develop to main
 ~~~
 
-Do not create version-specific `kenn/*` branches for new work.
+Do not push every implementation step to `kenn/develop`. Keep intermediate commits on the temporary work branch and open the PR only when the release slice is complete enough for the full gate.
