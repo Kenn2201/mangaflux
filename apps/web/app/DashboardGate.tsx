@@ -9,6 +9,7 @@ import DiscoverySections from "./DiscoverySections";
 import GenreShelf from "./GenreShelf";
 import LibraryClient from "./LibraryClient";
 import PersonalRecommendations from "./PersonalRecommendations";
+import RecentlyViewed from "./RecentlyViewed";
 
 type Session = {
   authenticated: boolean;
@@ -68,22 +69,25 @@ export default function DashboardGate() {
 
   if (!session.authenticated) {
     return (
-      <section className="dashboard-guest panel">
-        <p className="eyebrow">Your dashboard</p>
-        <h1>Sign in to bring your library together.</h1>
-        <p>
-          Your device reading still works while signed out. An account adds
-          cross-device bookmarks, history, and Continue Reading.
-        </p>
-        <div className="landing-actions">
-          <Link className="landing-primary" href="/account">
-            Sign in / Create account
-          </Link>
-          <Link className="landing-secondary" href="/browse?kind=popular">
-            Browse manga
-          </Link>
-        </div>
-      </section>
+      <>
+        <section className="dashboard-guest panel">
+          <p className="eyebrow">Your dashboard</p>
+          <h1>Sign in to bring your library together.</h1>
+          <p>
+            Your device reading still works while signed out. An account adds
+            cross-device bookmarks, history, and Continue Reading.
+          </p>
+          <div className="landing-actions">
+            <Link className="landing-primary" href="/account">
+              Sign in / Create account
+            </Link>
+            <Link className="landing-secondary" href="/browse?kind=popular">
+              Browse manga
+            </Link>
+          </div>
+        </section>
+        <RecentlyViewed compact />
+      </>
     );
   }
 
@@ -100,6 +104,7 @@ export default function DashboardGate() {
 
       <LibraryClient />
       <PersonalRecommendations />
+      <RecentlyViewed compact />
       <DiscoverySections compact />
       <GenreShelf />
     </>

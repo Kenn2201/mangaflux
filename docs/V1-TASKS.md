@@ -279,10 +279,21 @@
 - [x] clearly label presets as device-local
 - [x] preserve existing URL-based filtering/pagination behavior
 - [x] no new database migration
+- [x] physical production QA signed off
+
+## v1.4.3 — Recently Viewed Controls
+
+- [x] record successful manga-detail views independently from reading progress
+- [x] keep the 12 most recent unique manga on the current device
+- [x] move reopened manga to the front instead of duplicating it
+- [x] show Recently viewed on Home when local history exists
+- [x] show Recently viewed on signed-in and signed-out Dashboard states
+- [x] remove one recent view
+- [x] clear all recent views without changing library/account state
+- [x] no new database migration
 
 ## Remaining v1.4.x
 
-- [ ] recently viewed controls
 - [ ] search-history controls
 - [ ] stronger language/genre/status preferences
 - [ ] improve Hot / Popular / Trending

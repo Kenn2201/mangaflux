@@ -29,8 +29,9 @@ v1.3.7  ████████████████████  ✅
 v1.3.x  ████████████████████  ✅ COMPLETE
 v1.4.0  ████████████████████  ✅ QA
 v1.4.1  ████████████████████  ✅ QA
-v1.4.2  ████████████████████  🧪 CURRENT
-v1.4.3+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT AFTER QA
+v1.4.2  ████████████████████  ✅ QA
+v1.4.3  ████████████████████  🧪 CURRENT
+v1.4.4+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT AFTER QA
 v1.4.x  Discovery & Personalization
 v1.5+   Product Polish
          ↓
@@ -39,7 +40,7 @@ v2.x    Multi-Source + Platform Expansion
 v3.x    Advanced MangaFlux
 ~~~
 
-**v1.1.x — Library & Reading Quality**, **v1.2.x — Profiles & Community Depth**, and **v1.3.x — Following & Notifications** are signed off after physical QA. Optional Discord/webhook delivery is deferred. **v1.4.0 — Recommendation Explanations** and **v1.4.1 — Activity-Based Recommendations** have also passed physical QA. MangaFlux is now implementing **v1.4.2 — Saved Discovery Filters** inside **v1.4.x — Discovery & Personalization**.
+**v1.1.x — Library & Reading Quality**, **v1.2.x — Profiles & Community Depth**, and **v1.3.x — Following & Notifications** are signed off after physical QA. Optional Discord/webhook delivery is deferred. **v1.4.0 — Recommendation Explanations**, **v1.4.1 — Activity-Based Recommendations**, and **v1.4.2 — Saved Discovery Filters** have also passed physical QA. MangaFlux is now implementing **v1.4.3 — Recently Viewed Controls** inside **v1.4.x — Discovery & Personalization**.
 
 ---
 
@@ -450,7 +451,7 @@ Make discovery increasingly personalized.
 - Physical production QA passed
 - No new database migration
 
-### 🧪 v1.4.2 — Saved Discovery Filters — CURRENT
+### ✅ v1.4.2 — Saved Discovery Filters — QA SIGNED OFF
 
 - Save up to five discovery filter presets on the current device
 - Preserve sort, genre, status, year, and creator context in each preset
@@ -459,11 +460,22 @@ Make discovery increasingly personalized.
 - Reject duplicate presets and enforce the five-preset limit
 - Label saved presets clearly as device-local
 - Preserve URL-based Browse filtering and pagination
+- Physical production QA passed
 - No new database migration
 
-### ➡️ v1.4.3+ — Remaining Personalization Depth — NEXT AFTER QA
+### 🧪 v1.4.3 — Recently Viewed Controls — CURRENT
 
-- Recently viewed controls
+- Record successful manga-detail views separately from reading progress
+- Keep the 12 most recent unique manga on the current device
+- Move a reopened manga back to the front instead of duplicating it
+- Show Recently viewed shelves on Home and Dashboard when history exists
+- Remove one recently viewed manga
+- Clear the full recently viewed list
+- Keep bookmarks, reading history, Following, and account data untouched
+- No new database migration
+
+### ➡️ v1.4.4+ — Remaining Personalization Depth — NEXT AFTER QA
+
 - Search-history controls
 - Stronger language preferences
 - Genre preferences

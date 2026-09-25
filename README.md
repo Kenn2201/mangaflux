@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v1.4.2--Saved_Discovery_Filters-indigo.svg)
+![Version](https://img.shields.io/badge/version-v1.4.3--Recently_Viewed_Controls-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v1.4.2 — Saved Discovery Filters**
+**v1.4.3 — Recently Viewed Controls**
 
-MangaFlux V1 remains a stable single-source MangaDex product. After v1.4.1 Activity-Based Recommendations passed physical QA, v1.4.2 lets readers save and quickly reapply Browse filter combinations on the current device.
+MangaFlux V1 remains a stable single-source MangaDex product. After v1.4.2 Saved Discovery Filters passed physical QA, v1.4.3 adds device-local recently viewed manga history so browsing a details page is remembered without pretending that a view is reading progress.
 
 ### Library improvements
 
@@ -49,15 +49,15 @@ The settings sheet is available from manga chapter lists and inside the immersiv
 - an alternate-release count is shown when duplicates are collapsed
 - readers can opt back into all alternate releases
 
-### v1.4.2 refinements
+### v1.4.3 refinements
 
-- v1.4.1 Activity-Based Recommendations passed physical QA and is signed off
-- Browse can save up to five device-local discovery filter presets
-- saved presets preserve sort, genre, status, year, and creator context when present
-- saved presets can be reapplied in one tap and removed independently
-- duplicate presets are rejected and the five-preset limit is enforced
-- the UI explicitly labels saved filters as device-local rather than account-synced
-- existing URL-based Browse filtering and pagination remain unchanged
+- v1.4.2 Saved Discovery Filters passed physical QA and is signed off
+- successful manga-detail views are remembered separately from reading progress
+- recently viewed history is stored on the current device and capped at 12 unique manga
+- reopening a manga moves it back to the front instead of creating duplicates
+- Recently viewed shelves appear on Home and Dashboard when device history exists
+- readers can remove one recent view or clear the entire device-local list
+- clearing recent views does not touch bookmarks, reading history, Following, or account data
 - no new database migration is required
 
 ### Architecture boundary

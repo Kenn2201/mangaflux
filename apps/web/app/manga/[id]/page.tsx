@@ -19,6 +19,7 @@ import {
   syncReaderPreferences,
   type ReaderPreferences
 } from "../../../lib/readerPreferences";
+import { recordRecentlyViewed } from "../../../lib/recentlyViewed";
 
 type MangaDetails = {
   id: string;
@@ -141,7 +142,19 @@ export default function MangaPage() {
           item: MangaDetails;
         };
 
-        if (!cancelled) setManga(payload.item);
+        if (!cancelled) {
+          setManga(payload.item);
+          recordRecentlyViewed({
+            id: payload.item.id,
+            source: "mangadex",
+            title: payload.item.title,
+            coverUrl: payload.item.coverUrl,
+            year: payload.item.year,
+            tags:
+              payload.item.tagDetails?.map((tag) => tag.name).slice(0, 4) ??
+              payload.item.tags?.slice(0, 4)
+          });
+        }
       } catch (error) {
         if (!cancelled) {
           setMessage(

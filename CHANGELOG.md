@@ -7,9 +7,21 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- v1.4.x recently viewed and search-history controls
+- v1.4.x search-history controls
 - stronger language, genre, and manga-status preferences
 - improved Hot / Popular / Trending discovery
+
+## 1.4.3 - 2026-09-26 — Recently Viewed Controls
+
+### Discovery history
+- Accepted physical QA sign-off for v1.4.2 Saved Discovery Filters.
+- Added device-local recently viewed manga history independent from reading progress.
+- Record successful manga-detail views and keep the 12 most recent unique titles.
+- Reopening a manga moves it to the front instead of creating duplicate entries.
+- Added Recently viewed shelves on Home and Dashboard when local history exists.
+- Added remove-one and clear-all controls.
+- Clearing recent views leaves bookmarks, reading history, Following, and account data untouched.
+- No database migration is required.
 
 ## 1.4.2 - 2026-09-26 — Saved Discovery Filters
 

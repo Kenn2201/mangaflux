@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import DiscoverySections from "./DiscoverySections";
 import GenreShelf from "./GenreShelf";
 import LandingSessionCta from "./LandingSessionCta";
+import RecentlyViewed from "./RecentlyViewed";
 
 type HomeSearchParams = {
   q?: string | string[];
@@ -60,6 +61,7 @@ export default async function Home({
         </div>
       </section>
 
+      <RecentlyViewed />
       <DiscoverySections />
       <GenreShelf />
 
@@ -93,7 +95,7 @@ export default async function Home({
       </section>
 
       <div className="landing-version">
-        v1.4.2 · Saved Discovery Filters
+        v1.4.3 · Recently Viewed Controls
       </div>
     </main>
   );
