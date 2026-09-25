@@ -71,6 +71,9 @@ export const users = pgTable(
     communityRestricted: boolean("community_restricted")
       .notNull()
       .default(false),
+    notificationEmailEnabled: boolean("notification_email_enabled")
+      .notNull()
+      .default(true),
     emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()

@@ -69,6 +69,7 @@ type ProfileBody = {
   bio?: string | null;
   showPublicActivity?: boolean;
   showJoinedDate?: boolean;
+  notificationEmailEnabled?: boolean;
 };
 
 function normalizeEmail(value: unknown) {
@@ -634,6 +635,7 @@ export function registerAuthRoutes(
           showPublicActivity: session.showPublicActivity,
           showJoinedDate: session.showJoinedDate,
           communityRestricted: session.communityRestricted,
+          notificationEmailEnabled: session.notificationEmailEnabled,
           emailVerifiedAt: session.emailVerifiedAt,
           createdAt: session.createdAt,
           role: roleForEmail(session.email)
@@ -679,13 +681,20 @@ export function registerAuthRoutes(
           : typeof request.body.showJoinedDate === "boolean"
             ? request.body.showJoinedDate
             : undefined;
+      const notificationEmailEnabled =
+        request.body?.notificationEmailEnabled === undefined
+          ? session.notificationEmailEnabled ?? true
+          : typeof request.body.notificationEmailEnabled === "boolean"
+            ? request.body.notificationEmailEnabled
+            : undefined;
 
       if (
         displayName === undefined ||
         avatarDataUrl === undefined ||
         bio === undefined ||
         showPublicActivity === undefined ||
-        showJoinedDate === undefined
+        showJoinedDate === undefined ||
+        notificationEmailEnabled === undefined
       ) {
         return reply.code(400).send({
           error: "INVALID_REQUEST",
@@ -702,7 +711,8 @@ export function registerAuthRoutes(
           avatarDataUrl,
           bio,
           showPublicActivity,
-          showJoinedDate
+          showJoinedDate,
+          notificationEmailEnabled
         }
       );
 

@@ -64,6 +64,13 @@
       "when": 1790316000000,
       "tag": "0008_v123_community_controls",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790402400000,
+      "tag": "0009_v125_notification_preferences",
+      "breakpoints": true
     }
   ]
 }

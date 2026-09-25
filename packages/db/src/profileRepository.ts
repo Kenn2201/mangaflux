@@ -11,6 +11,7 @@ export async function updateUserProfile(
     bio: string | null;
     showPublicActivity: boolean;
     showJoinedDate: boolean;
+    notificationEmailEnabled: boolean;
   }
 ) {
   const [user] = await db
@@ -21,6 +22,7 @@ export async function updateUserProfile(
       bio: input.bio,
       showPublicActivity: input.showPublicActivity,
       showJoinedDate: input.showJoinedDate,
+      notificationEmailEnabled: input.notificationEmailEnabled,
       updatedAt: new Date()
     })
     .where(eq(users.id, userId))
@@ -33,6 +35,7 @@ export async function updateUserProfile(
       showPublicActivity: users.showPublicActivity,
       showJoinedDate: users.showJoinedDate,
       communityRestricted: users.communityRestricted,
+      notificationEmailEnabled: users.notificationEmailEnabled,
       emailVerifiedAt: users.emailVerifiedAt,
       createdAt: users.createdAt
     });

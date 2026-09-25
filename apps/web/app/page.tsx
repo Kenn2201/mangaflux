@@ -93,7 +93,7 @@ export default async function Home({
       </section>
 
       <div className="landing-version">
-        v1.2.4 · Mobile Avatar Reliability & Admin Polish
+        v1.2.5 · Notification Preference Groundwork
       </div>
     </main>
   );

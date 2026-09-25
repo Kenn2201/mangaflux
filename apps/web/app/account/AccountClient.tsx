@@ -23,6 +23,7 @@ type Session = {
     showPublicActivity?: boolean;
     showJoinedDate?: boolean;
     communityRestricted?: boolean;
+    notificationEmailEnabled?: boolean;
     emailVerifiedAt?: string | null;
     createdAt: string;
     role?: "user" | "admin";
@@ -147,6 +148,8 @@ export default function AccountClient() {
   const [profileBio, setProfileBio] = useState("");
   const [showPublicActivity, setShowPublicActivity] = useState(true);
   const [showJoinedDate, setShowJoinedDate] = useState(true);
+  const [notificationEmailEnabled, setNotificationEmailEnabled] =
+    useState(true);
   const [avatarDraft, setAvatarDraft] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [needsVerification, setNeedsVerification] = useState(false);
@@ -189,6 +192,7 @@ export default function AccountClient() {
       setProfileBio("");
       setShowPublicActivity(true);
       setShowJoinedDate(true);
+      setNotificationEmailEnabled(true);
       setAvatarDraft(null);
       return;
     }
@@ -198,6 +202,7 @@ export default function AccountClient() {
     setProfileBio(user.bio ?? "");
     setShowPublicActivity(user.showPublicActivity ?? true);
     setShowJoinedDate(user.showJoinedDate ?? true);
+    setNotificationEmailEnabled(user.notificationEmailEnabled ?? true);
     setAvatarDraft(user.avatarDataUrl ?? null);
   }, [session]);
 
@@ -376,6 +381,7 @@ export default function AccountClient() {
     setProfileBio(user.bio ?? "");
     setShowPublicActivity(user.showPublicActivity ?? true);
     setShowJoinedDate(user.showJoinedDate ?? true);
+    setNotificationEmailEnabled(user.notificationEmailEnabled ?? true);
     setAvatarDraft(user.avatarDataUrl ?? null);
     setProfileEditing(true);
   }
@@ -387,6 +393,7 @@ export default function AccountClient() {
     setProfileBio(user.bio ?? "");
     setShowPublicActivity(user.showPublicActivity ?? true);
     setShowJoinedDate(user.showJoinedDate ?? true);
+    setNotificationEmailEnabled(user.notificationEmailEnabled ?? true);
     setAvatarDraft(user.avatarDataUrl ?? null);
     setProfileEditing(false);
   }
@@ -438,7 +445,8 @@ export default function AccountClient() {
           avatarDataUrl: avatarDraft,
           bio: profileBio.trim() || null,
           showPublicActivity,
-          showJoinedDate
+          showJoinedDate,
+          notificationEmailEnabled
         })
       });
 
@@ -714,6 +722,22 @@ export default function AccountClient() {
                   />
                 </label>
 
+                <label className="profile-privacy-toggle">
+                  <span>
+                    <strong>Email notifications</strong>
+                    <small>
+                      Allow MangaFlux to email you about future followed-manga updates. No notification emails are sent yet.
+                    </small>
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={notificationEmailEnabled}
+                    onChange={(event) =>
+                      setNotificationEmailEnabled(event.target.checked)
+                    }
+                  />
+                </label>
+
                 <p className="device-note">
                   Images are cropped and compressed into a small WebP or JPEG
                   for reliable mobile upload. Your email is never shown publicly.
@@ -782,6 +806,20 @@ export default function AccountClient() {
                     {user.showJoinedDate === false
                       ? "Hidden"
                       : "Visible"}
+                  </strong>
+                </div>
+
+                <div className="profile-readonly-privacy">
+                  <span>
+                    <strong>Email notifications</strong>
+                    <small>
+                      Preference groundwork for future Following notifications
+                    </small>
+                  </span>
+                  <strong>
+                    {user.notificationEmailEnabled === false
+                      ? "Off"
+                      : "On"}
                   </strong>
                 </div>
 
