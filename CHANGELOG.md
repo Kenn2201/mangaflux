@@ -7,8 +7,18 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- v1.3.6+ quiet/disable controls and delivery rate limiting
+- v1.3.7+ account quiet-hours controls
 - optional Discord/webhook delivery only after core notification delivery is stable
+
+## 1.3.6 - 2026-09-26 — Notification Delivery Safety
+
+### Delivery safety
+- Hardened the checker-to-email path for newly created chapter events.
+- Preserved global Email notifications, verified-email, and per-manga Alerts gates.
+- Added a 20-successful-email cap per checker invocation.
+- Added emailRateLimited aggregate reporting for deliveries deferred by the cap.
+- Preserved durable inbox/checkpoint state independently from email delivery outcome.
+- No database migration is required.
 
 ## 1.3.5 - 2026-09-26 — Email Notification Delivery
 

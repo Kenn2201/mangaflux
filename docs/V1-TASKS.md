@@ -216,9 +216,19 @@
 - [x] preserve inbox event/checkpoint state when email delivery fails
 - [x] reuse existing schema without a new migration
 
+## v1.3.6 — Notification Delivery Safety
+
+- [x] harden checker-to-email delivery path
+- [x] retain global Email notifications as account disable control
+- [x] retain verified-email and per-manga Alerts delivery gates
+- [x] cap successful notification emails at 20 per checker invocation
+- [x] expose emailRateLimited alongside sent / skipped / failed counters
+- [x] preserve inbox/checkpoint state independently from delivery outcome
+- [x] reuse existing schema without a new migration
+
 ## Remaining v1.3.x
 
-- [ ] quiet/disable controls and rate limiting
+- [ ] account quiet-hours controls
 - [ ] optional Discord/webhook delivery after core notifications stabilize
 
 ## Future V1.x

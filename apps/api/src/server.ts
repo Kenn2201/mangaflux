@@ -5,6 +5,7 @@ import {
   createNewChapterNotificationEvent,
   getNotificationCheckpoint,
   getNotificationEligibleFollows,
+  getNotificationDeliveryUser,
   probeDatabase,
   upsertNotificationCheckpoint
 } from "@mangaflux/db";
@@ -12,7 +13,10 @@ import { registerAdminRoutes } from "./admin.js";
 import { isAdminConfigured } from "./adminAccess.js";
 import { registerAuthRoutes } from "./auth.js";
 import { registerCommunityRoutes } from "./community.js";
-import { isEmailConfigured } from "./email.js";
+import {
+  isEmailConfigured,
+  sendNewChapterNotificationEmail
+} from "./email.js";
 import { registerStateRoutes } from "./state.js";
 import { attachDiagnostics } from "./diagnostics.js";
 import {
@@ -24,7 +28,7 @@ import type {
   MangaSummary
 } from "@mangaflux/sources";
 
-const APP_VERSION = "1.3.5";
+const APP_VERSION = "1.3.6";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LANGUAGE_RE = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i;
@@ -190,6 +194,7 @@ const notificationCheckRateLimit = makeRateLimit(
   4,
   10 * 60_000
 );
+const MAX_NOTIFICATION_EMAILS_PER_CHECK = 20;
 
 function requireUuid(value: string, reply: any, field = "id") {
   if (UUID_RE.test(value)) return true;
@@ -448,6 +453,10 @@ app.post(
     let seeded = 0;
     let unchanged = 0;
     let created = 0;
+    let emailSent = 0;
+    let emailSkipped = 0;
+    let emailFailed = 0;
+    let emailRateLimited = 0;
     let advanced = 0;
     let skipped = 0;
     let failed = 0;
@@ -544,7 +553,34 @@ app.post(
             lastPublishedAt: sourcePublishedAt
           });
 
-          if (result.created) created += 1;
+          if (result.created) {
+            created += 1;
+            if (result.event) {
+              const deliveryUser = await getNotificationDeliveryUser(database, user.id);
+              if (deliveryUser?.notificationEmailEnabled && deliveryUser.emailVerifiedAt && isEmailConfigured()) {
+                if (emailSent >= MAX_NOTIFICATION_EMAILS_PER_CHECK) {
+                  emailRateLimited += 1;
+                } else {
+                  try {
+                    const sent = await sendNewChapterNotificationEmail(deliveryUser.email, {
+                      eventId: result.event.id,
+                      mangaTitle: result.event.mangaTitle,
+                      chapterId: result.event.chapterId,
+                      chapterLabel: result.event.chapterLabel,
+                      chapterTitle: result.event.chapterTitle
+                    });
+                    if (sent) emailSent += 1;
+                    else emailFailed += 1;
+                  } catch (error) {
+                    emailFailed += 1;
+                    request.log.warn({ err: error, userId: user.id, eventId: result.event.id }, "New chapter email delivery failed");
+                  }
+                }
+              } else {
+                emailSkipped += 1;
+              }
+            }
+          }
           advanced += 1;
         } catch (error) {
           failed += 1;
@@ -567,6 +603,10 @@ app.post(
       seeded,
       unchanged,
       created,
+      emailSent,
+      emailSkipped,
+      emailFailed,
+      emailRateLimited,
       advanced,
       skipped,
       failed

@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v1.3.5--Email_Notification_Delivery-indigo.svg)
+![Version](https://img.shields.io/badge/version-v1.3.6--Notification_Delivery_Safety-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v1.3.5 — Email Notification Delivery**
+**v1.3.6 — Notification Delivery Safety**
 
-MangaFlux V1 remains a stable single-source MangaDex product. v1.3.5 connects newly generated chapter events to transactional email while respecting both the existing global Email notifications preference and each manga's Alerts setting.
+MangaFlux V1 remains a stable single-source MangaDex product. v1.3.6 hardens the new-chapter email path with an explicit per-check delivery cap while preserving the existing account, verification, and per-manga notification gates.
 
 ### Library improvements
 
@@ -49,17 +49,16 @@ The settings sheet is available from manga chapter lists and inside the immersiv
 - an alternate-release count is shown when duplicates are collapsed
 - readers can opt back into all alternate releases
 
-### v1.3.5 refinements
+### v1.3.6 refinements
 
-- newly created chapter events can send a transactional email through the existing Resend transport
-- delivery requires the account-level Email notifications preference to be enabled
-- delivery requires a verified account email
-- per-manga Alerts on remains the generation gate
-- each event uses a stable Resend idempotency key so retries cannot intentionally duplicate the same event email
-- checker results expose emailSent, emailSkipped, and emailFailed aggregate counters
-- inbox event creation/checkpoint advancement is not rolled back when email delivery fails
+- hardened the checker-to-email delivery path for newly created chapter events
+- global Email notifications, verified email, and per-manga Alerts remain required gates
+- capped successful notification email sends to 20 per checker invocation
+- excess eligible deliveries are counted as emailRateLimited instead of creating an unbounded burst
+- checker exposes sent, skipped, failed, and rate-limited aggregate delivery counters
+- durable inbox events and checkpoints remain independent from email delivery success
 - no new database migration is required
-- quiet controls and broader delivery rate limiting remain later v1.3.x work
+- account quiet-hours controls remain a later focused v1.3.x slice
 
 ### Architecture boundary
 
