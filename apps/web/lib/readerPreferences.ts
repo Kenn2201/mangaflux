@@ -2,6 +2,20 @@ export type ReaderPreferences = {
   language: string;
   dataSaver: boolean;
   showAlternateReleases: boolean;
+  preferredScanlationGroup?: string;
+};
+
+type StoredReaderPreferences = ReaderPreferences & {
+  updatedAt?: string;
+};
+
+type SyncedReaderPreferences = {
+  mangaId: string;
+  language: string;
+  dataSaver: boolean;
+  showAlternateReleases: boolean;
+  preferredScanlationGroup?: string | null;
+  updatedAt: string;
 };
 
 const DEFAULTS: ReaderPreferences = {
@@ -29,11 +43,11 @@ export const readerLanguageOptions = [
   ["th", "Thai"]
 ] as const;
 
-function parse(value: string | null): Partial<ReaderPreferences> {
+function parse(value: string | null): Partial<StoredReaderPreferences> {
   if (!value) return {};
 
   try {
-    const parsed = JSON.parse(value) as Partial<ReaderPreferences>;
+    const parsed = JSON.parse(value) as Partial<StoredReaderPreferences>;
 
     return {
       language:
@@ -47,6 +61,16 @@ function parse(value: string | null): Partial<ReaderPreferences> {
       showAlternateReleases:
         typeof parsed.showAlternateReleases === "boolean"
           ? parsed.showAlternateReleases
+          : undefined,
+      preferredScanlationGroup:
+        typeof parsed.preferredScanlationGroup === "string" &&
+        parsed.preferredScanlationGroup.length <= 120
+          ? parsed.preferredScanlationGroup
+          : undefined,
+      updatedAt:
+        typeof parsed.updatedAt === "string" &&
+        !Number.isNaN(Date.parse(parsed.updatedAt))
+          ? parsed.updatedAt
           : undefined
     };
   } catch {
@@ -54,17 +78,21 @@ function parse(value: string | null): Partial<ReaderPreferences> {
   }
 }
 
+function seriesKey(mangaId: string) {
+  return `${SERIES_PREFIX}${mangaId}`;
+}
+
+function getStoredSeries(mangaId: string) {
+  if (typeof window === "undefined") return {};
+
+  return parse(window.localStorage.getItem(seriesKey(mangaId)));
+}
+
 export function getReaderPreferences(mangaId?: string): ReaderPreferences {
   if (typeof window === "undefined") return DEFAULTS;
 
   const global = parse(window.localStorage.getItem(GLOBAL_KEY));
-  const series = mangaId
-    ? parse(
-        window.localStorage.getItem(
-          `${SERIES_PREFIX}${mangaId}`
-        )
-      )
-    : {};
+  const series = mangaId ? getStoredSeries(mangaId) : {};
 
   const legacyDataSaver =
     window.localStorage.getItem("mangaflux:data-saver") === "true";
@@ -79,23 +107,35 @@ export function getReaderPreferences(mangaId?: string): ReaderPreferences {
     showAlternateReleases:
       series.showAlternateReleases ??
       global.showAlternateReleases ??
-      DEFAULTS.showAlternateReleases
+      DEFAULTS.showAlternateReleases,
+    preferredScanlationGroup:
+      series.preferredScanlationGroup ??
+      global.preferredScanlationGroup
   };
 }
 
-export function saveReaderPreferences(
+function persistReaderPreferences(
   preferences: ReaderPreferences,
   mangaId?: string,
-  scope: "series" | "global" = mangaId ? "series" : "global"
+  scope: "series" | "global" = mangaId ? "series" : "global",
+  updatedAt = new Date().toISOString()
 ) {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined") return updatedAt;
 
   const key =
     scope === "series" && mangaId
-      ? `${SERIES_PREFIX}${mangaId}`
+      ? seriesKey(mangaId)
       : GLOBAL_KEY;
 
-  window.localStorage.setItem(key, JSON.stringify(preferences));
+  window.localStorage.setItem(
+    key,
+    JSON.stringify({
+      ...preferences,
+      preferredScanlationGroup:
+        preferences.preferredScanlationGroup || undefined,
+      updatedAt
+    })
+  );
   window.localStorage.setItem(
     "mangaflux:data-saver",
     String(preferences.dataSaver)
@@ -109,12 +149,132 @@ export function saveReaderPreferences(
       }
     })
   );
+
+  return updatedAt;
+}
+
+export function saveReaderPreferences(
+  preferences: ReaderPreferences,
+  mangaId?: string,
+  scope: "series" | "global" = mangaId ? "series" : "global"
+) {
+  return persistReaderPreferences(preferences, mangaId, scope);
+}
+
+export async function syncReaderPreferences(
+  mangaId: string
+): Promise<ReaderPreferences> {
+  const local = getReaderPreferences(mangaId);
+  const stored = getStoredSeries(mangaId);
+  const localUpdatedAt = stored.updatedAt
+    ? Date.parse(stored.updatedAt)
+    : 0;
+
+  try {
+    const response = await fetch(
+      `/api/state/reader-preferences?mangaId=${encodeURIComponent(mangaId)}`,
+      { cache: "no-store" }
+    );
+
+    if (!response.ok) return local;
+
+    const payload = (await response.json()) as {
+      synced?: boolean;
+      item?: SyncedReaderPreferences | null;
+    };
+
+    if (!payload.synced) return local;
+
+    if (!payload.item) {
+      const updatedAt =
+        stored.updatedAt ?? new Date().toISOString();
+
+      if (!stored.updatedAt) {
+        persistReaderPreferences(local, mangaId, "series", updatedAt);
+      }
+
+      await pushReaderPreferences(mangaId, local, updatedAt);
+      return local;
+    }
+
+    const remoteUpdatedAt = Date.parse(payload.item.updatedAt);
+
+    if (localUpdatedAt > remoteUpdatedAt) {
+      await pushReaderPreferences(
+        mangaId,
+        local,
+        stored.updatedAt!
+      );
+      return local;
+    }
+
+    const remote: ReaderPreferences = {
+      language: payload.item.language,
+      dataSaver: payload.item.dataSaver,
+      showAlternateReleases:
+        payload.item.showAlternateReleases,
+      preferredScanlationGroup:
+        payload.item.preferredScanlationGroup || undefined
+    };
+
+    persistReaderPreferences(
+      remote,
+      mangaId,
+      "series",
+      payload.item.updatedAt
+    );
+
+    return remote;
+  } catch {
+    return local;
+  }
+}
+
+async function pushReaderPreferences(
+  mangaId: string,
+  preferences: ReaderPreferences,
+  updatedAt: string
+) {
+  try {
+    const response = await fetch("/api/state/reader-preferences", {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        mangaId,
+        ...preferences,
+        preferredScanlationGroup:
+          preferences.preferredScanlationGroup ?? null,
+        updatedAt
+      })
+    });
+
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+export function syncSavedReaderPreferences(
+  mangaId: string
+) {
+  if (typeof window === "undefined") return;
+
+  const preferences = getReaderPreferences(mangaId);
+  const stored = getStoredSeries(mangaId);
+  const updatedAt =
+    stored.updatedAt ?? persistReaderPreferences(
+      preferences,
+      mangaId,
+      "series"
+    );
+
+  void pushReaderPreferences(mangaId, preferences, updatedAt);
 }
 
 export function clearSeriesReaderPreferences(mangaId: string) {
   if (typeof window === "undefined") return;
 
-  window.localStorage.removeItem(`${SERIES_PREFIX}${mangaId}`);
+  window.localStorage.removeItem(seriesKey(mangaId));
   window.dispatchEvent(
     new CustomEvent("mangaflux:reader-preferences", {
       detail: { mangaId }
