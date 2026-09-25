@@ -16,6 +16,7 @@ import ReaderSettingsSheet from "../../ReaderSettingsSheet";
 import {
   getReaderPreferences,
   readerLanguageOptions,
+  syncReaderPreferences,
   type ReaderPreferences
 } from "../../../lib/readerPreferences";
 
@@ -95,7 +96,16 @@ export default function MangaPage() {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
     setReaderPreferences(getReaderPreferences(id));
+
+    void syncReaderPreferences(id).then((next) => {
+      if (!cancelled) setReaderPreferences(next);
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   useEffect(() => {
@@ -335,15 +345,36 @@ export default function MangaPage() {
       return chapters;
     }
 
-    const seen = new Set<string>();
+    const preferred = readerPreferences.preferredScanlationGroup;
+    const selected = new Map<string, Chapter>();
+
+    for (const chapter of chapters) {
+      const key = chapter.chapter ?? chapter.id;
+      const current = selected.get(key);
+
+      if (!current) {
+        selected.set(key, chapter);
+        continue;
+      }
+
+      if (
+        preferred &&
+        chapter.scanlationGroups?.includes(preferred) &&
+        !current.scanlationGroups?.includes(preferred)
+      ) {
+        selected.set(key, chapter);
+      }
+    }
 
     return chapters.filter((chapter) => {
       const key = chapter.chapter ?? chapter.id;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
+      return selected.get(key)?.id === chapter.id;
     });
-  }, [chapters, readerPreferences.showAlternateReleases]);
+  }, [
+    chapters,
+    readerPreferences.showAlternateReleases,
+    readerPreferences.preferredScanlationGroup
+  ]);
 
   const chapterLanguageName =
     readerLanguageOptions.find(
@@ -685,6 +716,9 @@ export default function MangaPage() {
 
       <ReaderSettingsSheet
         mangaId={id}
+        scanlationGroups={chapters.flatMap(
+          (chapter) => chapter.scanlationGroups ?? []
+        )}
         open={readerSettingsOpen}
         onClose={() => setReaderSettingsOpen(false)}
         onChange={(next) => {
