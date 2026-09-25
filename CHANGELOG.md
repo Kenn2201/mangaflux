@@ -7,8 +7,30 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- v1.1.5+ final reading-quality QA and regression fixes discovered during physical testing
-- move to v1.2.x only after the v1.1.x reading-quality phase is signed off
+- v1.1.6+ final sign-off fixes only if physical-device QA finds regressions
+- move to v1.2.x once Library & Reading Quality is signed off
+
+## 1.1.5 - 2026-09-25 — Reader Navigation & Resume Fixes
+
+### Continue Reading stability
+- Reworked resume behavior so saved pages are anchored after preceding page images settle.
+- Eager-load pages up to the saved resume target while keeping later pages lazy.
+- Pause intersection-based page tracking and progress writes during resume anchoring.
+- Release normal reader tracking only after the saved page is stable.
+
+### Chapter navigation
+- Replaced numeric key-in Jump Chapter with a scrollable chapter list.
+- Highlight the current chapter as Reading now and center it when the list opens.
+- Load toward the current chapter and fetch older chapters as the list is scrolled.
+
+### Reader exit navigation
+- Reader Back now opens Library, Discover more, and Surprise me choices.
+- Surprise me reuses MangaFlux similarity signals such as genres/themes and creator where available.
+- Reader Home continues to open the current manga page and is labeled accordingly.
+
+### Interaction polish
+- Added visual pressed-state feedback to common buttons, reader navigation, cards, and primary navigation.
+- Reduced-motion users do not receive the scale press animation.
 
 ## 1.1.4 - 2026-09-25 — Reader Typography & Accessibility
 

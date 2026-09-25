@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v1.1.4--Reader_Typography_Accessibility-indigo.svg)
+![Version](https://img.shields.io/badge/version-v1.1.5--Reader_Navigation_Resume_Fixes-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v1.1.4 — Reader Typography & Accessibility**
+**v1.1.5 — Reader Navigation & Resume Fixes**
 
-MangaFlux V1 remains a stable single-source MangaDex product. v1.1.4 finishes the planned reader-typography and settings-accessibility implementation while preserving the existing reader/source architecture.
+MangaFlux V1 remains a stable single-source MangaDex product. v1.1.5 applies the final reader-navigation and resume fixes discovered during physical QA without changing the source architecture.
 
 ### Library improvements
 
@@ -49,14 +49,15 @@ The settings sheet is available from manga chapter lists and inside the immersiv
 - an alternate-release count is shown when duplicates are collapsed
 - readers can opt back into all alternate releases
 
-### v1.1.4 refinements
+### v1.1.5 refinements
 
-- per-series reader UI text size can be set to Small, Standard, or Large
-- text-size preference synchronizes through the existing timestamp-safe account preference system
-- manga page artwork is never rescaled by the text-size setting
-- Reader Settings now traps keyboard focus while open and restores focus when closed
-- Reader Settings receives a predictable initial close-button focus
-- page-position announcements use an explicit live status for assistive technology
+- Continue Reading now holds the saved page while earlier lazy-loaded images settle instead of drifting to a later page
+- pages through the resume target are loaded eagerly, normal page observation is paused during resume, and progress saving resumes only after the target is anchored
+- Jump Chapter is now a scrollable chapter list with the current chapter highlighted as Reading now
+- the chapter list loads toward the current position and continues loading older chapters as you scroll
+- the reader Back control now offers Library, Discover more, and a similarity-based Surprise me roulette action
+- the reader Home icon explicitly opens the current manga page
+- common interactive controls now provide a small visual press response while respecting reduced-motion preferences
 
 ### Architecture boundary
 
