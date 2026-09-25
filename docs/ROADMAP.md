@@ -20,7 +20,7 @@ This is the canonical MangaFlux roadmap.
 
 ### v1.1.x — Library & Reading Quality — current
 
-#### v1.1.0 — Library & Reader Settings Foundation
+#### v1.1.0 — Library & Reader Settings Foundation — complete
 - richer Library filtering/sorting
 - reading-history remove/clear controls
 - larger persisted Library views
@@ -32,13 +32,21 @@ This is the canonical MangaFlux roadmap.
 - scanlation group attribution
 - mobile/tablet polish
 
-#### Remaining v1.1.x
-- decide/account-sync reader preferences safely
+#### v1.1.1 — Preference Sync & Scanlation Controls — next
+- define safe account-sync behavior for per-series reader preferences
+- keep browser-local preferences as a resilient fallback
+- synchronize supported reader preferences for signed-in users without overwriting newer choices
+- add optional preferred scanlation-group behavior per series
+- improve alternate-release/group selection controls
+- preserve explicit source/group attribution in chapter UI
+- add focused history-management refinements discovered during v1.1.0 testing
+- complete tablet/landscape QA for Library, chapter controls, and Reader Settings
+
+#### Later v1.1.x
 - stronger per-series reading preferences
-- optional preferred scanlation-group behavior
-- additional history management
 - reader typography/spacing/fit preferences where useful
-- more tablet/landscape reader QA
+- additional reading-quality refinements based on real usage
+- final v1.1.x regression/accessibility polish before v1.2.x
 
 ### v1.2.x — Profiles & Community Depth
 - richer public profiles
