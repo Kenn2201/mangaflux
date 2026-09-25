@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v1.4.5--Discovery_Language_Preference-indigo.svg)
+![Version](https://img.shields.io/badge/version-v1.4.6--Genre_Preferences-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v1.4.5 — Discovery Language Preference**
+**v1.4.6 — Genre Preferences**
 
-MangaFlux V1 remains a stable single-source MangaDex product. After v1.4.4 Search History Controls passed physical QA, v1.4.5 replaces English-only discovery with a device-local chapter-availability language preference across Browse and recommendation surfaces.
+MangaFlux V1 remains a stable single-source MangaDex product. After v1.4.5 Discovery Language Preference passed physical QA, v1.4.6 adds explicit device-local preferred genres and a dedicated personalized discovery rail without changing normal global rankings.
 
 ### Library improvements
 
@@ -49,15 +49,16 @@ The settings sheet is available from manga chapter lists and inside the immersiv
 - an alternate-release count is shown when duplicates are collapsed
 - readers can opt back into all alternate releases
 
-### v1.4.5 refinements
+### v1.4.6 refinements
 
-- v1.4.4 Search History Controls passed physical QA and is signed off
-- discovery is no longer hard-coded to English chapter availability
-- readers can choose a device-local discovery language from the existing supported language set
-- Home and Dashboard Hot / Popular / Top / Latest rails respect the selected language
-- Browse, personalized recommendations, similar-title recommendations, and Surprise me respect the same preference
-- MangaDex discovery cache keys include language so results do not leak across preference changes
-- per-series reader chapter language remains separate from discovery language
+- v1.4.5 Discovery Language Preference passed physical QA and is signed off
+- readers can choose up to three explicit preferred genres on the current device
+- genre preferences are independent from saved Browse filter presets
+- preferred genres can be added, removed individually, or cleared
+- a dedicated From your preferred genres rail blends results from the selected genres
+- duplicate manga across preferred-genre result groups are merged and ranked once
+- the preferred-genre rail respects the current Discovery language
+- normal Hot / Popular / Top / Latest rankings remain unchanged
 - no new database migration is required
 
 ### Architecture boundary

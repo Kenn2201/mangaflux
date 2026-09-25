@@ -319,10 +319,24 @@
 - [x] include language in ordered-discovery and Hot-pool cache keys
 - [x] keep per-series reader language separate
 - [x] no new database migration
+- [x] physical production QA signed off
+
+## v1.4.6 — Genre Preferences
+
+- [x] choose up to three explicit preferred genres on the current device
+- [x] keep genre preferences independent from saved Browse filter presets
+- [x] add preferred genres
+- [x] remove one preferred genre
+- [x] clear all preferred genres
+- [x] build a dedicated preferred-genre recommendation rail
+- [x] merge duplicate manga across preferred-genre result groups
+- [x] respect the active Discovery language
+- [x] preserve normal global discovery rankings
+- [x] no new database migration
 
 ## Remaining v1.4.x
 
-- [ ] stronger genre/status preferences
+- [ ] manga-status preferences
 - [ ] improve Hot / Popular / Trending
 
 ## Future V1.x

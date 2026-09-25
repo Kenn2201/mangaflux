@@ -1,0 +1,132 @@
+/* MangaFlux v1.4.6 — Genre Preferences */
+
+.genre-preferences {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px 18px;
+  margin: -8px 0 24px;
+  padding: 13px;
+  border: 1px solid #292929;
+  border-radius: 14px;
+  background: #0d0d0d;
+}
+
+.genre-preferences-copy strong {
+  display: block;
+  color: #d6d6d6;
+  font-size: 11px;
+}
+
+.genre-preferences-copy span {
+  display: block;
+  margin-top: 2px;
+  color: #737373;
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.genre-preferences-controls {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+}
+
+.genre-preferences-controls select {
+  width: min(230px, 42vw);
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid #303030;
+  border-radius: 11px;
+  outline: 0;
+  background: #111;
+  color: #d9d9d9;
+  font-size: 11px;
+}
+
+.genre-preferences-controls button,
+.preferred-genre-clear {
+  min-height: 40px;
+  padding: 0 11px;
+  border: 1px solid #333;
+  border-radius: 11px;
+  background: #121212;
+  color: #aaa;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.genre-preferences-controls button:disabled,
+.genre-preferences-controls select:disabled {
+  cursor: not-allowed;
+  opacity: .45;
+}
+
+.preferred-genre-list {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.preferred-genre-chip {
+  display: inline-flex;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid #343434;
+  border-radius: 999px;
+  background: #121212;
+  color: #c8c8c8;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.preferred-genre-chip > span {
+  padding: 8px 4px 8px 11px;
+}
+
+.preferred-genre-chip button {
+  width: 32px;
+  align-self: stretch;
+  border: 0;
+  background: transparent;
+  color: #777;
+  font-size: 16px;
+}
+
+.preferred-genre-chip button:hover,
+.preferred-genre-chip button:focus-visible {
+  color: #e1a4a4;
+}
+
+.preferred-genre-clear {
+  min-height: 34px;
+  color: #777;
+}
+
+.preferred-genre-recommendations {
+  min-width: 0;
+}
+
+@media (max-width: 700px) {
+  .genre-preferences {
+    grid-template-columns: 1fr;
+  }
+
+  .genre-preferences-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .genre-preferences-controls select {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .genre-preferences-controls button {
+    min-height: 44px;
+  }
+
+  .preferred-genre-list {
+    grid-column: auto;
+  }
+}

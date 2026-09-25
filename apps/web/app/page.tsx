@@ -95,7 +95,7 @@ export default async function Home({
       </section>
 
       <div className="landing-version">
-        v1.4.5 · Discovery Language Preference
+        v1.4.6 · Genre Preferences
       </div>
     </main>
   );
