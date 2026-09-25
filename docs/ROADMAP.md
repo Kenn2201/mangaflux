@@ -23,7 +23,8 @@ v1.3.1  ████████████████████  ✅
 v1.3.2  ████████████████████  ✅
 v1.3.3  ████████████████████  ✅
 v1.3.4  ████████████████████  ✅
-v1.3.5+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
+v1.3.5  ████████████████████  ✅
+v1.3.6+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
 v1.3.x  Following & Notifications
 v1.4.x  Discovery & Personalization
 v1.5+   Product Polish
@@ -33,7 +34,7 @@ v2.x    Multi-Source + Platform Expansion
 v3.x    Advanced MangaFlux
 ~~~
 
-**v1.1.x — Library & Reading Quality** and **v1.2.x — Profiles & Community Depth** are signed off after physical QA. MangaFlux is now in **v1.3.x — Following & Notifications**. **v1.3.4 — Notification Inbox & History** is complete, and v1.3.5+ continues with global Email delivery integration and delivery controls.
+**v1.1.x — Library & Reading Quality** and **v1.2.x — Profiles & Community Depth** are signed off after physical QA. MangaFlux is now in **v1.3.x — Following & Notifications**. **v1.3.5 — Email Notification Delivery** is complete, and v1.3.6+ continues with quiet/disable controls and delivery rate limiting.
 
 ---
 
@@ -378,11 +379,21 @@ Introduce a proper following system separate from bookmarks.
 - No new migration; uses the read_at field reserved in v1.3.2
 - No email delivery yet
 
-### ➡️ v1.3.5+ — Notification Delivery Controls — NEXT
+### ✅ v1.3.5 — Email Notification Delivery
+
+- New chapter events use the existing transactional Resend transport
+- Global Email notifications preference gates delivery
+- Verified account email is required
+- Per-manga Alerts on remains the event-generation gate
+- Event-stable email idempotency key
+- Aggregate sent / skipped / failed delivery counters
+- Inbox/checkpoint state remains durable when email delivery fails
+- No new database migration
+
+### ➡️ v1.3.6+ — Notification Delivery Controls — NEXT
 
 Continue in focused slices:
 
-- global Email notifications preference integration
 - quiet / disable controls
 - notification rate limiting
 - optional Discord/webhook notifications only after core delivery is stable

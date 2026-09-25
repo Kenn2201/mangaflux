@@ -205,9 +205,19 @@
 - [x] reuse v1.3.2 read_at without a new migration
 - [x] keep email delivery out of v1.3.4
 
+## v1.3.5 — Email Notification Delivery
+
+- [x] integrate existing global Email notifications preference as delivery gate
+- [x] require verified account email for new-chapter email delivery
+- [x] preserve per-manga Alerts on as the event-generation gate
+- [x] send new-chapter email through existing Resend transport
+- [x] use event-stable email idempotency keys
+- [x] expose aggregate sent / skipped / failed counters
+- [x] preserve inbox event/checkpoint state when email delivery fails
+- [x] reuse existing schema without a new migration
+
 ## Remaining v1.3.x
 
-- [ ] global email preference integration
 - [ ] quiet/disable controls and rate limiting
 - [ ] optional Discord/webhook delivery after core notifications stabilize
 

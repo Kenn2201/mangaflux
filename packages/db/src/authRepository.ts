@@ -484,6 +484,24 @@ export async function upsertNotificationCheckpoint(
   return checkpoint;
 }
 
+export async function getNotificationDeliveryUser(
+  db: MangaFluxDatabase,
+  userId: string
+) {
+  const [user] = await db
+    .select({
+      id: users.id,
+      email: users.email,
+      emailVerifiedAt: users.emailVerifiedAt,
+      notificationEmailEnabled: users.notificationEmailEnabled
+    })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+
+  return user ?? null;
+}
+
 export async function createNewChapterNotificationEvent(
   db: MangaFluxDatabase,
   input: {

@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v1.3.4--Notification_Inbox_History-indigo.svg)
+![Version](https://img.shields.io/badge/version-v1.3.5--Email_Notification_Delivery-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v1.3.4 — Notification Inbox & History**
+**v1.3.5 — Email Notification Delivery**
 
-MangaFlux V1 remains a stable single-source MangaDex product. v1.3.4 exposes generated chapter events as an account-only notification history with unread state, individual read actions, and Mark all read.
+MangaFlux V1 remains a stable single-source MangaDex product. v1.3.5 connects newly generated chapter events to transactional email while respecting both the existing global Email notifications preference and each manga's Alerts setting.
 
 ### Library improvements
 
@@ -49,16 +49,17 @@ The settings sheet is available from manga chapter lists and inside the immersiv
 - an alternate-release count is shown when duplicates are collapsed
 - readers can opt back into all alternate releases
 
-### v1.3.4 refinements
+### v1.3.5 refinements
 
-- added authenticated notification history API backed by existing durable events
-- added account-only Notifications view in Library
-- unread events are visually distinct and expose a count
-- opening an event or using Mark read persists read_at
-- Mark all read updates the account's unread event history
-- empty state explains that events appear after chapter detection
+- newly created chapter events can send a transactional email through the existing Resend transport
+- delivery requires the account-level Email notifications preference to be enabled
+- delivery requires a verified account email
+- per-manga Alerts on remains the generation gate
+- each event uses a stable Resend idempotency key so retries cannot intentionally duplicate the same event email
+- checker results expose emailSent, emailSkipped, and emailFailed aggregate counters
+- inbox event creation/checkpoint advancement is not rolled back when email delivery fails
 - no new database migration is required
-- email delivery remains a later v1.3.x slice
+- quiet controls and broader delivery rate limiting remain later v1.3.x work
 
 ### Architecture boundary
 

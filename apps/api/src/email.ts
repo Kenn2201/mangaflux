@@ -166,3 +166,39 @@ export async function sendPasswordResetEmail(
       `Reset your MangaFlux password\n\nOpen this link within 30 minutes:\n${url}\n\nIf you did not request this reset, ignore this email.`
   });
 }
+
+export async function sendNewChapterNotificationEmail(
+  to: string,
+  input: {
+    eventId: string;
+    mangaTitle: string;
+    chapterId: string;
+    chapterLabel?: string | null;
+    chapterTitle?: string | null;
+  }
+) {
+  const chapter =
+    input.chapterLabel?.trim() ||
+    input.chapterTitle?.trim() ||
+    "New chapter";
+  const url =
+    `${appOrigin()}/read/${encodeURIComponent(input.chapterId)}`;
+  const subject = `${input.mangaTitle}: ${chapter} is available`;
+
+  return sendEmail({
+    to,
+    subject,
+    idempotencyKey: `new-chapter/${input.eventId}`,
+    html: emailShell({
+      preheader: `A new chapter of ${input.mangaTitle} is available.`,
+      title: "New chapter available",
+      body: `${input.mangaTitle} · ${chapter} is now available on MangaFlux.`,
+      buttonLabel: "Read chapter",
+      buttonUrl: url,
+      note:
+        "You received this because Email notifications are enabled on your MangaFlux account and Alerts are enabled for this manga. You can disable Email notifications from your account settings."
+    }),
+    text:
+      `New chapter available\n\n${input.mangaTitle} · ${chapter}\n\nRead: ${url}\n\nYou can disable Email notifications from your MangaFlux account settings.`
+  });
+}
