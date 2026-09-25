@@ -12,6 +12,12 @@ import { notify } from "../../../lib/toast";
 import { MangaDetailsSkeleton } from "../../Skeletons";
 import CommunityThread from "../../CommunityThread";
 import MangaRecommendations from "../../MangaRecommendations";
+import ReaderSettingsSheet from "../../ReaderSettingsSheet";
+import {
+  getReaderPreferences,
+  readerLanguageOptions,
+  type ReaderPreferences
+} from "../../../lib/readerPreferences";
 
 type MangaDetails = {
   id: string;
@@ -74,12 +80,23 @@ export default function MangaPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [bookmarked, setBookmarked] = useState<boolean | null>(null);
   const [bookmarkBusy, setBookmarkBusy] = useState(false);
+  const [readerSettingsOpen, setReaderSettingsOpen] = useState(false);
+  const [readerPreferences, setReaderPreferences] =
+    useState<ReaderPreferences>({
+      language: "en",
+      dataSaver: false,
+      showAlternateReleases: false
+    });
 
   useEffect(() => {
     const query =
       new URLSearchParams(window.location.search).get("q")?.slice(0, 120) ?? "";
     setSearchQuery(query);
   }, []);
+
+  useEffect(() => {
+    setReaderPreferences(getReaderPreferences(id));
+  }, [id]);
 
   useEffect(() => {
     let cancelled = false;
@@ -133,7 +150,7 @@ export default function MangaPage() {
       setChapterMessage("");
 
       const query = new URLSearchParams({
-        language: "en",
+        language: readerPreferences.language,
         limit: String(CHAPTER_LIMIT),
         offset: String((chapterPage - 1) * CHAPTER_LIMIT),
         order: chapterOrder
@@ -182,7 +199,13 @@ export default function MangaPage() {
     return () => {
       cancelled = true;
     };
-  }, [id, chapterPage, chapterOrder, chapterFilter]);
+  }, [
+    id,
+    chapterPage,
+    chapterOrder,
+    chapterFilter,
+    readerPreferences.language
+  ]);
 
   useEffect(() => {
     if (!manga) return;
@@ -295,6 +318,37 @@ export default function MangaPage() {
     () => Math.max(1, Math.ceil(chapterTotal / CHAPTER_LIMIT)),
     [chapterTotal]
   );
+
+  const chapterReleaseCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+
+    for (const chapter of chapters) {
+      const key = chapter.chapter ?? chapter.id;
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+
+    return counts;
+  }, [chapters]);
+
+  const visibleChapters = useMemo(() => {
+    if (readerPreferences.showAlternateReleases) {
+      return chapters;
+    }
+
+    const seen = new Set<string>();
+
+    return chapters.filter((chapter) => {
+      const key = chapter.chapter ?? chapter.id;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [chapters, readerPreferences.showAlternateReleases]);
+
+  const chapterLanguageName =
+    readerLanguageOptions.find(
+      ([value]) => value === readerPreferences.language
+    )?.[1] ?? readerPreferences.language.toUpperCase();
 
   const querySuffix = searchQuery
     ? `?q=${encodeURIComponent(searchQuery)}`
@@ -468,7 +522,7 @@ export default function MangaPage() {
       <section className="panel chapters-panel">
         <div className="chapter-panel-heading">
           <div>
-            <p className="eyebrow">English chapters</p>
+            <p className="eyebrow">{chapterLanguageName} chapters</p>
             <h2>
               {chapterFilter
                 ? `Chapter ${chapterFilter}`
@@ -511,7 +565,16 @@ export default function MangaPage() {
             ) : null}
           </form>
 
-          <div className="chapter-sort" aria-label="Chapter sort order">
+          <div className="chapter-toolbar-actions">
+            <button
+              className="reader-settings-trigger"
+              type="button"
+              onClick={() => setReaderSettingsOpen(true)}
+            >
+              Reader settings
+            </button>
+
+            <div className="chapter-sort" aria-label="Chapter sort order">
             <button
               type="button"
               className={chapterOrder === "desc" ? "is-active" : ""}
@@ -532,6 +595,7 @@ export default function MangaPage() {
             >
               Oldest
             </button>
+            </div>
           </div>
         </div>
 
@@ -547,7 +611,7 @@ export default function MangaPage() {
           </div>
         ) : (
           <div className="chapter-list">
-            {chapters.map((chapter) => (
+            {visibleChapters.map((chapter) => (
               <Link
                 className="chapter-row"
                 href={`/read/${chapter.id}${querySuffix}`}
@@ -566,15 +630,25 @@ export default function MangaPage() {
                 </div>
 
                 <div className="chapter-meta">
-                  {chapter.scanlationGroups?.length
-                    ? chapter.scanlationGroups.join(", ")
-                    : "Unknown group"}
+                  <span>
+                    {chapter.scanlationGroups?.length
+                      ? chapter.scanlationGroups.join(", ")
+                      : "Unknown group"}
+                  </span>
+                  {!readerPreferences.showAlternateReleases &&
+                  (chapterReleaseCounts.get(chapter.chapter ?? chapter.id) ?? 0) > 1 ? (
+                    <small>
+                      +{(chapterReleaseCounts.get(chapter.chapter ?? chapter.id) ?? 1) - 1} alternate
+                    </small>
+                  ) : null}
                 </div>
               </Link>
             ))}
 
             {!chapterMessage && chapters.length === 0 ? (
-              <p className="message">No matching English chapters were returned.</p>
+              <p className="message">
+                No matching {chapterLanguageName} chapters were returned.
+              </p>
             ) : null}
           </div>
         )}
@@ -608,6 +682,16 @@ export default function MangaPage() {
           </nav>
         ) : null}
       </section>
+
+      <ReaderSettingsSheet
+        mangaId={id}
+        open={readerSettingsOpen}
+        onClose={() => setReaderSettingsOpen(false)}
+        onChange={(next) => {
+          setReaderPreferences(next);
+          setChapterPage(1);
+        }}
+      />
 
       <MangaRecommendations
         mangaId={id}

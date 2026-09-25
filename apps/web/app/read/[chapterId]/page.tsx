@@ -12,6 +12,12 @@ import {
 import { ReaderSkeleton } from "../../Skeletons";
 import CommunityThread from "../../CommunityThread";
 import ReaderChapterJump from "../../ReaderChapterJump";
+import ReaderSettingsSheet from "../../ReaderSettingsSheet";
+import {
+  getReaderPreferences,
+  readerLanguageOptions,
+  type ReaderPreferences
+} from "../../../lib/readerPreferences";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "https://api.manga.kenncode.me";
@@ -24,6 +30,7 @@ type ReaderResponse = {
     chapter?: string;
     scanlationGroups?: string[];
     externalUrl?: string;
+    language?: string;
   };
   pages: Array<{
     index: number;
@@ -156,6 +163,13 @@ export default function ReaderPage() {
   const [message, setMessage] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [dataSaver, setDataSaver] = useState(false);
+  const [readerSettingsOpen, setReaderSettingsOpen] = useState(false);
+  const [readerPreferences, setReaderPreferences] =
+    useState<ReaderPreferences>({
+      language: "en",
+      dataSaver: false,
+      showAlternateReleases: false
+    });
   const [searchQuery, setSearchQuery] = useState("");
   const [previousChapter, setPreviousChapter] = useState<Chapter>();
   const [nextChapter, setNextChapter] = useState<Chapter>();
@@ -168,9 +182,9 @@ export default function ReaderPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setSearchQuery(params.get("q")?.slice(0, 120) ?? "");
-    setDataSaver(
-      window.localStorage.getItem("mangaflux:data-saver") === "true"
-    );
+    const initial = getReaderPreferences();
+    setReaderPreferences(initial);
+    setDataSaver(initial.dataSaver);
 
     const resume = Number(params.get("resume") ?? "0");
     if (Number.isInteger(resume) && resume > 0 && resume <= 500) {
@@ -234,6 +248,10 @@ export default function ReaderPage() {
   useEffect(() => {
     if (!data?.chapter.mangaId) return;
 
+    const savedPreferences = getReaderPreferences(data.chapter.mangaId);
+    setReaderPreferences(savedPreferences);
+    setDataSaver(savedPreferences.dataSaver);
+
     let cancelled = false;
 
     async function loadMangaContext() {
@@ -272,7 +290,9 @@ export default function ReaderPage() {
           const response = await fetch(
             `/api/manga/${encodeURIComponent(
               mangaId
-            )}/chapters?language=en&limit=100&offset=${offset}&order=desc`,
+            )}/chapters?language=${encodeURIComponent(
+              savedPreferences.language
+            )}&limit=100&offset=${offset}&order=desc`,
             { cache: "no-store" }
           );
 
@@ -310,7 +330,9 @@ export default function ReaderPage() {
               const nextPageResponse = await fetch(
                 `/api/manga/${encodeURIComponent(
                   mangaId
-                )}/chapters?language=en&limit=100&offset=${nextOffset}&order=desc`,
+                )}/chapters?language=${encodeURIComponent(
+                  savedPreferences.language
+                )}&limit=100&offset=${nextOffset}&order=desc`,
                 { cache: "no-store" }
               );
 
@@ -346,7 +368,11 @@ export default function ReaderPage() {
     return () => {
       cancelled = true;
     };
-  }, [chapterId, data]);
+  }, [
+    chapterId,
+    data?.chapter.mangaId,
+    readerPreferences.language
+  ]);
 
   useEffect(() => {
     const container = pagesRef.current;
@@ -530,6 +556,19 @@ export default function ReaderPage() {
   function toggleDataSaver() {
     setDataSaver((current) => {
       const next = !current;
+      const preferences = {
+        ...readerPreferences,
+        dataSaver: next
+      };
+      setReaderPreferences(preferences);
+
+      if (data?.chapter.mangaId) {
+        window.localStorage.setItem(
+          `mangaflux:reader-series:v1:${data.chapter.mangaId}`,
+          JSON.stringify(preferences)
+        );
+      }
+
       window.localStorage.setItem("mangaflux:data-saver", String(next));
       return next;
     });
@@ -632,7 +671,21 @@ export default function ReaderPage() {
             mangaId={data.chapter.mangaId}
             currentChapter={data.chapter.chapter}
             querySuffix={querySuffix}
+            language={readerPreferences.language}
+            languageLabel={
+              readerLanguageOptions.find(
+                ([value]) => value === readerPreferences.language
+              )?.[1] ?? readerPreferences.language.toUpperCase()
+            }
           />
+
+          <button
+            className="reader-settings-trigger"
+            type="button"
+            onClick={() => setReaderSettingsOpen(true)}
+          >
+            Settings
+          </button>
 
           <span
             className={`reader-save-state reader-save-${saveState}`}
@@ -741,6 +794,16 @@ export default function ReaderPage() {
           </svg>
         </button>
       ) : null}
+
+      <ReaderSettingsSheet
+        mangaId={data.chapter.mangaId}
+        open={readerSettingsOpen}
+        onClose={() => setReaderSettingsOpen(false)}
+        onChange={(next) => {
+          setReaderPreferences(next);
+          setDataSaver(next.dataSaver);
+        }}
+      />
 
       <footer className="reader-footer reader-end-card">
         <span>{pageLabel}</span>

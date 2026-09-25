@@ -1,0 +1,391 @@
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* MangaFlux v1.1.0 — Library & Reader Settings Foundation */
+
+body.reader-settings-open {
+  overflow: hidden;
+}
+
+/* Library controls */
+.library-controls {
+  display: grid;
+  grid-template-columns: auto minmax(180px, 1fr) minmax(150px, auto);
+  gap: 9px;
+  align-items: center;
+  margin: 18px 0;
+}
+
+.library-view-tabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid #2b2b2b;
+  border-radius: 14px;
+  background: #0d0d0d;
+}
+
+.library-view-tabs button {
+  min-height: 36px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #777;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.library-view-tabs button.is-active {
+  background: #ededed;
+  color: #080808;
+}
+
+.library-search input,
+.library-sort select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid #303030;
+  border-radius: 12px;
+  outline: 0;
+  background: #111;
+  color: #d7d7d7;
+  font-size: 11px;
+}
+
+.library-search input:focus,
+.library-sort select:focus {
+  border-color: #666;
+}
+
+.library-bookmark-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
+  gap: 12px;
+  overflow: visible;
+}
+
+.library-history-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.library-history-heading > div {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.library-clear-history {
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid #383838;
+  border-radius: 11px;
+  background: #131313;
+  color: #a1a1a1;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.history-list-v11 {
+  gap: 7px;
+}
+
+.history-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px 0 0;
+  border: 1px solid #292929;
+  border-radius: 14px;
+  background: #0f0f0f;
+}
+
+.history-row > a {
+  min-width: 0;
+  padding: 12px;
+}
+
+.history-row > button {
+  min-height: 34px;
+  padding: 0 9px;
+  border: 1px solid #343434;
+  border-radius: 10px;
+  background: #151515;
+  color: #8f8f8f;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.library-no-results {
+  display: grid;
+  gap: 4px;
+  padding: 18px;
+  border: 1px dashed #303030;
+  border-radius: 15px;
+  color: #aaa;
+}
+
+.library-no-results span {
+  color: #727272;
+  font-size: 10px;
+}
+
+/* Reader settings */
+.reader-settings-layer {
+  position: fixed;
+  z-index: 260;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.reader-settings-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  border: 0;
+  background: rgba(0,0,0,.74);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.reader-settings-sheet {
+  position: relative;
+  z-index: 1;
+  width: min(520px, 100%);
+  padding: 22px;
+  border: 1px solid #383838;
+  border-radius: 24px;
+  background: #101010;
+  box-shadow: 0 30px 100px rgba(0,0,0,.72);
+}
+
+.reader-settings-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.reader-settings-heading h2 {
+  margin: 4px 0 0;
+  font-size: 30px;
+  letter-spacing: -.04em;
+}
+
+.reader-settings-heading > button {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #313131;
+  border-radius: 50%;
+  background: #171717;
+  color: #aaa;
+  font-size: 22px;
+}
+
+.reader-setting-row {
+  min-height: 76px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(140px, auto);
+  gap: 14px;
+  align-items: center;
+  margin-top: 10px;
+  padding: 14px;
+  border: 1px solid #292929;
+  border-radius: 16px;
+  background: #0c0c0c;
+}
+
+.reader-setting-row > span {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.reader-setting-row strong {
+  font-size: 12px;
+}
+
+.reader-setting-row small {
+  color: #737373;
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.reader-setting-row select {
+  min-width: 150px;
+  min-height: 42px;
+  padding: 0 10px;
+  border: 1px solid #343434;
+  border-radius: 11px;
+  background: #131313;
+  color: #ddd;
+}
+
+.reader-setting-toggle {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.reader-setting-toggle input {
+  width: 42px;
+  height: 24px;
+  accent-color: #ededed;
+}
+
+.reader-settings-reset {
+  width: 100%;
+  min-height: 42px;
+  margin-top: 12px;
+  border: 1px solid #303030;
+  border-radius: 12px;
+  background: #151515;
+  color: #929292;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.reader-settings-trigger {
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid #353535;
+  border-radius: 11px;
+  background: #131313;
+  color: #aaa;
+  font-size: 9px;
+  font-weight: 850;
+}
+
+.chapter-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chapter-meta {
+  display: grid;
+  justify-items: end;
+  gap: 3px;
+}
+
+.chapter-meta small {
+  color: #6f6f6f;
+  font-size: 8px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+@media (max-width: 900px) {
+  .library-controls {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .library-view-tabs {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .library-view-tabs button {
+    flex: 1 1 0;
+  }
+
+  .chapter-toolbar {
+    align-items: stretch;
+  }
+
+  .chapter-toolbar-actions {
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 700px) {
+  .library-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .library-view-tabs {
+    grid-column: auto;
+  }
+
+  .library-bookmark-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .history-row {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 0;
+  }
+
+  .history-row > button {
+    margin: 0 10px 10px;
+  }
+
+  .library-history-heading {
+    align-items: start;
+  }
+
+  .reader-settings-layer {
+    align-items: end;
+    padding:
+      8px
+      8px
+      max(8px, env(safe-area-inset-bottom));
+  }
+
+  .reader-settings-sheet {
+    width: 100%;
+    max-height: 82dvh;
+    overflow-y: auto;
+    border-radius: 26px;
+  }
+
+  .reader-setting-row {
+    grid-template-columns: 1fr;
+  }
+
+  .reader-setting-toggle {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .reader-setting-row select {
+    width: 100%;
+  }
+
+  .chapter-toolbar-actions {
+    width: 100%;
+  }
+
+  .reader-settings-trigger {
+    flex: 1 1 auto;
+  }
+}
+
+@media (max-width: 430px) {
+  .library-bookmark-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .library-history-heading {
+    display: grid;
+  }
+
+  .library-clear-history {
+    justify-self: start;
+  }
+}

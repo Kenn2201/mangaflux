@@ -4,8 +4,12 @@ import type {
   FastifyRequest
 } from "fastify";
 import {
+  clearProgress,
+  clearUserProgress,
   deleteBookmark,
+  deleteProgress,
   deleteUserBookmark,
+  deleteUserProgress,
   getBookmark,
   getReaderSummary,
   getUserBookmark,
@@ -358,6 +362,37 @@ export function registerStateRoutes(
     }
   );
 
+  app.delete<{
+    Params: { readerId: string };
+    Querystring: { source?: string; mangaId?: string; all?: string };
+  }>(
+    "/api/state/:readerId/progress",
+    { preHandler: limits.write },
+    async (request, reply) => {
+      if (!validateIdentity(request.params.readerId, reply)) return;
+      if (!databaseRequired(database, reply)) return;
+
+      if (request.query.all === "1") {
+        await clearProgress(database, request.params.readerId);
+        return { cleared: true };
+      }
+
+      const source = request.query.source ?? "mangadex";
+      const mangaId = request.query.mangaId;
+
+      if (!validateSourceAndManga(source, mangaId, reply)) return;
+
+      await deleteProgress(
+        database,
+        request.params.readerId,
+        source,
+        mangaId!
+      );
+
+      return { removed: true };
+    }
+  );
+
   app.get(
     "/api/account/state/summary",
     { preHandler: limits.read },
@@ -461,6 +496,41 @@ export function registerStateRoutes(
       );
 
       return { bookmarked: false };
+    }
+  );
+
+  app.delete<{
+    Querystring: { source?: string; mangaId?: string; all?: string };
+  }>(
+    "/api/account/state/progress",
+    { preHandler: limits.write },
+    async (request, reply) => {
+      const session = await authenticateSession(
+        request,
+        reply,
+        database,
+        authProxySecret
+      );
+      if (!session || !database) return;
+
+      if (request.query.all === "1") {
+        await clearUserProgress(database, session.userId);
+        return { cleared: true };
+      }
+
+      const source = request.query.source ?? "mangadex";
+      const mangaId = request.query.mangaId;
+
+      if (!validateSourceAndManga(source, mangaId, reply)) return;
+
+      await deleteUserProgress(
+        database,
+        session.userId,
+        source,
+        mangaId!
+      );
+
+      return { removed: true };
     }
   );
 

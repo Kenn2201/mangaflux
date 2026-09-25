@@ -7,25 +7,44 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- v1.x quality-of-life and product-depth releases
+- remaining v1.1.x reading-quality refinements
+- account-sync strategy for reader preferences
+- additional scanlation-group selection controls
+
+## 1.1.0 - 2026-09-25 — Library & Reader Settings Foundation
+
+### Library
+- Added All / Bookmarks / History library views.
+- Added title filtering.
+- Added recent/title/progress sorting.
+- Expanded persisted summary retrieval from 12 to 100 bookmark/history records.
+- Added remove-one reading-history action.
+- Added clear-history action while preserving bookmarks.
+- Added confirmation UX around history deletion.
+
+### Reader settings
+- Added a per-series reader settings sheet.
+- Added preferred chapter language.
+- Added per-series Data Saver preference.
+- Added alternate-release visibility preference.
+- Settings are browser-local in the v1.1.0 foundation and can fall back to global defaults.
+
+### Chapters
+- Manga chapter list uses preferred language.
+- Reader previous/next chapter lookup uses preferred language.
+- Jump Chapter uses preferred language.
+- Duplicate releases for the same chapter number collapse by default.
+- Scanlation group remains visible.
+- Collapsed rows show the number of alternate releases.
+- Readers can enable all alternate releases.
+
+### Responsive UX
+- Added dedicated tablet/mobile layouts for library controls, history actions, reader settings, and chapter controls.
+
+### Development workflow
+- Standardized future ChatGPT-assisted development on a single persistent `kenn/develop` branch.
 
 ## 1.0.0 - 2026-09-24 — Stable V1
-
-### Stable
-- Promoted the audited v0.9 release-candidate codebase to the stable V1 baseline.
-- Synchronized all workspace, API, and MangaDex adapter versions to 1.0.0.
-- Preserved the V1 single-source MangaDex architecture and existing production safety boundaries.
-
-### Product
-- Mobile-first landing, discovery/dashboard, search autocomplete, genres, filters, recommendations, library, account, and reader UX.
-- Scalable chapter browsing and direct chapter jump.
-- Verified accounts, password recovery, one-active-session behavior, avatars, community profiles, reactions, comments, and account-backed reading state.
-- Admin operations, source/database status, runtime diagnostics, bounded caching, and rate-limit hardening.
-
-### Release engineering
-- Secret scan, migration validation, release-invariant checks, TypeScript checks, production build, and dependency audit remain mandatory for release PRs.
-- v0.9 became the final release-candidate stabilization series before Stable V1.
-
 ## 0.9.1 - 2026-09-24 — RC UX & Account Hardening
 ## 0.9.0 - 2026-09-24 — V1 Release Candidate
 ## 0.8.3 - 2026-09-24 — Cache, Rate Limits & Performance Hardening
