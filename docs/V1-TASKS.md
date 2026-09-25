@@ -193,9 +193,20 @@
 - [x] conservative checker rate limit and aggregate counters
 - [x] keep inbox/email delivery out of v1.3.3
 
+## v1.3.4 — Notification Inbox & History
+
+- [x] authenticated notification history API
+- [x] account-only Notifications Library view
+- [x] unread count and visual state
+- [x] individual persisted Mark read
+- [x] opening an event marks it read
+- [x] persisted Mark all read
+- [x] chapter links from events
+- [x] reuse v1.3.2 read_at without a new migration
+- [x] keep email delivery out of v1.3.4
+
 ## Remaining v1.3.x
 
-- [ ] notification inbox/history
 - [ ] global email preference integration
 - [ ] quiet/disable controls and rate limiting
 - [ ] optional Discord/webhook delivery after core notifications stabilize

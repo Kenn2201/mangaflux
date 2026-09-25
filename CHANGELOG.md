@@ -7,9 +7,19 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- v1.3.4+ notification inbox/history
-- global Email notifications integration as a delivery gate
+- v1.3.5+ global Email notifications integration as a delivery gate
 - quiet/disable controls and delivery rate limiting
+- optional Discord/webhook delivery after core notifications stabilize
+
+## 1.3.4 - 2026-09-26 — Notification Inbox & History
+
+### Inbox/history
+- Added authenticated notification history reads.
+- Added persisted individual and bulk read-state updates.
+- Added a Notifications Library view with unread count and chapter links.
+- Opening an unread event marks it read; explicit Mark read and Mark all read are also available.
+- No database migration is required because v1.3.2 reserved read_at.
+- Email delivery remains disabled.
 
 ## 1.3.3 - 2026-09-26 — Controlled Notification Generation
 
