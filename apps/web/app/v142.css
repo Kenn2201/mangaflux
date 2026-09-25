@@ -1,0 +1,115 @@
+/* MangaFlux v1.4.2 — Saved Discovery Filters */
+
+.saved-discovery-filters {
+  margin: -14px 0 28px;
+  padding: 12px 14px;
+  border: 1px solid #292929;
+  border-radius: 16px;
+  background: #0b0b0b;
+}
+
+.saved-discovery-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.saved-discovery-heading .eyebrow {
+  margin: 0;
+}
+
+.saved-discovery-heading p:last-child {
+  margin: 3px 0 0;
+  color: #6f6f6f;
+  font-size: 9px;
+}
+
+.saved-discovery-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.saved-discovery-item {
+  display: inline-grid;
+  grid-template-columns: minmax(0, auto) 30px;
+  overflow: hidden;
+  max-width: 100%;
+  border: 1px solid #303030;
+  border-radius: 999px;
+  background: #111;
+}
+
+.saved-discovery-apply,
+.saved-discovery-remove {
+  min-height: 34px;
+  border: 0;
+  background: transparent;
+  color: #aaa;
+}
+
+.saved-discovery-apply {
+  min-width: 0;
+  max-width: 320px;
+  padding: 0 11px;
+  overflow: hidden;
+  font-size: 10px;
+  font-weight: 800;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.saved-discovery-apply:hover,
+.saved-discovery-apply:focus-visible {
+  color: #eee;
+}
+
+.saved-discovery-remove {
+  width: 30px;
+  border-left: 1px solid #292929;
+  color: #777;
+  font-size: 17px;
+}
+
+.saved-discovery-remove:hover,
+.saved-discovery-remove:focus-visible {
+  color: #e2a6a6;
+}
+
+@media (max-width: 700px) {
+  .browse-filter-actions {
+    flex-wrap: wrap;
+  }
+
+  .browse-filter-actions button {
+    min-width: calc(50% - 3px);
+  }
+
+  .saved-discovery-filters {
+    margin-top: -16px;
+    padding: 11px;
+  }
+
+  .saved-discovery-list {
+    display: grid;
+  }
+
+  .saved-discovery-item {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr) 36px;
+    border-radius: 12px;
+  }
+
+  .saved-discovery-apply {
+    max-width: none;
+    min-height: 40px;
+  }
+
+  .saved-discovery-remove {
+    width: 36px;
+    min-height: 40px;
+  }
+}

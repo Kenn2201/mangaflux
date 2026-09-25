@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v1.4.1--Activity_Based_Recommendations-indigo.svg)
+![Version](https://img.shields.io/badge/version-v1.4.2--Saved_Discovery_Filters-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v1.4.1 — Activity-Based Recommendations**
+**v1.4.2 — Saved Discovery Filters**
 
-MangaFlux V1 remains a stable single-source MangaDex product. After v1.4.0 Recommendation Explanations passed physical QA, v1.4.1 broadens personalized discovery from a single seed title to a bounded blend of recent reading and library activity.
+MangaFlux V1 remains a stable single-source MangaDex product. After v1.4.1 Activity-Based Recommendations passed physical QA, v1.4.2 lets readers save and quickly reapply Browse filter combinations on the current device.
 
 ### Library improvements
 
@@ -49,15 +49,15 @@ The settings sheet is available from manga chapter lists and inside the immersiv
 - an alternate-release count is shown when duplicates are collapsed
 - readers can opt back into all alternate releases
 
-### v1.4.1 refinements
+### v1.4.2 refinements
 
-- v1.4.0 Recommendation Explanations passed physical QA and is signed off
-- recommendations now blend up to three recent reading/bookmark activity seeds instead of relying on one title
-- more recent activity receives greater ranking weight
-- repeated creator/tag/year signals are deduplicated and strengthened across activity seeds
-- discovery work is capped at eight ranked signals to keep MangaDex/API traffic bounded
-- explanations identify which recent title contributed each creator, genre/theme, or year signal
-- existing bookmark/history exclusions remain intact
+- v1.4.1 Activity-Based Recommendations passed physical QA and is signed off
+- Browse can save up to five device-local discovery filter presets
+- saved presets preserve sort, genre, status, year, and creator context when present
+- saved presets can be reapplied in one tap and removed independently
+- duplicate presets are rejected and the five-preset limit is enforced
+- the UI explicitly labels saved filters as device-local rather than account-synced
+- existing URL-based Browse filtering and pagination remain unchanged
 - no new database migration is required
 
 ### Architecture boundary

@@ -7,9 +7,21 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- v1.4.x saved discovery and history controls
+- v1.4.x recently viewed and search-history controls
 - stronger language, genre, and manga-status preferences
 - improved Hot / Popular / Trending discovery
+
+## 1.4.2 - 2026-09-26 — Saved Discovery Filters
+
+### Discovery controls
+- Accepted physical QA sign-off for v1.4.1 Activity-Based Recommendations.
+- Added up to five device-local saved Browse filter presets.
+- Preserve sort, genre, status, year, and creator context inside saved presets.
+- Allow one-tap preset application and independent preset removal.
+- Reject duplicate saved presets and enforce the five-preset limit.
+- Explicitly label saved filters as device-local so they are not mistaken for account-synced preferences.
+- Preserve existing URL-based discovery filtering and pagination behavior.
+- No database migration is required.
 
 ## 1.4.1 - 2026-09-26 — Activity-Based Recommendations
 
