@@ -8,7 +8,8 @@ This is the canonical MangaFlux roadmap.
 v1.0.0  ████████████████████  ✅
 v1.1.0  ████████████████████  ✅
 v1.1.1  ████████████████████  ✅
-v1.1.2+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
+v1.1.2  ████████████████████  ✅
+v1.1.3+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
 v1.2.x  Profiles & Community
 v1.3.x  Following & Notifications
 v1.4.x  Discovery & Personalization
@@ -19,7 +20,7 @@ v2.x    Multi-Source + Platform Expansion
 v3.x    Advanced MangaFlux
 ~~~
 
-We are not rushing toward v2 or v3. **v1.1.1 — Reading Quality Refinements is complete.** The immediate target is now **v1.1.2+ — Remaining Reading Quality** until the Library & Reading Quality phase is satisfactory.
+We are not rushing toward v2 or v3. **v1.1.2 — Reader Layout Controls is complete.** The immediate target remains inside **v1.1.x — Library & Reading Quality**, with **v1.1.3+** reserved for the remaining history, accessibility, regression, and final reading-quality work.
 
 ---
 
@@ -52,8 +53,6 @@ The original stable MangaFlux foundation:
 ## ➡️ v1.1.x — Library & Reading Quality — CURRENT
 
 ### ✅ v1.1.0 — Library + Reader Settings Foundation
-
-Already completed and on `main`.
 
 #### Library
 - All / Bookmarks / History views
@@ -94,49 +93,53 @@ Already completed and on `main`.
 
 ### ✅ v1.1.1 — Reading Quality Refinements
 
-This is the immediate development target.
-
-#### Preference improvements
-- Define safe account synchronization for reader preferences
-- Keep browser-local preferences as fallback
-- Avoid overwriting newer preference choices when synchronizing
+#### Preference synchronization
+- Safe account synchronization for per-series reader preferences
+- Browser-local fallback for signed-out/offline use
+- Timestamp conflict protection so older choices cannot overwrite newer settings
 
 #### Scanlation controls
-- Better scanlation-group selection
 - Optional preferred scanlation group per manga
-- Better alternate-release selection
-- Keep scanlation attribution clearly visible
-
-#### Reader/chapter quality
-- Remaining chapter-quality improvements building naturally on v1.1.0
-- Fix/polish issues discovered from actual v1.1.0 testing
-- Focused history-management improvements
+- Preferred-group selection when duplicate chapter releases are collapsed
+- Scanlation attribution remains visible
+- Alternate-release visibility remains available
 
 #### Responsive QA
-- Tablet testing
-- Landscape testing
-- Library QA
-- Reader Settings QA
-- Chapter-controls QA
-
-**Scope rule:** do not put every remaining v1.1 feature into v1.1.1.
+- Reader Settings hardening for short landscape viewports
+- Reader/chapter regression pass around the v1.1.0 foundation
 
 ---
 
-### ➡️ v1.1.2+ — Remaining Reading Quality — NEXT
+### ✅ v1.1.2 — Reader Layout Controls
 
-Room remains for additional v1.1.x releases.
+#### Layout preferences
+- Per-series image-fit preference
+- **Fit width** keeps the existing continuous full-width reader behavior
+- **Fit screen** keeps each page inside the current viewport height while preserving vertical reading
+- Page spacing options: **Seamless**, **Small gap**, and **Large gap**
+
+#### Preference persistence
+- Image fit and page spacing use the existing account-synced preference model
+- Browser-local fallback remains available
+- Existing account rows migrate safely to Fit width + Seamless
+- Timestamp conflict protection continues to apply
+
+#### Reader consistency
+- The quick Data Saver control now uses the same timestamped local/account sync path as Reader Settings instead of bypassing preference synchronization
+
+---
+
+### ➡️ v1.1.3+ — Remaining Reading Quality — NEXT
+
+Keep the remaining v1.1.x work focused instead of rushing to v1.2.
 
 Possible work includes:
 
-- Stronger per-series preferences
-- Reader typography settings
-- Reader spacing controls
-- Image/reader fit preferences
 - Additional history controls
-- More reading-quality refinements based on real usage
-- Accessibility fixes
-- Regression fixes
+- Reader typography refinements if actual usage justifies them
+- Broader accessibility fixes
+- Regression fixes discovered through physical device testing
+- Final Library/reader QA
 - Final v1.1.x polish
 
 Once the entire Library & Reading Quality phase is satisfactory, move forward to v1.2.x.
