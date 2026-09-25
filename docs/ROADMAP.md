@@ -22,7 +22,8 @@ v1.3.0  ████████████████████  ✅
 v1.3.1  ████████████████████  ✅
 v1.3.2  ████████████████████  ✅
 v1.3.3  ████████████████████  ✅
-v1.3.4+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
+v1.3.4  ████████████████████  ✅
+v1.3.5+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
 v1.3.x  Following & Notifications
 v1.4.x  Discovery & Personalization
 v1.5+   Product Polish
@@ -32,7 +33,7 @@ v2.x    Multi-Source + Platform Expansion
 v3.x    Advanced MangaFlux
 ~~~
 
-**v1.1.x — Library & Reading Quality** and **v1.2.x — Profiles & Community Depth** are signed off after physical QA. MangaFlux is now in **v1.3.x — Following & Notifications**. **v1.3.3 — Controlled Notification Generation** is complete, and v1.3.4+ continues with notification inbox/history before delivery work.
+**v1.1.x — Library & Reading Quality** and **v1.2.x — Profiles & Community Depth** are signed off after physical QA. MangaFlux is now in **v1.3.x — Following & Notifications**. **v1.3.4 — Notification Inbox & History** is complete, and v1.3.5+ continues with global Email delivery integration and delivery controls.
 
 ---
 
@@ -365,11 +366,22 @@ Introduce a proper following system separate from bookmarks.
 - Conservative checker rate limiting and aggregate counters
 - No inbox UI or email delivery yet
 
-### ➡️ v1.3.4+ — Notification Inbox & Delivery — NEXT
+### ✅ v1.3.4 — Notification Inbox & History
+
+- Account-only notification history API
+- Notifications view in Library
+- Unread count and unread visual state
+- Individual Mark read persistence
+- Opening an event marks it read
+- Mark all read persistence
+- Chapter links from generated events
+- No new migration; uses the read_at field reserved in v1.3.2
+- No email delivery yet
+
+### ➡️ v1.3.5+ — Notification Delivery Controls — NEXT
 
 Continue in focused slices:
 
-- notification inbox and history
 - global Email notifications preference integration
 - quiet / disable controls
 - notification rate limiting

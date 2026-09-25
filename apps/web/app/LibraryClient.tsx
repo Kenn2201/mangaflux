@@ -27,6 +27,21 @@ type Follow = {
   createdAt: string;
 };
 
+type NotificationEvent = {
+  id: string;
+  type: string;
+  source: string;
+  mangaId: string;
+  mangaTitle: string;
+  coverUrl?: string | null;
+  chapterId: string;
+  chapterLabel?: string | null;
+  chapterTitle?: string | null;
+  sourcePublishedAt?: string | null;
+  createdAt: string;
+  readAt?: string | null;
+};
+
 type Progress = {
   source: string;
   mangaId: string;
@@ -60,8 +75,11 @@ export default function LibraryClient() {
   const [unavailable, setUnavailable] = useState(false);
   const [query, setQuery] = useState("");
   const [view, setView] = useState<
-    "all" | "bookmarks" | "following" | "history"
+    "all" | "bookmarks" | "following" | "notifications" | "history"
   >("all");
+  const [notifications, setNotifications] = useState<NotificationEvent[]>([]);
+  const [notificationsLoaded, setNotificationsLoaded] = useState(false);
+  const [notificationsBusy, setNotificationsBusy] = useState(false);
   const [sort, setSort] = useState<"recent" | "title" | "progress">("recent");
   const [pendingHistoryAction, setPendingHistoryAction] =
     useState<PendingHistoryAction>(null);
@@ -97,6 +115,92 @@ export default function LibraryClient() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (view !== "notifications" || notificationsLoaded) return;
+
+    let cancelled = false;
+    async function loadNotifications() {
+      try {
+        const response = await fetch("/api/state/notifications?limit=100", {
+          cache: "no-store"
+        });
+        if (!response.ok) throw new Error("Notification history unavailable.");
+        const payload = (await response.json()) as {
+          items?: NotificationEvent[];
+        };
+        if (!cancelled) {
+          setNotifications(payload.items ?? []);
+          setNotificationsLoaded(true);
+        }
+      } catch {
+        if (!cancelled) {
+          notify({
+            tone: "error",
+            title: "Notifications unavailable",
+            message: "Try again shortly."
+          });
+        }
+      }
+    }
+
+    void loadNotifications();
+    return () => {
+      cancelled = true;
+    };
+  }, [view, notificationsLoaded]);
+
+  async function markNotificationRead(eventId: string) {
+    const response = await fetch("/api/state/notifications", {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ eventId })
+    });
+    if (!response.ok) {
+      notify({
+        tone: "error",
+        title: "Notification update failed",
+        message: "Try again shortly."
+      });
+      return;
+    }
+    const now = new Date().toISOString();
+    setNotifications((items) =>
+      items.map((item) =>
+        item.id === eventId ? { ...item, readAt: now } : item
+      )
+    );
+  }
+
+  async function markAllNotificationsRead() {
+    if (notificationsBusy) return;
+    setNotificationsBusy(true);
+    try {
+      const response = await fetch("/api/state/notifications", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ all: true })
+      });
+      if (!response.ok) throw new Error("Notification update failed.");
+      const now = new Date().toISOString();
+      setNotifications((items) =>
+        items.map((item) => ({ ...item, readAt: item.readAt ?? now }))
+      );
+      notify({
+        tone: "success",
+        title: "Notifications read",
+        message: "Your notification history is up to date."
+      });
+    } catch {
+      notify({
+        tone: "error",
+        title: "Notification update failed",
+        message: "Try again shortly."
+      });
+    } finally {
+      setNotificationsBusy(false);
+    }
+  }
 
   const normalizedQuery = query.trim().toLowerCase();
 
@@ -357,7 +461,7 @@ export default function LibraryClient() {
 
       <div className="library-controls">
         <div className="library-view-tabs" aria-label="Library view">
-          {(["all", "bookmarks", "following", "history"] as const).map((item) => (
+          {(["all", "bookmarks", "following", "notifications", "history"] as const).map((item) => (
             <button
               type="button"
               key={item}
@@ -371,7 +475,9 @@ export default function LibraryClient() {
                   ? "Bookmarks"
                   : item === "following"
                     ? "Following"
-                    : "History"}
+                    : item === "notifications"
+                      ? "Notifications"
+                      : "History"}
             </button>
           ))}
         </div>
@@ -530,6 +636,74 @@ export default function LibraryClient() {
               </article>
             ))}
           </div>
+        </div>
+      ) : null}
+
+      {view === "notifications" ? (
+        <div className="library-block notification-history">
+          <div className="library-subheading notification-history-heading">
+            <div>
+              <h3>Notifications</h3>
+              <span>
+                {notifications.filter((item) => !item.readAt).length} unread
+              </span>
+            </div>
+            {notifications.some((item) => !item.readAt) ? (
+              <button
+                type="button"
+                className="notification-read-all"
+                disabled={notificationsBusy}
+                onClick={() => void markAllNotificationsRead()}
+              >
+                {notificationsBusy ? "Updating…" : "Mark all read"}
+              </button>
+            ) : null}
+          </div>
+
+          {notifications.length ? (
+            <div className="notification-list">
+              {notifications.map((item) => (
+                <article
+                  className={`notification-row ${item.readAt ? "" : "is-unread"}`}
+                  key={item.id}
+                >
+                  <Link
+                    href={`/read/${item.chapterId}`}
+                    onClick={() => {
+                      if (!item.readAt) void markNotificationRead(item.id);
+                    }}
+                  >
+                    <strong>{item.mangaTitle}</strong>
+                    <span>
+                      New chapter {item.chapterLabel || item.chapterTitle || ""}
+                    </span>
+                    <small>
+                      {new Date(
+                        item.sourcePublishedAt ?? item.createdAt
+                      ).toLocaleString()}
+                    </small>
+                  </Link>
+                  {!item.readAt ? (
+                    <button
+                      type="button"
+                      onClick={() => void markNotificationRead(item.id)}
+                    >
+                      Mark read
+                    </button>
+                  ) : (
+                    <span className="notification-read-state">Read</span>
+                  )}
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="library-no-results">
+              <strong>No notifications yet.</strong>
+              <span>
+                New chapter alerts will appear here after MangaFlux detects them.
+              </span>
+            </div>
+          )}
         </div>
       ) : null}
 

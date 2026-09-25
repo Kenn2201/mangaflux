@@ -1,0 +1,58 @@
+.notification-history-heading {
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.notification-history-heading > div {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+.notification-read-all,
+.notification-row button {
+  min-height: 44px;
+}
+
+.notification-list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.notification-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.12));
+  border-radius: 14px;
+}
+
+.notification-row.is-unread {
+  border-color: rgba(255, 255, 255, 0.32);
+}
+
+.notification-row > a {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 0.2rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.notification-row small,
+.notification-read-state {
+  opacity: 0.7;
+}
+
+@media (max-width: 640px) {
+  .notification-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .notification-row button {
+    width: 100%;
+  }
+}

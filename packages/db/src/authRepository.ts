@@ -3,6 +3,7 @@ import {
   desc,
   eq,
   gt,
+  isNull,
   lt
 } from "drizzle-orm";
 import type { MangaFluxDatabase } from "./client.js";
@@ -532,6 +533,43 @@ export async function listNotificationEvents(
     .where(eq(notificationEvents.userId, userId))
     .orderBy(desc(notificationEvents.createdAt))
     .limit(Math.max(1, Math.min(100, Math.floor(limit))));
+}
+
+export async function markNotificationEventRead(
+  db: MangaFluxDatabase,
+  userId: string,
+  eventId: string
+) {
+  const [event] = await db
+    .update(notificationEvents)
+    .set({ readAt: new Date() })
+    .where(
+      and(
+        eq(notificationEvents.id, eventId),
+        eq(notificationEvents.userId, userId)
+      )
+    )
+    .returning();
+
+  return event ?? null;
+}
+
+export async function markAllNotificationEventsRead(
+  db: MangaFluxDatabase,
+  userId: string
+) {
+  const events = await db
+    .update(notificationEvents)
+    .set({ readAt: new Date() })
+    .where(
+      and(
+        eq(notificationEvents.userId, userId),
+        isNull(notificationEvents.readAt)
+      )
+    )
+    .returning({ id: notificationEvents.id });
+
+  return events.length;
 }
 
 export async function upsertUserProgress(

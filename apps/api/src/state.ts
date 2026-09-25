@@ -18,6 +18,9 @@ import {
   getUserBookmark,
   getUserFollow,
   getUserReaderPreferences,
+  listNotificationEvents,
+  markAllNotificationEventsRead,
+  markNotificationEventRead,
   getUserSummary,
   setUserFollowNotifications,
   upsertBookmark,
@@ -49,6 +52,11 @@ type FollowNotificationBody = {
   source?: string;
   mangaId?: string;
   notificationsEnabled?: boolean;
+};
+
+type NotificationReadBody = {
+  eventId?: string;
+  all?: boolean;
 };
 
 type ReaderPreferencesBody = {
@@ -688,6 +696,81 @@ export function registerStateRoutes(
       });
 
       return { synced: true, item };
+    }
+  );
+
+  app.get<{ Querystring: { limit?: string } }>(
+    "/api/account/state/notifications",
+    { preHandler: limits.read },
+    async (request, reply) => {
+      const session = await authenticateSession(
+        request,
+        reply,
+        database,
+        authProxySecret
+      );
+      if (!session || !database) return;
+
+      const parsed = Number(request.query.limit ?? "50");
+      const limit =
+        Number.isInteger(parsed) && parsed >= 1 && parsed <= 100
+          ? parsed
+          : 50;
+      const items = await listNotificationEvents(
+        database,
+        session.userId,
+        limit
+      );
+
+      return {
+        items,
+        unread: items.filter((item) => !item.readAt).length
+      };
+    }
+  );
+
+  app.patch<{ Body: NotificationReadBody }>(
+    "/api/account/state/notifications",
+    { preHandler: limits.write },
+    async (request, reply) => {
+      const session = await authenticateSession(
+        request,
+        reply,
+        database,
+        authProxySecret
+      );
+      if (!session || !database) return;
+
+      if (request.body?.all === true) {
+        const updated = await markAllNotificationEventsRead(
+          database,
+          session.userId
+        );
+        return { updated };
+      }
+
+      const eventId = request.body?.eventId;
+      if (!eventId || !UUID_RE.test(eventId)) {
+        return reply.code(400).send({
+          error: "INVALID_REQUEST",
+          message: "eventId must be a valid notification UUID."
+        });
+      }
+
+      const item = await markNotificationEventRead(
+        database,
+        session.userId,
+        eventId
+      );
+
+      if (!item) {
+        return reply.code(404).send({
+          error: "NOT_FOUND",
+          message: "Notification event not found."
+        });
+      }
+
+      return { item };
     }
   );
 
