@@ -7,9 +7,20 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- v1.4.x search-history controls
 - stronger language, genre, and manga-status preferences
 - improved Hot / Popular / Trending discovery
+
+## 1.4.4 - 2026-09-26 — Search History Controls
+
+### Discovery history
+- Accepted physical QA sign-off for v1.4.3 Recently Viewed Controls.
+- Added device-local history for up to 10 unique explicit search terms.
+- Record submitted searches, selected search suggestions, and visited results queries without logging ordinary autocomplete typing.
+- Move repeated searches back to the front instead of creating duplicates.
+- Show recent searches when the header search is focused and empty.
+- Added recent-search rerun, remove-one, and clear-all controls on the empty Search page.
+- Keep search history separate from Recently viewed, reading history, bookmarks, and account data.
+- No database migration is required.
 
 ## 1.4.3 - 2026-09-26 — Recently Viewed Controls
 

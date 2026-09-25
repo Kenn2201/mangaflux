@@ -24,7 +24,7 @@ export default async function SearchPage({
           {query ? <>Results for “{query}”</> : "Search MangaFlux"}
         </h1>
         <p>
-          Search suggestions appear directly in the header as you type.
+          Search suggestions appear as you type. Explicit searches are remembered on this device so you can run them again quickly.
         </p>
       </section>
 

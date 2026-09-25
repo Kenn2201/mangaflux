@@ -95,7 +95,7 @@ export default async function Home({
       </section>
 
       <div className="landing-version">
-        v1.4.3 · Recently Viewed Controls
+        v1.4.4 · Search History Controls
       </div>
     </main>
   );

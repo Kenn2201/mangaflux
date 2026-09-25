@@ -291,10 +291,22 @@
 - [x] remove one recent view
 - [x] clear all recent views without changing library/account state
 - [x] no new database migration
+- [x] physical production QA signed off
+
+## v1.4.4 — Search History Controls
+
+- [x] remember up to 10 unique explicit search terms on the current device
+- [x] record submitted searches and selected autocomplete suggestions
+- [x] record visited results queries so direct/reloaded result pages stay in history
+- [x] avoid logging ordinary autocomplete keystrokes
+- [x] move repeated searches to the front instead of duplicating them
+- [x] show recent searches in the empty focused header search
+- [x] show recent-search controls on the empty Search page
+- [x] re-run, remove one, and clear all recent searches
+- [x] no new database migration
 
 ## Remaining v1.4.x
 
-- [ ] search-history controls
 - [ ] stronger language/genre/status preferences
 - [ ] improve Hot / Popular / Trending
 

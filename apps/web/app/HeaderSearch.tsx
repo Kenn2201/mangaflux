@@ -11,6 +11,15 @@ import {
 import { usePathname, useRouter } from "next/navigation";
 import type { MangaTileItem } from "./MangaTile";
 import { reliableFetch } from "../lib/reliableFetch";
+import {
+  clearSearchHistory,
+  readSearchHistory,
+  recordSearchHistory,
+  removeSearchHistory,
+  SEARCH_HISTORY_EVENT,
+  SEARCH_QUERY_EVENT,
+  type SearchHistoryItem
+} from "../lib/searchHistory";
 
 type SearchPayload = {
   items: MangaTileItem[];
@@ -22,9 +31,41 @@ export default function HeaderSearch() {
   const shellRef = useRef<HTMLDivElement | null>(null);
   const [query, setQuery] = useState("");
   const [items, setItems] = useState<MangaTileItem[]>([]);
+  const [recentSearches, setRecentSearches] = useState<SearchHistoryItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [focused, setFocused] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+
+  useEffect(() => {
+    function syncHistory() {
+      setRecentSearches(readSearchHistory());
+    }
+
+    syncHistory();
+    window.addEventListener("storage", syncHistory);
+    window.addEventListener(SEARCH_HISTORY_EVENT, syncHistory);
+
+    return () => {
+      window.removeEventListener("storage", syncHistory);
+      window.removeEventListener(SEARCH_HISTORY_EVENT, syncHistory);
+    };
+  }, []);
+
+  useEffect(() => {
+    function syncQuery(event: Event) {
+      const value = (event as CustomEvent<string>).detail;
+
+      if (typeof value === "string") {
+        setQuery(value.slice(0, 120));
+      }
+    }
+
+    window.addEventListener(SEARCH_QUERY_EVENT, syncQuery);
+    return () => {
+      window.removeEventListener(SEARCH_QUERY_EVENT, syncQuery);
+    };
+  }, []);
 
   useEffect(() => {
     if (pathname !== "/search") return;
@@ -38,13 +79,22 @@ export default function HeaderSearch() {
   }, [pathname]);
 
   useEffect(() => {
+    if (focused && !query.trim()) {
+      setOpen(recentSearches.length > 0);
+    }
+  }, [focused, query, recentSearches.length]);
+
+  useEffect(() => {
     const value = query.trim();
 
     if (value.length < 2) {
       setItems([]);
-      setOpen(false);
       setLoading(false);
       setActiveIndex(-1);
+
+      if (value.length > 0) {
+        setOpen(false);
+      }
       return;
     }
 
@@ -97,6 +147,7 @@ export default function HeaderSearch() {
         !shellRef.current.contains(event.target as Node)
       ) {
         setOpen(false);
+        setFocused(false);
       }
     }
 
@@ -111,12 +162,30 @@ export default function HeaderSearch() {
     const value = query.trim().slice(0, 120);
     if (!value) return;
 
+    recordSearchHistory(value);
+    setOpen(false);
+    router.push(`/search?q=${encodeURIComponent(value)}`);
+  }
+
+  function openSuggestion(item: MangaTileItem) {
+    const value = query.trim().slice(0, 120);
+
+    if (value) recordSearchHistory(value);
+    setOpen(false);
+    router.push(
+      `/manga/${item.id}?q=${encodeURIComponent(value)}`
+    );
+  }
+
+  function runRecent(value: string) {
+    recordSearchHistory(value);
+    setQuery(value);
     setOpen(false);
     router.push(`/search?q=${encodeURIComponent(value)}`);
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-    if (!open || items.length === 0) {
+    if (!open || items.length === 0 || query.trim().length < 2) {
       if (event.key === "Escape") setOpen(false);
       return;
     }
@@ -140,13 +209,14 @@ export default function HeaderSearch() {
 
     if (event.key === "Enter" && activeIndex >= 0) {
       event.preventDefault();
-      const item = items[activeIndex];
-      setOpen(false);
-      router.push(
-        `/manga/${item.id}?q=${encodeURIComponent(query.trim())}`
-      );
+      openSuggestion(items[activeIndex]);
     }
   }
+
+  const showRecent =
+    open && !query.trim() && recentSearches.length > 0;
+  const showSuggestions =
+    open && query.trim().length >= 2;
 
   return (
     <div className="header-search-shell" ref={shellRef}>
@@ -168,7 +238,7 @@ export default function HeaderSearch() {
           role="combobox"
           aria-label="Search manga"
           aria-autocomplete="list"
-          aria-expanded={open}
+          aria-expanded={showRecent || showSuggestions}
           aria-controls="mangaflux-search-suggestions"
           aria-activedescendant={
             activeIndex >= 0
@@ -176,9 +246,24 @@ export default function HeaderSearch() {
               : undefined
           }
           placeholder="Search manga…"
-          onChange={(event) => setQuery(event.target.value)}
+          onChange={(event) => {
+            const value = event.target.value;
+            setQuery(value);
+
+            if (!value.trim()) {
+              setOpen(recentSearches.length > 0);
+            } else if (value.trim().length < 2) {
+              setOpen(false);
+            }
+          }}
           onFocus={() => {
-            if (items.length) setOpen(true);
+            setFocused(true);
+
+            if (!query.trim() && recentSearches.length) {
+              setOpen(true);
+            } else if (items.length) {
+              setOpen(true);
+            }
           }}
           onKeyDown={onKeyDown}
         />
@@ -188,59 +273,106 @@ export default function HeaderSearch() {
         ) : null}
       </form>
 
-      {open ? (
+      {showRecent || showSuggestions ? (
         <div
           className="search-suggestions"
           id="mangaflux-search-suggestions"
-          role="listbox"
+          role={showSuggestions ? "listbox" : undefined}
         >
-          {items.map((item, index) => {
-            const meta = [
-              "Manga",
-              item.year ? String(item.year) : undefined,
-              item.tags?.[0]
-            ].filter(Boolean);
+          {showRecent ? (
+            <div className="search-recent">
+              <div className="search-recent-heading">
+                <span>Recent searches</span>
+                <button
+                  type="button"
+                  onClick={() => clearSearchHistory()}
+                >
+                  Clear all
+                </button>
+              </div>
 
-            return (
-              <Link
-                key={item.id}
-                className={`search-suggestion ${
-                  index === activeIndex ? "is-active" : ""
-                }`}
-                id={`mangaflux-search-option-${index}`}
-                href={`/manga/${item.id}?q=${encodeURIComponent(query.trim())}`}
-                role="option"
-                aria-selected={index === activeIndex}
-                onClick={() => setOpen(false)}
-              >
-                <div className="search-suggestion-cover">
-                  {item.coverUrl ? (
-                    <img
-                      src={item.coverUrl}
-                      alt=""
-                      referrerPolicy="no-referrer"
-                    />
-                  ) : (
-                    <span />
-                  )}
+              {recentSearches.map((item) => (
+                <div
+                  className="search-recent-row"
+                  key={item.query.toLocaleLowerCase()}
+                >
+                  <button
+                    type="button"
+                    className="search-recent-run"
+                    onClick={() => runRecent(item.query)}
+                  >
+                    <span aria-hidden="true">⌕</span>
+                    <strong>{item.query}</strong>
+                  </button>
+                  <button
+                    type="button"
+                    className="search-recent-remove"
+                    aria-label={`Remove ${item.query} from search history`}
+                    onClick={() => removeSearchHistory(item.query)}
+                  >
+                    ×
+                  </button>
                 </div>
+              ))}
+            </div>
+          ) : null}
 
-                <div>
-                  <strong>{item.title}</strong>
-                  <span>{meta.join(" · ")}</span>
-                </div>
-              </Link>
-            );
-          })}
+          {showSuggestions
+            ? items.map((item, index) => {
+                const meta = [
+                  "Manga",
+                  item.year ? String(item.year) : undefined,
+                  item.tags?.[0]
+                ].filter(Boolean);
 
-          <button
-            className="search-all-button"
-            type="button"
-            onClick={() => goToResults()}
-          >
-            Search all results for “{query.trim()}”
-            <span aria-hidden="true">→</span>
-          </button>
+                return (
+                  <Link
+                    key={item.id}
+                    className={`search-suggestion ${
+                      index === activeIndex ? "is-active" : ""
+                    }`}
+                    id={`mangaflux-search-option-${index}`}
+                    href={`/manga/${item.id}?q=${encodeURIComponent(
+                      query.trim()
+                    )}`}
+                    role="option"
+                    aria-selected={index === activeIndex}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      openSuggestion(item);
+                    }}
+                  >
+                    <div className="search-suggestion-cover">
+                      {item.coverUrl ? (
+                        <img
+                          src={item.coverUrl}
+                          alt=""
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <span />
+                      )}
+                    </div>
+
+                    <div>
+                      <strong>{item.title}</strong>
+                      <span>{meta.join(" · ")}</span>
+                    </div>
+                  </Link>
+                );
+              })
+            : null}
+
+          {showSuggestions ? (
+            <button
+              className="search-all-button"
+              type="button"
+              onClick={() => goToResults()}
+            >
+              Search all results for “{query.trim()}”
+              <span aria-hidden="true">→</span>
+            </button>
+          ) : null}
         </div>
       ) : null}
     </div>
