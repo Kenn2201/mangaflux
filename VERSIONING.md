@@ -30,28 +30,27 @@ Before merging into `main`:
 
 ## Branch workflow
 
-MangaFlux development uses:
+MangaFlux development uses exactly two persistent branches for project work:
 
 - `main`: deployable production and the PR target.
-- `kenn/develop`: a clean development baseline that is synchronized to merged `main`, not a branch for repeated incremental pushes.
-- temporary `kenn/work-*` branches: isolated in-progress implementation branches.
+- `kenn/develop`: the single development branch for implementation, fixes, documentation, and release preparation.
 
 Workflow:
 
 ~~~text
 main
   ↓
-temporary kenn/work-* branch
+kenn/develop
   ↓
 complete implementation + fixes + docs
   ↓
-one final PR to main
+one PR to main
   ↓
 CI gate
   ↓
 main
   ↓
-sync kenn/develop to main
+reset kenn/develop to main
 ~~~
 
-Do not push every implementation step to `kenn/develop`. Keep intermediate commits on the temporary work branch and open the PR only when the release slice is complete enough for the full gate.
+Do not create temporary `kenn/work-*`, version-specific, or fix branches for normal MangaFlux development. Keep the full release on `kenn/develop`, open one complete PR to `main`, merge only after the CI gate passes, then reset `kenn/develop` to the merged `main` head.
