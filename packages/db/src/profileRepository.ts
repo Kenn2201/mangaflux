@@ -12,6 +12,10 @@ export async function updateUserProfile(
     showPublicActivity: boolean;
     showJoinedDate: boolean;
     notificationEmailEnabled: boolean;
+    notificationQuietHoursEnabled: boolean;
+    notificationQuietHoursStart: string;
+    notificationQuietHoursEnd: string;
+    notificationTimeZone: string;
   }
 ) {
   const [user] = await db
@@ -23,6 +27,10 @@ export async function updateUserProfile(
       showPublicActivity: input.showPublicActivity,
       showJoinedDate: input.showJoinedDate,
       notificationEmailEnabled: input.notificationEmailEnabled,
+      notificationQuietHoursEnabled: input.notificationQuietHoursEnabled,
+      notificationQuietHoursStart: input.notificationQuietHoursStart,
+      notificationQuietHoursEnd: input.notificationQuietHoursEnd,
+      notificationTimeZone: input.notificationTimeZone,
       updatedAt: new Date()
     })
     .where(eq(users.id, userId))
@@ -36,6 +44,10 @@ export async function updateUserProfile(
       showJoinedDate: users.showJoinedDate,
       communityRestricted: users.communityRestricted,
       notificationEmailEnabled: users.notificationEmailEnabled,
+      notificationQuietHoursEnabled: users.notificationQuietHoursEnabled,
+      notificationQuietHoursStart: users.notificationQuietHoursStart,
+      notificationQuietHoursEnd: users.notificationQuietHoursEnd,
+      notificationTimeZone: users.notificationTimeZone,
       emailVerifiedAt: users.emailVerifiedAt,
       createdAt: users.createdAt
     });

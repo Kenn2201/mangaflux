@@ -7,8 +7,18 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- v1.3.7+ account quiet-hours controls
-- optional Discord/webhook delivery only after core notification delivery is stable
+- v1.3.8+ delivery maturity / optional external integrations after core notifications remain stable
+
+## 1.3.7 - 2026-09-26 — Notification Quiet Hours
+
+### Delivery controls
+- Added persisted account-level quiet hours.
+- Added local start/end time and IANA time-zone settings.
+- Added device-time-zone helper in Account settings.
+- Quiet hours suppress new-chapter email without removing durable inbox events.
+- Added cross-midnight quiet-window handling.
+- Added emailQuietHours checker reporting.
+- Added migration 0013_v137_notification_quiet_hours.
 
 ## 1.3.6 - 2026-09-26 — Notification Delivery Safety
 

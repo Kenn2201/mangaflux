@@ -54,6 +54,10 @@ export async function createUser(
       showJoinedDate: users.showJoinedDate,
       communityRestricted: users.communityRestricted,
       notificationEmailEnabled: users.notificationEmailEnabled,
+      notificationQuietHoursEnabled: users.notificationQuietHoursEnabled,
+      notificationQuietHoursStart: users.notificationQuietHoursStart,
+      notificationQuietHoursEnd: users.notificationQuietHoursEnd,
+      notificationTimeZone: users.notificationTimeZone,
       emailVerifiedAt: users.emailVerifiedAt,
       createdAt: users.createdAt
     });
@@ -493,7 +497,11 @@ export async function getNotificationDeliveryUser(
       id: users.id,
       email: users.email,
       emailVerifiedAt: users.emailVerifiedAt,
-      notificationEmailEnabled: users.notificationEmailEnabled
+      notificationEmailEnabled: users.notificationEmailEnabled,
+      notificationQuietHoursEnabled: users.notificationQuietHoursEnabled,
+      notificationQuietHoursStart: users.notificationQuietHoursStart,
+      notificationQuietHoursEnd: users.notificationQuietHoursEnd,
+      notificationTimeZone: users.notificationTimeZone
     })
     .from(users)
     .where(eq(users.id, userId))

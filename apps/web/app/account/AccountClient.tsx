@@ -24,6 +24,10 @@ type Session = {
     showJoinedDate?: boolean;
     communityRestricted?: boolean;
     notificationEmailEnabled?: boolean;
+    notificationQuietHoursEnabled?: boolean;
+    notificationQuietHoursStart?: string;
+    notificationQuietHoursEnd?: string;
+    notificationTimeZone?: string;
     emailVerifiedAt?: string | null;
     createdAt: string;
     role?: "user" | "admin";
@@ -150,6 +154,13 @@ export default function AccountClient() {
   const [showJoinedDate, setShowJoinedDate] = useState(true);
   const [notificationEmailEnabled, setNotificationEmailEnabled] =
     useState(true);
+  const [notificationQuietHoursEnabled, setNotificationQuietHoursEnabled] =
+    useState(false);
+  const [notificationQuietHoursStart, setNotificationQuietHoursStart] =
+    useState("22:00");
+  const [notificationQuietHoursEnd, setNotificationQuietHoursEnd] =
+    useState("07:00");
+  const [notificationTimeZone, setNotificationTimeZone] = useState("UTC");
   const [avatarDraft, setAvatarDraft] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [needsVerification, setNeedsVerification] = useState(false);
@@ -193,6 +204,10 @@ export default function AccountClient() {
       setShowPublicActivity(true);
       setShowJoinedDate(true);
       setNotificationEmailEnabled(true);
+      setNotificationQuietHoursEnabled(false);
+      setNotificationQuietHoursStart("22:00");
+      setNotificationQuietHoursEnd("07:00");
+      setNotificationTimeZone("UTC");
       setAvatarDraft(null);
       return;
     }
@@ -203,6 +218,10 @@ export default function AccountClient() {
     setShowPublicActivity(user.showPublicActivity ?? true);
     setShowJoinedDate(user.showJoinedDate ?? true);
     setNotificationEmailEnabled(user.notificationEmailEnabled ?? true);
+    setNotificationQuietHoursEnabled(user.notificationQuietHoursEnabled ?? false);
+    setNotificationQuietHoursStart(user.notificationQuietHoursStart ?? "22:00");
+    setNotificationQuietHoursEnd(user.notificationQuietHoursEnd ?? "07:00");
+    setNotificationTimeZone(user.notificationTimeZone ?? "UTC");
     setAvatarDraft(user.avatarDataUrl ?? null);
   }, [session]);
 
@@ -394,6 +413,10 @@ export default function AccountClient() {
     setShowPublicActivity(user.showPublicActivity ?? true);
     setShowJoinedDate(user.showJoinedDate ?? true);
     setNotificationEmailEnabled(user.notificationEmailEnabled ?? true);
+    setNotificationQuietHoursEnabled(user.notificationQuietHoursEnabled ?? false);
+    setNotificationQuietHoursStart(user.notificationQuietHoursStart ?? "22:00");
+    setNotificationQuietHoursEnd(user.notificationQuietHoursEnd ?? "07:00");
+    setNotificationTimeZone(user.notificationTimeZone ?? "UTC");
     setAvatarDraft(user.avatarDataUrl ?? null);
     setProfileEditing(false);
   }
@@ -446,7 +469,11 @@ export default function AccountClient() {
           bio: profileBio.trim() || null,
           showPublicActivity,
           showJoinedDate,
-          notificationEmailEnabled
+          notificationEmailEnabled,
+          notificationQuietHoursEnabled,
+          notificationQuietHoursStart,
+          notificationQuietHoursEnd,
+          notificationTimeZone
         })
       });
 
@@ -726,7 +753,7 @@ export default function AccountClient() {
                   <span>
                     <strong>Email notifications</strong>
                     <small>
-                      Allow MangaFlux to email you about future followed-manga updates. No notification emails are sent yet.
+                      Allow MangaFlux to email you when followed manga with Alerts on receive a new chapter.
                     </small>
                   </span>
                   <input
@@ -737,6 +764,77 @@ export default function AccountClient() {
                     }
                   />
                 </label>
+
+                <div className="notification-quiet-hours">
+                  <label className="profile-privacy-toggle">
+                    <span>
+                      <strong>Quiet hours</strong>
+                      <small>
+                        Keep inbox notifications, but suppress new-chapter emails during this local time window.
+                      </small>
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={notificationQuietHoursEnabled}
+                      disabled={!notificationEmailEnabled}
+                      onChange={(event) => {
+                        const enabled = event.target.checked;
+                        setNotificationQuietHoursEnabled(enabled);
+                        if (enabled && notificationTimeZone === "UTC") {
+                          setNotificationTimeZone(
+                            Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"
+                          );
+                        }
+                      }}
+                    />
+                  </label>
+
+                  {notificationQuietHoursEnabled && notificationEmailEnabled ? (
+                    <div className="notification-quiet-grid">
+                      <label>
+                        <span>From</span>
+                        <input
+                          type="time"
+                          value={notificationQuietHoursStart}
+                          onChange={(event) =>
+                            setNotificationQuietHoursStart(event.target.value)
+                          }
+                        />
+                      </label>
+                      <label>
+                        <span>Until</span>
+                        <input
+                          type="time"
+                          value={notificationQuietHoursEnd}
+                          onChange={(event) =>
+                            setNotificationQuietHoursEnd(event.target.value)
+                          }
+                        />
+                      </label>
+                      <label>
+                        <span>Time zone</span>
+                        <input
+                          value={notificationTimeZone}
+                          maxLength={64}
+                          onChange={(event) =>
+                            setNotificationTimeZone(event.target.value)
+                          }
+                        />
+                      </label>
+                      <button
+                        className="profile-text-button"
+                        type="button"
+                        onClick={() =>
+                          setNotificationTimeZone(
+                            Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"
+                          )
+                        }
+                      >
+                        Use this device time zone
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
 
                 <p className="device-note">
                   Images are cropped and compressed into a small WebP or JPEG
@@ -813,13 +911,27 @@ export default function AccountClient() {
                   <span>
                     <strong>Email notifications</strong>
                     <small>
-                      Preference groundwork for future Following notifications
+                      New-chapter email delivery for followed manga with Alerts on
                     </small>
                   </span>
                   <strong>
                     {user.notificationEmailEnabled === false
                       ? "Off"
                       : "On"}
+                  </strong>
+                </div>
+
+                <div className="profile-readonly-privacy">
+                  <span>
+                    <strong>Quiet hours</strong>
+                    <small>
+                      {user.notificationQuietHoursEnabled
+                        ? `${user.notificationQuietHoursStart ?? "22:00"}–${user.notificationQuietHoursEnd ?? "07:00"} · ${user.notificationTimeZone ?? "UTC"}`
+                        : "Email quiet hours are disabled"}
+                    </small>
+                  </span>
+                  <strong>
+                    {user.notificationQuietHoursEnabled ? "On" : "Off"}
                   </strong>
                 </div>
 

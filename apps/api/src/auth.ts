@@ -70,6 +70,10 @@ type ProfileBody = {
   showPublicActivity?: boolean;
   showJoinedDate?: boolean;
   notificationEmailEnabled?: boolean;
+  notificationQuietHoursEnabled?: boolean;
+  notificationQuietHoursStart?: string;
+  notificationQuietHoursEnd?: string;
+  notificationTimeZone?: string;
 };
 
 function normalizeEmail(value: unknown) {
@@ -127,6 +131,27 @@ function normalizeBio(value: unknown) {
   }
 
   return bio;
+}
+
+function normalizeQuietTime(value: unknown) {
+  if (typeof value !== "string") return undefined;
+  const time = value.trim();
+  return /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(time)
+    ? time
+    : undefined;
+}
+
+function normalizeTimeZone(value: unknown) {
+  if (typeof value !== "string") return undefined;
+  const timeZone = value.trim();
+  if (!timeZone || timeZone.length > 64) return undefined;
+
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone }).format(new Date());
+    return timeZone;
+  } catch {
+    return undefined;
+  }
 }
 
 function normalizeAvatarDataUrl(value: unknown) {
@@ -636,6 +661,10 @@ export function registerAuthRoutes(
           showJoinedDate: session.showJoinedDate,
           communityRestricted: session.communityRestricted,
           notificationEmailEnabled: session.notificationEmailEnabled,
+          notificationQuietHoursEnabled: session.notificationQuietHoursEnabled,
+          notificationQuietHoursStart: session.notificationQuietHoursStart,
+          notificationQuietHoursEnd: session.notificationQuietHoursEnd,
+          notificationTimeZone: session.notificationTimeZone,
           emailVerifiedAt: session.emailVerifiedAt,
           createdAt: session.createdAt,
           role: roleForEmail(session.email)
@@ -687,6 +716,24 @@ export function registerAuthRoutes(
           : typeof request.body.notificationEmailEnabled === "boolean"
             ? request.body.notificationEmailEnabled
             : undefined;
+      const notificationQuietHoursEnabled =
+        request.body?.notificationQuietHoursEnabled === undefined
+          ? session.notificationQuietHoursEnabled ?? false
+          : typeof request.body.notificationQuietHoursEnabled === "boolean"
+            ? request.body.notificationQuietHoursEnabled
+            : undefined;
+      const notificationQuietHoursStart =
+        request.body?.notificationQuietHoursStart === undefined
+          ? session.notificationQuietHoursStart ?? "22:00"
+          : normalizeQuietTime(request.body.notificationQuietHoursStart);
+      const notificationQuietHoursEnd =
+        request.body?.notificationQuietHoursEnd === undefined
+          ? session.notificationQuietHoursEnd ?? "07:00"
+          : normalizeQuietTime(request.body.notificationQuietHoursEnd);
+      const notificationTimeZone =
+        request.body?.notificationTimeZone === undefined
+          ? session.notificationTimeZone ?? "UTC"
+          : normalizeTimeZone(request.body.notificationTimeZone);
 
       if (
         displayName === undefined ||
@@ -694,12 +741,16 @@ export function registerAuthRoutes(
         bio === undefined ||
         showPublicActivity === undefined ||
         showJoinedDate === undefined ||
-        notificationEmailEnabled === undefined
+        notificationEmailEnabled === undefined ||
+        notificationQuietHoursEnabled === undefined ||
+        notificationQuietHoursStart === undefined ||
+        notificationQuietHoursEnd === undefined ||
+        notificationTimeZone === undefined
       ) {
         return reply.code(400).send({
           error: "INVALID_REQUEST",
           message:
-            "Use a 2-32 character display name, a bio up to 280 characters, valid privacy settings, and a small WebP or JPEG avatar."
+            "Use valid profile/privacy settings, HH:MM quiet hours, a valid time zone, and a small WebP or JPEG avatar."
         });
       }
 
@@ -712,7 +763,11 @@ export function registerAuthRoutes(
           bio,
           showPublicActivity,
           showJoinedDate,
-          notificationEmailEnabled
+          notificationEmailEnabled,
+          notificationQuietHoursEnabled,
+          notificationQuietHoursStart,
+          notificationQuietHoursEnd,
+          notificationTimeZone
         }
       );
 

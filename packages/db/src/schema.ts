@@ -74,6 +74,18 @@ export const users = pgTable(
     notificationEmailEnabled: boolean("notification_email_enabled")
       .notNull()
       .default(true),
+    notificationQuietHoursEnabled: boolean("notification_quiet_hours_enabled")
+      .notNull()
+      .default(false),
+    notificationQuietHoursStart: text("notification_quiet_hours_start")
+      .notNull()
+      .default("22:00"),
+    notificationQuietHoursEnd: text("notification_quiet_hours_end")
+      .notNull()
+      .default("07:00"),
+    notificationTimeZone: text("notification_time_zone")
+      .notNull()
+      .default("UTC"),
     emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
