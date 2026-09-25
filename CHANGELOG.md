@@ -7,9 +7,20 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- v1.3.3+ controlled new-chapter event generation/checkpointing
-- notification inbox/history after generation is stable
+- v1.3.4+ notification inbox/history
 - global Email notifications integration as a delivery gate
+- quiet/disable controls and delivery rate limiting
+
+## 1.3.3 - 2026-09-26 — Controlled Notification Generation
+
+### Generation/checkpointing
+- Added per-user/per-manga notification checkpoints.
+- First observation seeds the current latest chapter and does not backfill a false "new" alert.
+- A later latest-chapter change creates one idempotent new-chapter event and advances the checkpoint.
+- Only followed manga with per-manga Alerts on are checked.
+- Added a fail-closed internal check endpoint protected by NOTIFICATION_CRON_SECRET.
+- Added conservative rate limiting and aggregate check counters.
+- No inbox UI or email delivery is enabled yet.
 
 ## 1.3.2 - 2026-09-26 — Notification Event Foundation
 

@@ -9,6 +9,7 @@ import type { MangaFluxDatabase } from "./client.js";
 import {
   bookmarks,
   emailVerificationTokens,
+  notificationCheckpoints,
   notificationEvents,
   passwordResetTokens,
   readerImports,
@@ -425,6 +426,61 @@ export async function getNotificationEligibleFollows(
       )
     )
     .orderBy(desc(userFollows.createdAt));
+}
+
+export async function getNotificationCheckpoint(
+  db: MangaFluxDatabase,
+  userId: string,
+  source: string,
+  mangaId: string
+) {
+  const [checkpoint] = await db
+    .select()
+    .from(notificationCheckpoints)
+    .where(
+      and(
+        eq(notificationCheckpoints.userId, userId),
+        eq(notificationCheckpoints.source, source),
+        eq(notificationCheckpoints.mangaId, mangaId)
+      )
+    )
+    .limit(1);
+
+  return checkpoint ?? null;
+}
+
+export async function upsertNotificationCheckpoint(
+  db: MangaFluxDatabase,
+  input: {
+    userId: string;
+    source: string;
+    mangaId: string;
+    lastChapterId: string;
+    lastPublishedAt?: Date | null;
+  }
+) {
+  const [checkpoint] = await db
+    .insert(notificationCheckpoints)
+    .values({
+      ...input,
+      lastPublishedAt: input.lastPublishedAt ?? null,
+      checkedAt: new Date()
+    })
+    .onConflictDoUpdate({
+      target: [
+        notificationCheckpoints.userId,
+        notificationCheckpoints.source,
+        notificationCheckpoints.mangaId
+      ],
+      set: {
+        lastChapterId: input.lastChapterId,
+        lastPublishedAt: input.lastPublishedAt ?? null,
+        checkedAt: new Date()
+      }
+    })
+    .returning();
+
+  return checkpoint;
 }
 
 export async function createNewChapterNotificationEvent(

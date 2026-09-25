@@ -21,7 +21,8 @@ v1.2.5  ████████████████████  ✅
 v1.3.0  ████████████████████  ✅
 v1.3.1  ████████████████████  ✅
 v1.3.2  ████████████████████  ✅
-v1.3.3+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
+v1.3.3  ████████████████████  ✅
+v1.3.4+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
 v1.3.x  Following & Notifications
 v1.4.x  Discovery & Personalization
 v1.5+   Product Polish
@@ -31,7 +32,7 @@ v2.x    Multi-Source + Platform Expansion
 v3.x    Advanced MangaFlux
 ~~~
 
-**v1.1.x — Library & Reading Quality** and **v1.2.x — Profiles & Community Depth** are signed off after physical QA. MangaFlux is now in **v1.3.x — Following & Notifications**. **v1.3.2 — Notification Event Foundation** is complete, and v1.3.3+ continues with controlled new-chapter event generation before inbox/delivery work.
+**v1.1.x — Library & Reading Quality** and **v1.2.x — Profiles & Community Depth** are signed off after physical QA. MangaFlux is now in **v1.3.x — Following & Notifications**. **v1.3.3 — Controlled Notification Generation** is complete, and v1.3.4+ continues with notification inbox/history before delivery work.
 
 ---
 
@@ -353,11 +354,21 @@ Introduce a proper following system separate from bookmarks.
 - Repository primitives for event creation and chronological listing
 - No polling job, inbox UI, or delivery side effects yet
 
-### ➡️ v1.3.3+ — Notification Generation & Delivery — NEXT
+### ✅ v1.3.3 — Controlled Notification Generation
+
+- Per-user/per-manga latest-chapter checkpoints
+- First observation seeds state without historical notification spam
+- Later latest-chapter changes create idempotent new-chapter events
+- Checkpoints advance after a successful changed-chapter observation
+- Only per-manga Alerts on follows participate
+- Internal checker is fail-closed behind NOTIFICATION_CRON_SECRET
+- Conservative checker rate limiting and aggregate counters
+- No inbox UI or email delivery yet
+
+### ➡️ v1.3.4+ — Notification Inbox & Delivery — NEXT
 
 Continue in focused slices:
 
-- controlled new-chapter event generation/checkpointing
 - notification inbox and history
 - global Email notifications preference integration
 - quiet / disable controls
