@@ -14,7 +14,8 @@ v1.1.4  ████████████████████  ✅
 v1.1.5  ████████████████████  ✅
 v1.2.0  ████████████████████  ✅
 v1.2.1  ████████████████████  ✅
-v1.2.2+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
+v1.2.2  ████████████████████  ✅
+v1.2.3+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
 v1.3.x  Following & Notifications
 v1.4.x  Discovery & Personalization
 v1.5+   Product Polish
@@ -24,7 +25,7 @@ v2.x    Multi-Source + Platform Expansion
 v3.x    Advanced MangaFlux
 ~~~
 
-**v1.1.x — Library & Reading Quality is signed off.** MangaFlux is now in **v1.2.x — Profiles & Community Depth**. **v1.2.1 — Profile Editing & Mobile Modal Polish** is complete, and v1.2.2+ continues community-depth work.
+**v1.1.x — Library & Reading Quality is signed off.** MangaFlux is now in **v1.2.x — Profiles & Community Depth**. **v1.2.2 — Activity Browsing & Discussion UX** is complete, and v1.2.3+ continues the remaining profile/privacy/administration work.
 
 ---
 
@@ -230,17 +231,36 @@ The v1.1.x reading-quality phase is complete. Regression-only fixes can still be
 
 ---
 
-### ➡️ v1.2.2+ — Community Depth — NEXT
+### ✅ v1.2.2 — Activity Browsing & Discussion UX
+
+#### Public activity browsing
+- Paginated public-profile comment history beyond the recent preview
+- Server-side privacy check on every activity page request
+- Newer / Older navigation inside the public profile modal
+- Public activity continues to exclude email and private account data
+
+#### Discussion UX
+- Newest / Oldest comment sorting
+- Direction-aware comment pagination labels
+- New posts return to Newest-first page one
+- Deleting the final comment on a page safely moves to the prior page
+- Signed-in reader's own comments are marked You
+
+#### Reaction clarity
+- Total reaction summary
+- Selected reaction summary for signed-in readers
+- Accessible live status around reaction changes
+
+---
+
+### ➡️ v1.2.3+ — Community Depth — NEXT
 
 Continue the v1.2.x phase with focused slices such as:
 
-- better profile activity browsing
-- improved activity/history presentation
-- better comment UX
-- better reaction UX
 - broader user/privacy preferences
 - notification/privacy preference groundwork
 - stronger community administration and moderation
+- additional activity presentation improvements discovered through QA
 - keep credentials and private account information protected
 
 ---

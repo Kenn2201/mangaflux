@@ -12,6 +12,7 @@ import {
   getSessionUser,
   getUserCommunityReaction,
   listCommunityComments,
+  listCommunityProfileActivity,
   setCommunityReaction
 } from "@mangaflux/db";
 import type { MangaFluxDatabase } from "@mangaflux/db";
@@ -132,8 +133,58 @@ export function registerCommunityRoutes(
   );
 
   app.get<{
-    Params: { targetType: string; targetId: string };
+    Params: { userId: string };
     Querystring: { limit?: string; offset?: string };
+  }>(
+    "/api/community/users/:userId/activity",
+    { preHandler: limits.read },
+    async (request, reply) => {
+      if (!requireAuthProxy(request, reply, authProxySecret)) return;
+      if (!databaseRequired(database, reply)) return;
+
+      if (!UUID_RE.test(request.params.userId)) {
+        return reply.code(400).send({
+          error: "INVALID_REQUEST",
+          message: "Invalid community profile."
+        });
+      }
+
+      const rawLimit = Number(request.query.limit ?? "10");
+      const rawOffset = Number(request.query.offset ?? "0");
+      const limit =
+        Number.isInteger(rawLimit) && rawLimit >= 1 && rawLimit <= 25
+          ? rawLimit
+          : 10;
+      const offset =
+        Number.isInteger(rawOffset) && rawOffset >= 0 && rawOffset <= 10_000
+          ? rawOffset
+          : 0;
+
+      const activity = await listCommunityProfileActivity(
+        database,
+        request.params.userId,
+        limit,
+        offset
+      );
+
+      if (!activity) {
+        return reply.code(404).send({
+          error: "NOT_FOUND",
+          message: "Community profile not found."
+        });
+      }
+
+      return activity;
+    }
+  );
+
+  app.get<{
+    Params: { targetType: string; targetId: string };
+    Querystring: {
+      limit?: string;
+      offset?: string;
+      order?: string;
+    };
   }>(
     "/api/community/:targetType/:targetId",
     { preHandler: limits.read },
@@ -160,6 +211,8 @@ export function registerCommunityRoutes(
         Number.isInteger(rawOffset) && rawOffset >= 0 && rawOffset <= 10_000
           ? rawOffset
           : 0;
+      const order =
+        request.query.order === "asc" ? "asc" : "desc";
 
       const session = await optionalSession(request, database);
 
@@ -169,7 +222,8 @@ export function registerCommunityRoutes(
           targetType,
           targetId,
           limit,
-          offset
+          offset,
+          order
         ),
         getCommunityReactionSummary(database, targetType, targetId),
         session
@@ -186,6 +240,7 @@ export function registerCommunityRoutes(
         ...comments,
         limit,
         offset,
+        order,
         reactions,
         viewerReaction,
         viewerUserId: session?.userId ?? null,

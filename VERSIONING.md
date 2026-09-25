@@ -4,7 +4,7 @@ MangaFlux follows Semantic Versioning.
 
 ## Current version
 
-**v1.2.1 — Profile Editing & Mobile Modal Polish**
+**v1.2.2 — Activity Browsing & Discussion UX**
 
 - `PATCH` = compatible bug/security/reliability fixes and focused compatible release slices
 - `MINOR` = compatible larger feature milestones

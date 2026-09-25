@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v1.2.1--Profile_Editing_Mobile_Modal_Polish-indigo.svg)
+![Version](https://img.shields.io/badge/version-v1.2.2--Activity_Browsing_Discussion_UX-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v1.2.1 — Profile Editing & Mobile Modal Polish**
+**v1.2.2 — Activity Browsing & Discussion UX**
 
-MangaFlux V1 remains a stable single-source MangaDex product. v1.2.1 polishes the first Profiles & Community Depth release with an explicit edit workflow and reliable mobile profile-modal return behavior.
+MangaFlux V1 remains a stable single-source MangaDex product. v1.2.2 deepens public activity browsing and makes manga/chapter discussions easier to navigate without crossing into the separate Following & Notifications phase.
 
 ### Library improvements
 
@@ -49,15 +49,16 @@ The settings sheet is available from manga chapter lists and inside the immersiv
 - an alternate-release count is shown when duplicates are collapsed
 - readers can opt back into all alternate releases
 
-### v1.2.1 refinements
+### v1.2.2 refinements
 
-- community profile settings are read-only by default
-- Edit profile explicitly enters the editable state
-- Save profile returns the card to read-only mode
-- Cancel discards draft edits and restores the saved profile state
-- mobile public-profile modals preserve the exact underlying scroll position when opened and closed
-- closing a public profile restores focus without scrolling the manga/comment page
-- v1.2.0 bio, privacy, manga navigation, and v1.1.x reader behavior remain unchanged
+- public profiles can browse paginated comment activity beyond the initial recent-comment preview
+- public-activity pagination rechecks the server-side privacy setting before returning activity
+- manga/chapter discussions can switch between Newest and Oldest ordering
+- posting a new comment returns the discussion to Newest so the new post is immediately visible
+- deleting the final comment on a page safely moves back to the previous available page
+- signed-in readers see a clear You badge on their own comments
+- reaction totals and the reader's selected reaction are summarized with accessible live status
+- v1.2.1 profile editing and mobile modal scroll restoration remain unchanged
 
 ### Architecture boundary
 

@@ -8,6 +8,14 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 
+type PublicCommentActivity = {
+  id: string;
+  targetType: "manga" | "chapter";
+  targetId: string;
+  body: string;
+  createdAt: string;
+};
+
 type PublicProfile = {
   user: {
     id: string;
@@ -21,14 +29,18 @@ type PublicProfile = {
     comments: number;
     reactions: number;
   };
-  recentComments: Array<{
-    id: string;
-    targetType: "manga" | "chapter";
-    targetId: string;
-    body: string;
-    createdAt: string;
-  }>;
+  recentComments: PublicCommentActivity[];
 };
+
+type PublicActivityPayload = {
+  activityVisible: boolean;
+  items: PublicCommentActivity[];
+  total: number;
+  limit: number;
+  offset: number;
+};
+
+const ACTIVITY_LIMIT = 8;
 
 function formatJoined(value: string) {
   const date = new Date(value);
@@ -51,6 +63,40 @@ function formatDate(value: string) {
   }).format(date);
 }
 
+function ActivityList({
+  items,
+  onNavigate
+}: {
+  items: PublicCommentActivity[];
+  onNavigate: () => void;
+}) {
+  return (
+    <div className="public-profile-comment-list">
+      {items.map((comment) => (
+        <Link
+          key={comment.id}
+          href={
+            comment.targetType === "manga"
+              ? `/manga/${comment.targetId}`
+              : `/read/${comment.targetId}`
+          }
+          onClick={onNavigate}
+        >
+          <div>
+            <strong>
+              {comment.targetType === "manga"
+                ? "Manga discussion"
+                : "Chapter discussion"}
+            </strong>
+            <span>{formatDate(comment.createdAt)}</span>
+          </div>
+          <p>{comment.body}</p>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 export default function PublicProfileModal({
   userId,
   onClose
@@ -62,11 +108,72 @@ export default function PublicProfileModal({
   const [data, setData] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [activityMode, setActivityMode] = useState(false);
+  const [activityData, setActivityData] =
+    useState<PublicActivityPayload | null>(null);
+  const [activityLoading, setActivityLoading] = useState(false);
+  const [activityMessage, setActivityMessage] = useState("");
+
+  async function loadActivity(nextOffset: number) {
+    if (!userId || activityLoading) return;
+
+    setActivityLoading(true);
+    setActivityMessage("");
+
+    try {
+      const response = await fetch(
+        `/api/community/users/${encodeURIComponent(
+          userId
+        )}/activity?limit=${ACTIVITY_LIMIT}&offset=${nextOffset}`,
+        { cache: "no-store" }
+      );
+
+      const payload = (await response.json().catch(() => null)) as
+        | (PublicActivityPayload & { message?: string })
+        | null;
+
+      if (!response.ok || !payload) {
+        throw new Error(
+          payload?.message ?? "Activity is temporarily unavailable."
+        );
+      }
+
+      if (!payload.activityVisible) {
+        setData((current) =>
+          current
+            ? {
+                ...current,
+                activityVisible: false,
+                stats: { comments: 0, reactions: 0 },
+                recentComments: []
+              }
+            : current
+        );
+        setActivityMode(false);
+        setActivityData(null);
+        return;
+      }
+
+      setActivityData(payload);
+      setActivityMode(true);
+    } catch (error) {
+      setActivityMessage(
+        error instanceof Error
+          ? error.message
+          : "Activity is temporarily unavailable."
+      );
+    } finally {
+      setActivityLoading(false);
+    }
+  }
 
   useEffect(() => {
     if (!userId) {
       setData(null);
       setMessage("");
+      setActivityMode(false);
+      setActivityData(null);
+      setActivityMessage("");
       return;
     }
 
@@ -87,6 +194,9 @@ export default function PublicProfileModal({
 
     setLoading(true);
     setMessage("");
+    setActivityMode(false);
+    setActivityData(null);
+    setActivityMessage("");
     body.classList.add("profile-modal-open");
     body.style.position = "fixed";
     body.style.top = `-${scrollY}px`;
@@ -168,6 +278,12 @@ export default function PublicProfileModal({
 
   const name = data?.user.displayName || "MangaFlux Reader";
   const initial = name.trim().charAt(0).toUpperCase() || "R";
+  const activityPage = activityData
+    ? Math.floor(activityData.offset / activityData.limit) + 1
+    : 1;
+  const activityTotalPages = activityData
+    ? Math.max(1, Math.ceil(activityData.total / activityData.limit))
+    : 1;
 
   return createPortal(
     <div className="public-profile-layer">
@@ -231,61 +347,135 @@ export default function PublicProfileModal({
 
             {data.activityVisible ? (
               <>
-            <div className="public-profile-stats">
-              <div>
-                <strong>{data.stats.comments}</strong>
-                <span>Comments</span>
-              </div>
-              <div>
-                <strong>{data.stats.reactions}</strong>
-                <span>Reactions</span>
-              </div>
-            </div>
-
-            <div className="public-profile-activity">
-              <div className="section-heading">
-                <div>
-                  <p className="eyebrow">Activity</p>
-                  <h3>Recent comments</h3>
+                <div className="public-profile-stats">
+                  <div>
+                    <strong>{data.stats.comments}</strong>
+                    <span>Comments</span>
+                  </div>
+                  <div>
+                    <strong>{data.stats.reactions}</strong>
+                    <span>Reactions</span>
+                  </div>
                 </div>
-              </div>
 
-              {data.recentComments.length ? (
-                <div className="public-profile-comment-list">
-                  {data.recentComments.map((comment) => (
-                    <Link
-                      key={comment.id}
-                      href={
-                        comment.targetType === "manga"
-                          ? `/manga/${comment.targetId}`
-                          : `/read/${comment.targetId}`
-                      }
-                      onClick={onClose}
-                    >
-                      <div>
-                        <strong>
-                          {comment.targetType === "manga"
-                            ? "Manga discussion"
-                            : "Chapter discussion"}
-                        </strong>
-                        <span>{formatDate(comment.createdAt)}</span>
+                <div className="public-profile-activity">
+                  <div className="section-heading public-activity-heading">
+                    <div>
+                      <p className="eyebrow">Activity</p>
+                      <h3>
+                        {activityMode ? "Comment history" : "Recent comments"}
+                      </h3>
+                    </div>
+
+                    {data.stats.comments > data.recentComments.length ? (
+                      <button
+                        type="button"
+                        className="public-activity-mode-button"
+                        disabled={activityLoading}
+                        onClick={() => {
+                          if (activityMode) {
+                            setActivityMode(false);
+                            setActivityMessage("");
+                          } else {
+                            void loadActivity(0);
+                          }
+                        }}
+                      >
+                        {activityMode ? "Recent" : "View all"}
+                      </button>
+                    ) : null}
+                  </div>
+
+                  {activityMessage ? (
+                    <p className="community-message">{activityMessage}</p>
+                  ) : null}
+
+                  {activityLoading ? (
+                    <div className="public-activity-loading" aria-busy="true">
+                      Loading activity…
+                    </div>
+                  ) : activityMode ? (
+                    activityData?.items.length ? (
+                      <>
+                        <ActivityList
+                          items={activityData.items}
+                          onNavigate={onClose}
+                        />
+
+                        {activityData.total > activityData.limit ? (
+                          <nav
+                            className="public-activity-pagination"
+                            aria-label="Profile activity pages"
+                          >
+                            <button
+                              type="button"
+                              disabled={
+                                activityData.offset <= 0 ||
+                                activityLoading
+                              }
+                              onClick={() =>
+                                void loadActivity(
+                                  Math.max(
+                                    0,
+                                    activityData.offset -
+                                      activityData.limit
+                                  )
+                                )
+                              }
+                            >
+                              ← Newer
+                            </button>
+
+                            <span>
+                              Page {activityPage} / {activityTotalPages}
+                            </span>
+
+                            <button
+                              type="button"
+                              disabled={
+                                activityData.offset +
+                                  activityData.limit >=
+                                  activityData.total ||
+                                activityLoading
+                              }
+                              onClick={() =>
+                                void loadActivity(
+                                  activityData.offset +
+                                    activityData.limit
+                                )
+                              }
+                            >
+                              Older →
+                            </button>
+                          </nav>
+                        ) : null}
+                      </>
+                    ) : (
+                      <div className="community-empty">
+                        <strong>No comments yet.</strong>
+                        <span>This reader has not posted publicly yet.</span>
                       </div>
-                      <p>{comment.body}</p>
-                    </Link>
-                  ))}
+                    )
+                  ) : data.recentComments.length ? (
+                    <ActivityList
+                      items={data.recentComments}
+                      onNavigate={onClose}
+                    />
+                  ) : (
+                    <div className="community-empty">
+                      <strong>No comments yet.</strong>
+                      <span>This reader has not posted publicly yet.</span>
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="community-empty">
-                  <strong>No comments yet.</strong>
-                  <span>This reader has not posted publicly yet.</span>
-                </div>
-              )}
-            </div>
               </>
             ) : (
               <div className="community-empty public-profile-private">
                 <strong>Activity is private.</strong>
-                <span>This reader chose not to show public activity totals or recent comments.</span>
+                <span>
+                  This reader chose not to show public activity totals or
+                  recent comments.
+                </span>
               </div>
             )}
           </>
