@@ -47,11 +47,21 @@
 - [x] migration defaults for existing reader-preference rows
 - [x] quick Data Saver control uses the synchronized preference path
 
+## v1.1.3 — History Cleanup & Accessibility
+
+- [x] clear history older than 30 days
+- [x] clear history older than 90 days
+- [x] account/device support for age-based cleanup
+- [x] preserve bookmarks and newer Continue Reading progress
+- [x] safer destructive-dialog initial focus
+- [x] confirmation-dialog keyboard focus trap
+- [x] visible keyboard focus styling
+- [x] reduced-motion CSS support
+
 ## Remaining v1.1.x
 
-- [ ] additional history management
 - [ ] reader typography refinements if real usage justifies them
-- [ ] broader accessibility/regression polish
+- [ ] final accessibility/regression polish
 - [ ] final v1.1.x reading-quality QA
 
 ## Future V1.x

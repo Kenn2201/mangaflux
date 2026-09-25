@@ -5,7 +5,9 @@ import type {
 } from "fastify";
 import {
   clearProgress,
+  clearProgressBefore,
   clearUserProgress,
+  clearUserProgressBefore,
   deleteBookmark,
   deleteProgress,
   deleteUserBookmark,
@@ -59,6 +61,13 @@ type ProgressBody = {
   chapterLabel?: string | null;
   page?: number;
   totalPages?: number;
+};
+
+type ProgressDeleteQuery = {
+  source?: string;
+  mangaId?: string;
+  all?: string;
+  olderThanDays?: string;
 };
 
 function validReaderId(value: string) {
@@ -209,6 +218,32 @@ function normalizeCoverUrl(value: unknown) {
   } catch {
     return { ok: false as const };
   }
+}
+
+function historyCutoff(
+  value: string | undefined,
+  reply: FastifyReply
+) {
+  if (value === undefined) return null;
+
+  const days = Number(value);
+
+  if (
+    !Number.isInteger(days) ||
+    days < 1 ||
+    days > 3650
+  ) {
+    reply.code(400).send({
+      error: "INVALID_REQUEST",
+      message: "olderThanDays must be an integer from 1 to 3650"
+    });
+    return false as const;
+  }
+
+  return {
+    days,
+    before: new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+  };
 }
 
 function databaseRequired(
@@ -487,13 +522,34 @@ export function registerStateRoutes(
 
   app.delete<{
     Params: { readerId: string };
-    Querystring: { source?: string; mangaId?: string; all?: string };
+    Querystring: ProgressDeleteQuery;
   }>(
     "/api/state/:readerId/progress",
     { preHandler: limits.write },
     async (request, reply) => {
       if (!validateIdentity(request.params.readerId, reply)) return;
       if (!databaseRequired(database, reply)) return;
+
+      const cutoff = historyCutoff(
+        request.query.olderThanDays,
+        reply
+      );
+      if (cutoff === false) return;
+
+      if (cutoff) {
+        const removed = await clearProgressBefore(
+          database,
+          request.params.readerId,
+          cutoff.before
+        );
+
+        return {
+          cleared: true,
+          removed,
+          olderThanDays: cutoff.days,
+          before: cutoff.before.toISOString()
+        };
+      }
 
       if (request.query.all === "1") {
         await clearProgress(database, request.params.readerId);
@@ -718,7 +774,7 @@ export function registerStateRoutes(
   );
 
   app.delete<{
-    Querystring: { source?: string; mangaId?: string; all?: string };
+    Querystring: ProgressDeleteQuery;
   }>(
     "/api/account/state/progress",
     { preHandler: limits.write },
@@ -730,6 +786,27 @@ export function registerStateRoutes(
         authProxySecret
       );
       if (!session || !database) return;
+
+      const cutoff = historyCutoff(
+        request.query.olderThanDays,
+        reply
+      );
+      if (cutoff === false) return;
+
+      if (cutoff) {
+        const removed = await clearUserProgressBefore(
+          database,
+          session.userId,
+          cutoff.before
+        );
+
+        return {
+          cleared: true,
+          removed,
+          olderThanDays: cutoff.days,
+          before: cutoff.before.toISOString()
+        };
+      }
 
       if (request.query.all === "1") {
         await clearUserProgress(database, session.userId);

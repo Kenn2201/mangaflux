@@ -36,8 +36,11 @@ type ReaderSummary = {
   continueReading: Progress | null;
 };
 
+type HistoryCleanupDays = 30 | 90;
+
 type PendingHistoryAction =
   | { type: "item"; item: Progress }
+  | { type: "older"; days: HistoryCleanupDays }
   | { type: "all" }
   | null;
 
@@ -50,6 +53,8 @@ export default function LibraryClient() {
   const [sort, setSort] = useState<"recent" | "title" | "progress">("recent");
   const [pendingHistoryAction, setPendingHistoryAction] =
     useState<PendingHistoryAction>(null);
+  const [historyCleanupDays, setHistoryCleanupDays] =
+    useState<HistoryCleanupDays>(90);
   const [historyBusy, setHistoryBusy] = useState(false);
 
   useEffect(() => {
@@ -133,16 +138,21 @@ export default function LibraryClient() {
       });
   }, [data, normalizedQuery, sort]);
 
-  async function removeHistory(item?: Progress) {
+  async function applyHistoryAction(
+    action: Exclude<PendingHistoryAction, null>
+  ) {
     if (historyBusy) return;
     setHistoryBusy(true);
 
     try {
-      const url = item
-        ? `/api/state/progress?source=${encodeURIComponent(
-            item.source
-          )}&mangaId=${encodeURIComponent(item.mangaId)}`
-        : "/api/state/progress?all=1";
+      const url =
+        action.type === "item"
+          ? `/api/state/progress?source=${encodeURIComponent(
+              action.item.source
+            )}&mangaId=${encodeURIComponent(action.item.mangaId)}`
+          : action.type === "older"
+            ? `/api/state/progress?olderThanDays=${action.days}`
+            : "/api/state/progress?all=1";
 
       const response = await fetch(url, {
         method: "DELETE"
@@ -152,18 +162,33 @@ export default function LibraryClient() {
         throw new Error("Reading history update failed.");
       }
 
+      const payload = (await response.json()) as {
+        removed?: number;
+        before?: string;
+      };
+      const before =
+        action.type === "older" && payload.before
+          ? Date.parse(payload.before)
+          : null;
+
       setData((current) => {
         if (!current) return current;
 
-        const history = item
-          ? current.history.filter(
-              (entry) =>
-                !(
-                  entry.source === item.source &&
-                  entry.mangaId === item.mangaId
+        const history =
+          action.type === "item"
+            ? current.history.filter(
+                (entry) =>
+                  !(
+                    entry.source === action.item.source &&
+                    entry.mangaId === action.item.mangaId
+                  )
+              )
+            : action.type === "older" && before !== null
+              ? current.history.filter(
+                  (entry) =>
+                    new Date(entry.updatedAt).getTime() >= before
                 )
-            )
-          : [];
+              : [];
 
         return {
           ...current,
@@ -174,10 +199,18 @@ export default function LibraryClient() {
 
       notify({
         tone: "success",
-        title: item ? "Removed from history" : "Reading history cleared",
-        message: item
-          ? `${item.mangaTitle} was removed from recent reading.`
-          : "Your saved bookmarks were not changed."
+        title:
+          action.type === "item"
+            ? "Removed from history"
+            : action.type === "older"
+              ? "Old history cleared"
+              : "Reading history cleared",
+        message:
+          action.type === "item"
+            ? `${action.item.mangaTitle} was removed from recent reading.`
+            : action.type === "older"
+              ? `${payload.removed ?? 0} entr${payload.removed === 1 ? "y" : "ies"} older than ${action.days} days removed. Bookmarks were not changed.`
+              : "Your saved bookmarks were not changed."
       });
     } catch {
       notify({
@@ -367,15 +400,46 @@ export default function LibraryClient() {
               <span>{filteredHistory.length}</span>
             </div>
 
-            <button
-              type="button"
-              className="library-clear-history"
-              onClick={() =>
-                setPendingHistoryAction({ type: "all" })
-              }
-            >
-              Clear history
-            </button>
+            <div className="library-history-actions">
+              <label>
+                <span className="sr-only">History cleanup age</span>
+                <select
+                  value={historyCleanupDays}
+                  onChange={(event) =>
+                    setHistoryCleanupDays(
+                      Number(event.target.value) as HistoryCleanupDays
+                    )
+                  }
+                  aria-label="History cleanup age"
+                >
+                  <option value={30}>Older than 30 days</option>
+                  <option value={90}>Older than 90 days</option>
+                </select>
+              </label>
+
+              <button
+                type="button"
+                className="library-clear-history"
+                onClick={() =>
+                  setPendingHistoryAction({
+                    type: "older",
+                    days: historyCleanupDays
+                  })
+                }
+              >
+                Clear {historyCleanupDays}d+
+              </button>
+
+              <button
+                type="button"
+                className="library-clear-history"
+                onClick={() =>
+                  setPendingHistoryAction({ type: "all" })
+                }
+              >
+                Clear all
+              </button>
+            </div>
           </div>
 
           <div className="history-list history-list-v11">
@@ -430,27 +494,31 @@ export default function LibraryClient() {
         open={Boolean(pendingHistoryAction)}
         title={
           pendingHistoryAction?.type === "all"
-            ? "Clear reading history?"
-            : "Remove from reading history?"
+            ? "Clear all reading history?"
+            : pendingHistoryAction?.type === "older"
+              ? `Clear history older than ${pendingHistoryAction.days} days?`
+              : "Remove from reading history?"
         }
         description={
           pendingHistoryAction?.type === "all"
-            ? "This clears reading progress/history from your current MangaFlux identity. Bookmarks are kept."
-            : "This removes the saved reading position for this manga. Your bookmark, if any, stays saved."
+            ? "This clears all reading progress/history from your current MangaFlux identity. Bookmarks are kept."
+            : pendingHistoryAction?.type === "older"
+              ? `This removes reading progress last updated more than ${pendingHistoryAction.days} days ago. Newer progress and bookmarks are kept.`
+              : "This removes the saved reading position for this manga. Your bookmark, if any, stays saved."
         }
         confirmLabel={
           pendingHistoryAction?.type === "all"
-            ? "Clear history"
-            : "Remove"
+            ? "Clear all"
+            : pendingHistoryAction?.type === "older"
+              ? "Clear old history"
+              : "Remove"
         }
         danger
         busy={historyBusy}
         onCancel={() => setPendingHistoryAction(null)}
         onConfirm={() => {
-          if (pendingHistoryAction?.type === "item") {
-            void removeHistory(pendingHistoryAction.item);
-          } else if (pendingHistoryAction?.type === "all") {
-            void removeHistory();
+          if (pendingHistoryAction) {
+            void applyHistoryAction(pendingHistoryAction);
           }
         }}
       />

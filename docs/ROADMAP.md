@@ -9,7 +9,8 @@ v1.0.0  ████████████████████  ✅
 v1.1.0  ████████████████████  ✅
 v1.1.1  ████████████████████  ✅
 v1.1.2  ████████████████████  ✅
-v1.1.3+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
+v1.1.3  ████████████████████  ✅
+v1.1.4+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
 v1.2.x  Profiles & Community
 v1.3.x  Following & Notifications
 v1.4.x  Discovery & Personalization
@@ -20,7 +21,7 @@ v2.x    Multi-Source + Platform Expansion
 v3.x    Advanced MangaFlux
 ~~~
 
-We are not rushing toward v2 or v3. **v1.1.2 — Reader Layout Controls is complete.** The immediate target remains inside **v1.1.x — Library & Reading Quality**, with **v1.1.3+** reserved for the remaining history, accessibility, regression, and final reading-quality work.
+We are not rushing toward v2 or v3. **v1.1.3 — History Cleanup & Accessibility is complete.** The immediate target remains inside **v1.1.x — Library & Reading Quality**, with **v1.1.4+** reserved for typography decisions, final accessibility/regression work, and final reading-quality QA.
 
 ---
 
@@ -129,15 +130,31 @@ The original stable MangaFlux foundation:
 
 ---
 
-### ➡️ v1.1.3+ — Remaining Reading Quality — NEXT
+### ✅ v1.1.3 — History Cleanup & Accessibility
+
+#### History management
+- Clear reading history older than 30 days
+- Clear reading history older than 90 days
+- Age cleanup works for browser/device identities and signed-in accounts
+- Preserve bookmarks and newer Continue Reading progress
+- Keep remove-one and clear-all actions
+
+#### Accessibility
+- Safer initial focus for destructive confirmation dialogs
+- Keyboard focus trap inside confirmation dialogs
+- Visible keyboard focus styling
+- Reduced-motion CSS support
+
+---
+
+### ➡️ v1.1.4+ — Remaining Reading Quality — NEXT
 
 Keep the remaining v1.1.x work focused instead of rushing to v1.2.
 
 Possible work includes:
 
-- Additional history controls
 - Reader typography refinements if actual usage justifies them
-- Broader accessibility fixes
+- Additional accessibility fixes discovered through physical testing
 - Regression fixes discovered through physical device testing
 - Final Library/reader QA
 - Final v1.1.x polish

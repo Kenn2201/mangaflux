@@ -7,10 +7,23 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- v1.1.3+ remaining reading-quality work
-- additional history-management controls
+- v1.1.4+ remaining reading-quality work
 - reader typography refinements if real usage justifies them
-- broader accessibility/regression polish and final v1.1.x QA
+- final accessibility/regression polish and final v1.1.x QA
+
+## 1.1.3 - 2026-09-25 — History Cleanup & Accessibility
+
+### History management
+- Added reading-history cleanup for entries older than 30 or 90 days.
+- Added server-side age cleanup for both browser/device identities and signed-in accounts.
+- Preserved bookmarks and newer Continue Reading progress when clearing old history.
+- Kept existing remove-one and clear-all history actions.
+
+### Accessibility and regression polish
+- Confirmation dialogs now initially focus Cancel for safer destructive actions.
+- Trapped keyboard focus inside confirmation dialogs while they are open.
+- Added visible focus treatment for keyboard navigation.
+- Added reduced-motion CSS behavior for users who request it.
 
 ## 1.1.2 - 2026-09-25 — Reader Layout Controls
 
