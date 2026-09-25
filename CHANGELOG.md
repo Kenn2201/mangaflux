@@ -7,9 +7,20 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- v1.3.5+ global Email notifications integration as a delivery gate
-- quiet/disable controls and delivery rate limiting
-- optional Discord/webhook delivery after core notifications stabilize
+- v1.3.6+ quiet/disable controls and delivery rate limiting
+- optional Discord/webhook delivery only after core notification delivery is stable
+
+## 1.3.5 - 2026-09-26 — Email Notification Delivery
+
+### Delivery
+- Connected newly generated chapter events to the existing Resend email transport.
+- Global Email notifications must be enabled for delivery.
+- Delivery requires a verified account email.
+- Per-manga Alerts on remains required before an event can be generated.
+- Added event-stable Resend idempotency keys.
+- Added emailSent, emailSkipped, and emailFailed checker counters.
+- Email failure does not roll back durable inbox events or chapter checkpoints.
+- No database migration is required.
 
 ## 1.3.4 - 2026-09-26 — Notification Inbox & History
 
