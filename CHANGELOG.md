@@ -6,10 +6,13 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 
 ## Unreleased
 
-### Planned
-- remaining v1.1.x reading-quality refinements
-- account-sync strategy for reader preferences
-- additional scanlation-group selection controls
+### v1.1.1 — Preference Sync & Scanlation Controls
+- safe account-sync behavior for per-series reader preferences
+- browser-local preference fallback for resilience
+- optional preferred scanlation-group behavior per series
+- improved alternate-release/group selection controls
+- focused history-management refinements from v1.1.0 testing
+- tablet/landscape QA for Library, chapter controls, and Reader Settings
 
 ## 1.1.0 - 2026-09-25 — Library & Reader Settings Foundation
 
