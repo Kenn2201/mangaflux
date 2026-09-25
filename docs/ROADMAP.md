@@ -2,7 +2,22 @@
 
 This is the canonical MangaFlux roadmap.
 
-## v1.x — Stable MangaFlux product
+## Current progression
+
+- ✅ **v1.0.0 — Stable V1**
+- ➡️ **v1.1.x — Library & Reading Quality — CURRENT**
+  - ✅ **v1.1.0 — Library + Reader Settings Foundation**
+  - ➡️ **v1.1.1 — Reading Quality Refinements — NEXT**
+- **v1.2.x — Profiles & Community Depth**
+- **v1.3.x — Following & Notifications**
+- **v1.4.x — Discovery & Personalization**
+- **v1.5+ — Product Polish**
+
+After the 1.x product is mature, MangaFlux enters the deliberately larger **v2.x — Multi-Source + Platform Expansion** phase. v2.x is intentionally open for more architecture, source, platform, data, migration, operations, and scaling milestones before major scope is moved into v3.x.
+
+---
+
+## v1.x — Stable MangaFlux Product
 
 ### v1.0.0 — Stable V1 — complete
 - mobile-first landing/dashboard/discovery
@@ -20,7 +35,7 @@ This is the canonical MangaFlux roadmap.
 
 ### v1.1.x — Library & Reading Quality — current
 
-#### v1.1.0 — Library & Reader Settings Foundation — complete
+#### v1.1.0 — Library + Reader Settings Foundation — complete
 - richer Library filtering/sorting
 - reading-history remove/clear controls
 - larger persisted Library views
@@ -32,29 +47,35 @@ This is the canonical MangaFlux roadmap.
 - scanlation group attribution
 - mobile/tablet polish
 
-#### v1.1.1 — Preference Sync & Scanlation Controls — next
-- define safe account-sync behavior for per-series reader preferences
+#### v1.1.1 — Reading Quality Refinements — next
+
+Keep this release focused. Do not put every remaining v1.1.x idea into v1.1.1.
+
+- define a safe account-sync strategy for reader preferences
 - keep browser-local preferences as a resilient fallback
-- synchronize supported reader preferences for signed-in users without overwriting newer choices
-- add optional preferred scanlation-group behavior per series
-- improve alternate-release/group selection controls
-- preserve explicit source/group attribution in chapter UI
-- add focused history-management refinements discovered during v1.1.0 testing
-- complete tablet/landscape QA for Library, chapter controls, and Reader Settings
+- improve scanlation-group selection/control
+- improve alternate-release selection UX while preserving group attribution
+- make remaining reader/chapter quality improvements that naturally build on v1.1.0
+- polish issues discovered while testing v1.1.0
+- focused history-management refinements where useful
+- tablet/landscape QA for Library, Reader Settings, and chapter controls
 
 #### Later v1.1.x
 - stronger per-series reading preferences
 - reader typography/spacing/fit preferences where useful
 - additional reading-quality refinements based on real usage
-- final v1.1.x regression/accessibility polish before v1.2.x
+- final v1.1.x regression/accessibility polish
+
+Do not move to v1.2.x until the Library & Reading Quality phase is considered complete.
 
 ### v1.2.x — Profiles & Community Depth
 - richer public profiles
-- optional bio/preferences with privacy controls
-- better activity browsing
-- comment/reaction UX refinements
-- notification/privacy preferences groundwork
-- stronger admin community tools without exposing credentials/private account data
+- optional bio/preferences
+- privacy controls
+- improved activity/history display and browsing
+- better comments/reactions UX
+- notification/privacy preference groundwork
+- more community/admin tools without exposing credentials/private account data
 
 ### v1.3.x — Following & Notifications
 - Follow Manga separate from bookmark/reading state
@@ -72,7 +93,7 @@ This is the canonical MangaFlux roadmap.
 - stronger language/genre/status preferences
 - richer Hot/Popular/Trending discovery
 
-### v1.5+ — Product polish
+### v1.5+ — Product Polish
 - PWA/installability
 - faster application shell
 - accessibility/performance improvements
@@ -82,9 +103,11 @@ This is the canonical MangaFlux roadmap.
 
 ---
 
-## v2.x — Multi-source + Platform Expansion
+## v2.x — Multi-Source + Platform Expansion
 
-v2.x is intentionally a large phase. MangaFlux should complete the important source/platform architecture work here before moving major scope into v3.x.
+**v2.x is intentionally a large, expandable phase.** It is not a single multi-source milestone. If a new feature belongs to source/platform architecture, data, migration, operations, or scaling, extend v2.x first instead of prematurely moving it into v3.x.
+
+The sequence below is a working structure, not a cap. Add v2.7, v2.8, v2.9, v2.10+ as needed before v3.
 
 ### v2.0.x — Source Platform Foundation
 - source registry
@@ -97,7 +120,7 @@ v2.x is intentionally a large phase. MangaFlux should complete the important sou
 - HTML adapters only where explicitly permitted
 - no CAPTCHA/paywall/login-wall/anti-bot bypasses
 
-### v2.1.x — Unified Multi-source Search
+### v2.1.x — Unified Multi-Source Search
 - query multiple permitted sources
 - normalized merged results
 - source badges
@@ -121,7 +144,7 @@ v2.x is intentionally a large phase. MangaFlux should complete the important sou
 - explicit source switching
 - never silently hide attribution
 
-### v2.4.x — Cross-source Library Migration & Provenance
+### v2.4.x — Cross-Source Library Migration & Provenance
 - map existing MangaDex bookmarks/progress to canonical MangaFlux titles
 - preserve original source references
 - migration confidence/status UI
@@ -136,7 +159,7 @@ v2.x is intentionally a large phase. MangaFlux should complete the important sou
 - capability validation
 - compatibility/version checks
 
-### v2.6.x — Multi-source Operations & Scale
+### v2.6.x — Multi-Source Operations & Scale
 - source-specific diagnostics
 - background queues/jobs where needed
 - shared caching where justified
@@ -144,19 +167,20 @@ v2.x is intentionally a large phase. MangaFlux should complete the important sou
 - source incident/degraded-state controls
 - operational/admin source controls
 
-### v2.7+ — Platform maturity before v3
-- additional permitted sources
+### v2.7+ — Platform Expansion / Maturity
+- intentionally open for additional permitted sources and platform milestones
 - migration tooling refinements
-- source quality scoring based on concrete metadata/availability signals
+- source quality signals based on concrete metadata/availability
 - better canonical matching
+- data architecture and scaling work as actual needs emerge
 - platform stability/security work
-- only move to v3 when multi-source architecture is mature
+- additional v2.x milestones before v3 whenever they fit the multi-source/platform evolution
 
 ---
 
-## v3.x — Intelligent & Multi-client MangaFlux
+## v3.x — Future / Advanced MangaFlux
 
-v3 scope stays intentionally later. New architecture/platform ideas that belong in v2 should be added to v2 first.
+v3.x stays intentionally later. Do not prematurely move architecture/platform ideas here when they belong in v2.x.
 
 ### v3.0.x — Semantic Discovery
 - metadata/embedding-assisted search
@@ -172,14 +196,14 @@ v3 scope stays intentionally later. New architecture/platform ideas that belong 
 - recommendation transparency
 - reset/delete preference history
 
-### v3.2.x — Richer Social Layer
+### v3.2.x — Richer Social Features
 - optional shareable lists
 - public/private/custom lists
 - activity controls
 - optional reader following only with privacy/anti-abuse controls
 - stronger moderation/admin tooling before social expansion
 
-### v3.3.x — Native / Mature PWA
+### v3.3.x — Native / Flutter App
 - mature installable PWA
 - possible Flutter iOS/Android client
 - shared MangaFlux API/account
@@ -187,9 +211,11 @@ v3 scope stays intentionally later. New architecture/platform ideas that belong 
 - mobile notifications
 - accessibility parity across clients
 
-### v3.4+ — Platform Ecosystem
+### v3.4+ — Platform/API Ecosystem
 - documented API contracts
 - user-owned data import/export
 - richer analytics/operations
 - source/adapter developer ecosystem
 - future integrations and experimental clients without weakening V1/V2 security boundaries
+
+Additional advanced ideas can be added later after the v2.x platform work is mature.
