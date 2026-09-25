@@ -10,7 +10,8 @@ v1.1.0  ████████████████████  ✅
 v1.1.1  ████████████████████  ✅
 v1.1.2  ████████████████████  ✅
 v1.1.3  ████████████████████  ✅
-v1.1.4+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
+v1.1.4  ████████████████████  ✅
+v1.1.5+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
 v1.2.x  Profiles & Community
 v1.3.x  Following & Notifications
 v1.4.x  Discovery & Personalization
@@ -21,7 +22,7 @@ v2.x    Multi-Source + Platform Expansion
 v3.x    Advanced MangaFlux
 ~~~
 
-We are not rushing toward v2 or v3. **v1.1.3 — History Cleanup & Accessibility is complete.** The immediate target remains inside **v1.1.x — Library & Reading Quality**, with **v1.1.4+** reserved for typography decisions, final accessibility/regression work, and final reading-quality QA.
+We are not rushing toward v2 or v3. **v1.1.4 — Reader Typography & Accessibility is complete.** The remaining v1.1.x work is now a final physical-device QA/regression pass before MangaFlux moves to v1.2.x.
 
 ---
 
@@ -147,17 +148,34 @@ The original stable MangaFlux foundation:
 
 ---
 
-### ➡️ v1.1.4+ — Remaining Reading Quality — NEXT
+### ✅ v1.1.4 — Reader Typography & Accessibility
 
-Keep the remaining v1.1.x work focused instead of rushing to v1.2.
+#### Reader typography
+- Per-series Small / Standard / Large reader UI text
+- Reader chrome, labels, status text, and navigation respond to the selected size
+- Manga page artwork remains unchanged
+- Text size uses account synchronization and browser-local fallback
+- Existing account rows default safely to Standard
 
-Possible work includes:
+#### Settings accessibility
+- Reader Settings keyboard focus trap
+- Predictable initial focus and focus restoration
+- Explicit live reader-page status for assistive technology
 
-- Reader typography refinements if actual usage justifies them
-- Additional accessibility fixes discovered through physical testing
-- Regression fixes discovered through physical device testing
-- Final Library/reader QA
-- Final v1.1.x polish
+---
+
+### ➡️ v1.1.5+ — Final Reading Quality QA — NEXT
+
+No new feature family is planned here by default.
+
+This is the final v1.1.x validation/fix window:
+
+- physical phone/tablet reader QA
+- portrait and landscape Reader Settings QA
+- keyboard/screen-reader regression checks
+- Library/history regression checks
+- fix only issues discovered during final QA
+- move to v1.2.x once the Library & Reading Quality phase is signed off
 
 Once the entire Library & Reading Quality phase is satisfactory, move forward to v1.2.x.
 

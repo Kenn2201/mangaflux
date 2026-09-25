@@ -49,6 +49,7 @@ type ReaderPreferencesBody = {
   preferredScanlationGroup?: string | null;
   imageFit?: string;
   pageGap?: string;
+  textSize?: string;
   updatedAt?: string;
 };
 
@@ -77,6 +78,7 @@ function validReaderId(value: string) {
 const LANGUAGE_RE = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i;
 const READER_IMAGE_FITS = new Set(["width", "screen"]);
 const READER_PAGE_GAPS = new Set(["none", "small", "large"]);
+const READER_TEXT_SIZES = new Set(["small", "standard", "large"]);
 
 function validMangaDexId(value: unknown): value is string {
   return typeof value === "string" && UUID_RE.test(value);
@@ -161,6 +163,17 @@ function validateReaderPreferencesBody(
     return null;
   }
 
+  if (
+    typeof body.textSize !== "string" ||
+    !READER_TEXT_SIZES.has(body.textSize)
+  ) {
+    reply.code(400).send({
+      error: "INVALID_REQUEST",
+      message: "textSize is invalid"
+    });
+    return null;
+  }
+
   if (typeof body.updatedAt !== "string") {
     reply.code(400).send({
       error: "INVALID_REQUEST",
@@ -192,6 +205,7 @@ function validateReaderPreferencesBody(
       body.preferredScanlationGroup?.trim() || undefined,
     imageFit: body.imageFit,
     pageGap: body.pageGap,
+    textSize: body.textSize,
     updatedAt
   };
 }

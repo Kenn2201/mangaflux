@@ -7,9 +7,21 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- v1.1.4+ remaining reading-quality work
-- reader typography refinements if real usage justifies them
-- final accessibility/regression polish and final v1.1.x QA
+- v1.1.5+ final reading-quality QA and regression fixes discovered during physical testing
+- move to v1.2.x only after the v1.1.x reading-quality phase is signed off
+
+## 1.1.4 - 2026-09-25 — Reader Typography & Accessibility
+
+### Reader typography
+- Added per-series Small, Standard, and Large reader UI text-size options.
+- Kept manga page artwork unchanged; the option affects reader chrome, labels, navigation, and status text only.
+- Synchronized text size through the existing account/local preference model with timestamp conflict protection.
+- Added a safe Standard default for existing account preference rows.
+
+### Settings accessibility
+- Reader Settings now traps keyboard focus while open.
+- Reader Settings receives a predictable initial close-button focus and restores the previous focus after closing.
+- Added an explicit live status for current reader page announcements.
 
 ## 1.1.3 - 2026-09-25 — History Cleanup & Accessibility
 

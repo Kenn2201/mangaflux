@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v1.1.3--History_Cleanup_Accessibility-indigo.svg)
+![Version](https://img.shields.io/badge/version-v1.1.4--Reader_Typography_Accessibility-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v1.1.3 — History Cleanup & Accessibility**
+**v1.1.4 — Reader Typography & Accessibility**
 
-MangaFlux V1 remains a stable single-source MangaDex product. v1.1.3 adds focused history-cleanup controls and keyboard/accessibility polish without changing the reader/source architecture.
+MangaFlux V1 remains a stable single-source MangaDex product. v1.1.4 finishes the planned reader-typography and settings-accessibility implementation while preserving the existing reader/source architecture.
 
 ### Library improvements
 
@@ -34,6 +34,7 @@ Each manga can keep per-series reader preferences with signed-in account synchro
 - whether alternate scanlation releases are shown
 - image fit: Fit width or Fit screen
 - page spacing: Seamless, Small gap, or Large gap
+- reader UI text size: Small, Standard, or Large
 
 The settings sheet is available from manga chapter lists and inside the immersive reader.
 
@@ -48,14 +49,14 @@ The settings sheet is available from manga chapter lists and inside the immersiv
 - an alternate-release count is shown when duplicates are collapsed
 - readers can opt back into all alternate releases
 
-### v1.1.3 refinements
+### v1.1.4 refinements
 
-- reading history can be cleaned by age: older than 30 days or older than 90 days
-- age cleanup works for signed-out device state and signed-in account state
-- bookmarks and newer Continue Reading progress are preserved
-- destructive confirmation dialogs now focus the safer Cancel action first and trap keyboard focus
-- interactive controls receive visible keyboard focus treatment
-- reduced-motion preferences suppress nonessential CSS animation/transition motion
+- per-series reader UI text size can be set to Small, Standard, or Large
+- text-size preference synchronizes through the existing timestamp-safe account preference system
+- manga page artwork is never rescaled by the text-size setting
+- Reader Settings now traps keyboard focus while open and restores focus when closed
+- Reader Settings receives a predictable initial close-button focus
+- page-position announcements use an explicit live status for assistive technology
 
 ### Architecture boundary
 

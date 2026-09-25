@@ -88,7 +88,8 @@ export default function MangaPage() {
       dataSaver: false,
       showAlternateReleases: false,
       imageFit: "width",
-      pageGap: "none"
+      pageGap: "none",
+      textSize: "standard"
     });
 
   useEffect(() => {

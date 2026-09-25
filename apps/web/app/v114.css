@@ -1,0 +1,33 @@
+/* MangaFlux v1.1.4 — Reader Typography & Settings Accessibility */
+
+.reader-text-small .reader-page-hud { font-size: 9px; }
+.reader-text-small .reader-chrome-back { font-size: 11px; }
+.reader-text-small .reader-chrome-title strong { font-size: 12px; }
+.reader-text-small .reader-chrome-title span,
+.reader-text-small .reader-chrome-meta,
+.reader-text-small .reader-save-state,
+.reader-text-small .reader-chrome-bottom small { font-size: 8px; }
+
+.reader-text-large .reader-page-hud {
+  min-height: 34px;
+  padding-inline: 12px;
+  font-size: 12px;
+}
+.reader-text-large .reader-chrome-back { font-size: 14px; }
+.reader-text-large .reader-chrome-title strong { font-size: 16px; }
+.reader-text-large .reader-chrome-title span { font-size: 12px; }
+.reader-text-large .reader-chrome-meta,
+.reader-text-large .reader-save-state { font-size: 11px; }
+.reader-text-large .reader-mode-button,
+.reader-text-large .reader-settings-trigger,
+.reader-text-large .reader-jump-trigger { font-size: 11px; }
+.reader-text-large .reader-chrome-bottom > a > span,
+.reader-text-large .reader-overlay-disabled > span { font-size: 13px; }
+.reader-text-large .reader-chrome-bottom small { font-size: 10px; }
+.reader-text-large .reader-end-card { font-size: 14px; }
+
+@media (max-width: 700px) {
+  .reader-text-large .reader-chrome-title strong { font-size: 14px; }
+  .reader-text-large .reader-chrome-title span { font-size: 11px; }
+  .reader-text-large .reader-chrome-meta { gap: 10px; }
+}

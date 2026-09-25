@@ -58,11 +58,20 @@
 - [x] visible keyboard focus styling
 - [x] reduced-motion CSS support
 
+## v1.1.4 — Reader Typography & Accessibility
+
+- [x] Small / Standard / Large reader UI text size
+- [x] account/local synchronization for reader text size
+- [x] migration default for existing reader-preference rows
+- [x] Reader Settings keyboard focus trap
+- [x] Reader Settings initial focus + focus restoration
+- [x] explicit live reader-page status for assistive technology
+
 ## Remaining v1.1.x
 
-- [ ] reader typography refinements if real usage justifies them
-- [ ] final accessibility/regression polish
-- [ ] final v1.1.x reading-quality QA
+- [ ] final physical-device accessibility/regression QA
+- [ ] fix only issues discovered during final v1.1.x QA
+- [ ] sign off Library & Reading Quality before v1.2
 
 ## Future V1.x
 
