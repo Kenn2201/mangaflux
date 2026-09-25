@@ -67,11 +67,24 @@
 - [x] Reader Settings initial focus + focus restoration
 - [x] explicit live reader-page status for assistive technology
 
+## v1.1.5 — Reader Navigation & Resume Fixes
+
+- [x] stabilize Continue Reading resume against delayed image layout
+- [x] pause page tracking/progress writes during resume anchoring
+- [x] eager-load pages through the saved resume target only
+- [x] replace key-in Jump Chapter with a scrollable chapter list
+- [x] highlight and center the currently reading chapter
+- [x] load older chapters while scrolling the jump list
+- [x] reader Back menu with Library / Discover more / Surprise me
+- [x] similarity-based Surprise me roulette
+- [x] reader Home explicitly opens the current manga page
+- [x] visual press feedback with reduced-motion handling
+
 ## Remaining v1.1.x
 
-- [ ] final physical-device accessibility/regression QA
-- [ ] fix only issues discovered during final v1.1.x QA
-- [ ] sign off Library & Reading Quality before v1.2
+- [ ] final physical-device regression sign-off
+- [ ] fix only regressions discovered during final sign-off
+- [ ] move to v1.2 after Library & Reading Quality is signed off
 
 ## Future V1.x
 

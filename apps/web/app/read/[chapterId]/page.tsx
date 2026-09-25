@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
   MouseEvent,
   useEffect,
@@ -62,6 +62,17 @@ type MangaMeta = {
   id: string;
   title: string;
   coverUrl?: string;
+  year?: number;
+  tagDetails?: Array<{
+    id: string;
+    name: string;
+    group?: string;
+  }>;
+  creators?: Array<{
+    id: string;
+    name: string;
+    role: "author" | "artist";
+  }>;
 };
 
 function proxyImageUrl(
@@ -76,21 +87,33 @@ function proxyImageUrl(
 function ReaderImage({
   chapterId,
   index,
-  dataSaver
+  dataSaver,
+  eager = false,
+  onSettled
 }: {
   chapterId: string;
   index: number;
   dataSaver: boolean;
+  eager?: boolean;
+  onSettled?: (index: number) => void;
 }) {
   const [fallbackSaver, setFallbackSaver] = useState(false);
   const [failed, setFailed] = useState(false);
+  const settledRef = useRef(false);
   const useSaver = dataSaver || fallbackSaver;
   const src = proxyImageUrl(chapterId, index, useSaver);
 
   useEffect(() => {
     setFallbackSaver(false);
     setFailed(false);
+    settledRef.current = false;
   }, [chapterId, dataSaver]);
+
+  function settle() {
+    if (settledRef.current) return;
+    settledRef.current = true;
+    onSettled?.(index);
+  }
 
   return (
     <figure
@@ -101,7 +124,8 @@ function ReaderImage({
         <img
           src={src}
           alt={`Page ${index}`}
-          loading={index <= 2 ? "eager" : "lazy"}
+          loading={eager || index <= 2 ? "eager" : "lazy"}
+          onLoad={settle}
           onError={() => {
             if (!useSaver) {
               setFallbackSaver(true);
@@ -109,6 +133,7 @@ function ReaderImage({
             }
 
             setFailed(true);
+            settle();
           }}
         />
       ) : (
@@ -155,9 +180,13 @@ function findDistinctNeighbor(
 
 export default function ReaderPage() {
   const params = useParams<{ chapterId: string }>();
+  const router = useRouter();
   const chapterId = params.chapterId;
   const pagesRef = useRef<HTMLDivElement | null>(null);
-  const resumePageRef = useRef<number | null>(null);
+  const resumeTargetRef = useRef<number | null>(null);
+  const settledPagesRef = useRef<Set<number>>(new Set());
+  const resumeReleaseTimerRef = useRef<number | null>(null);
+  const exitMenuRef = useRef<HTMLDivElement | null>(null);
   const lastSavedRef = useRef("");
 
   const [data, setData] = useState<ReaderResponse | null>(null);
@@ -181,6 +210,10 @@ export default function ReaderPage() {
   const [nextChapter, setNextChapter] = useState<Chapter>();
   const [controlsVisible, setControlsVisible] = useState(true);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [resumeTarget, setResumeTarget] = useState<number | null>(null);
+  const [resumePending, setResumePending] = useState(false);
+  const [exitMenuOpen, setExitMenuOpen] = useState(false);
+  const [surpriseBusy, setSurpriseBusy] = useState(false);
   const [saveState, setSaveState] = useState<
     "idle" | "saving" | "saved" | "error"
   >("idle");
@@ -188,15 +221,27 @@ export default function ReaderPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setSearchQuery(params.get("q")?.slice(0, 120) ?? "");
+
     const initial = getReaderPreferences();
     setReaderPreferences(initial);
     setDataSaver(initial.dataSaver);
 
     const resume = Number(params.get("resume") ?? "0");
-    if (Number.isInteger(resume) && resume > 0 && resume <= 500) {
-      resumePageRef.current = resume;
+    const target =
+      Number.isInteger(resume) && resume > 0 && resume <= 500
+        ? resume
+        : null;
+
+    resumeTargetRef.current = target;
+    settledPagesRef.current.clear();
+    setResumeTarget(target);
+    setResumePending(Boolean(target));
+
+    if (resumeReleaseTimerRef.current !== null) {
+      window.clearTimeout(resumeReleaseTimerRef.current);
+      resumeReleaseTimerRef.current = null;
     }
-  }, []);
+  }, [chapterId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -406,6 +451,8 @@ export default function ReaderPage() {
 
     const observer = new IntersectionObserver(
       (entries) => {
+        if (resumePending) return;
+
         for (const entry of entries) {
           const page = Number(
             (entry.target as HTMLElement).dataset.pageIndex ?? "0"
@@ -441,37 +488,88 @@ export default function ReaderPage() {
     for (const element of pageElements) observer.observe(element);
 
     return () => observer.disconnect();
-  }, [chapterId, data?.pages.length]);
+  }, [chapterId, data?.pages.length, resumePending]);
 
   useEffect(() => {
-    const requestedPage = resumePageRef.current;
-    const container = pagesRef.current;
+    return () => {
+      if (resumeReleaseTimerRef.current !== null) {
+        window.clearTimeout(resumeReleaseTimerRef.current);
+      }
+    };
+  }, []);
 
+  useEffect(() => {
     if (
-      !requestedPage ||
-      !container ||
-      !data?.pages.length ||
-      requestedPage > data.pages.length
+      !resumePending ||
+      resumeTarget === null ||
+      !data?.pages.length
     ) {
       return;
     }
 
-    setCurrentPage(requestedPage);
-    resumePageRef.current = null;
+    const clampedTarget = Math.min(
+      resumeTarget,
+      data.pages.length
+    );
 
-    const timer = window.setTimeout(() => {
-      container
-        .querySelector<HTMLElement>(
-          `[data-page-index="${requestedPage}"]`
+    if (clampedTarget !== resumeTarget) {
+      resumeTargetRef.current = clampedTarget;
+      setResumeTarget(clampedTarget);
+    }
+  }, [
+    data?.pages.length,
+    resumePending,
+    resumeTarget
+  ]);
+
+  function handleResumePageSettled(index: number) {
+    const target = resumeTargetRef.current;
+
+    if (
+      !resumePending ||
+      !target ||
+      index > target
+    ) {
+      return;
+    }
+
+    settledPagesRef.current.add(index);
+
+    for (let page = 1; page <= target; page += 1) {
+      if (!settledPagesRef.current.has(page)) return;
+    }
+
+    const anchor = () => {
+      pagesRef.current
+        ?.querySelector<HTMLElement>(
+          `[data-page-index="${target}"]`
         )
         ?.scrollIntoView({
           block: "start",
           behavior: "auto"
         });
-    }, 350);
+    };
 
-    return () => window.clearTimeout(timer);
-  }, [chapterId, data?.pages.length]);
+    setCurrentPage(target);
+    anchor();
+
+    window.requestAnimationFrame(() => {
+      anchor();
+      window.requestAnimationFrame(anchor);
+    });
+
+    if (resumeReleaseTimerRef.current !== null) {
+      window.clearTimeout(resumeReleaseTimerRef.current);
+    }
+
+    resumeReleaseTimerRef.current = window.setTimeout(() => {
+      anchor();
+      resumeTargetRef.current = null;
+      setResumeTarget(null);
+      setResumePending(false);
+      resumeReleaseTimerRef.current = null;
+    }, 280);
+  }
 
   useEffect(() => {
     function onScroll() {
@@ -485,19 +583,33 @@ export default function ReaderPage() {
   }, []);
 
   useEffect(() => {
-    if (!controlsVisible || loading) return;
+    if (
+      !controlsVisible ||
+      loading ||
+      exitMenuOpen ||
+      readerSettingsOpen
+    ) {
+      return;
+    }
 
     const timer = window.setTimeout(() => {
       setControlsVisible(false);
     }, 3200);
 
     return () => window.clearTimeout(timer);
-  }, [controlsVisible, loading, chapterId]);
+  }, [
+    controlsVisible,
+    loading,
+    chapterId,
+    exitMenuOpen,
+    readerSettingsOpen
+  ]);
 
   const totalPages = data?.pages.length ?? 0;
 
   useEffect(() => {
     if (
+      resumePending ||
       !data?.chapter.mangaId ||
       !mangaMeta ||
       !totalPages ||
@@ -550,7 +662,8 @@ export default function ReaderPage() {
     currentPage,
     data,
     mangaMeta,
-    totalPages
+    totalPages,
+    resumePending
   ]);
 
   const progress = totalPages
@@ -597,9 +710,121 @@ export default function ReaderPage() {
   function toggleControls(event: MouseEvent<HTMLDivElement>) {
     const target = event.target as HTMLElement;
 
-    if (target.closest("a, button, input, textarea, label")) return;
+    if (target.closest("a, button, input, textarea, select, label")) return;
 
     setControlsVisible((visible) => !visible);
+  }
+
+  useEffect(() => {
+    if (!exitMenuOpen) return;
+
+    function onPointerDown(event: PointerEvent) {
+      const target = event.target as Node;
+
+      if (!exitMenuRef.current?.contains(target)) {
+        setExitMenuOpen(false);
+      }
+    }
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setExitMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [exitMenuOpen]);
+
+  async function surpriseMe() {
+    if (surpriseBusy || !data?.chapter.mangaId) return;
+
+    setSurpriseBusy(true);
+
+    try {
+      const usefulTags =
+        mangaMeta?.tagDetails
+          ?.filter(
+            (tag) =>
+              tag.group === "genre" ||
+              tag.group === "theme"
+          )
+          .slice(0, 2) ?? [];
+      const creator =
+        mangaMeta?.creators?.find(
+          (item) => item.role === "author"
+        ) ?? mangaMeta?.creators?.[0];
+
+      const requests: string[] = usefulTags.map(
+        (tag, index) =>
+          `/api/discovery?kind=${
+            index === 0 ? "popular" : "top"
+          }&limit=18&tag=${encodeURIComponent(tag.id)}`
+      );
+
+      if (creator) {
+        requests.push(
+          `/api/discovery?kind=popular&limit=18&creator=${encodeURIComponent(
+            creator.id
+          )}`
+        );
+      }
+
+      if (!requests.length) {
+        requests.push("/api/discovery?kind=popular&limit=24");
+      }
+
+      const groups = await Promise.all(
+        requests.map(async (url) => {
+          const response = await fetch(url, {
+            cache: "no-store"
+          });
+
+          if (!response.ok) return [];
+
+          const payload = (await response.json()) as {
+            items?: Array<{ id: string }>;
+          };
+
+          return payload.items ?? [];
+        })
+      );
+
+      const candidates = new Map<string, { id: string }>();
+
+      for (const group of groups) {
+        for (const item of group) {
+          if (item.id !== data.chapter.mangaId) {
+            candidates.set(item.id, item);
+          }
+        }
+      }
+
+      const pool = [...candidates.values()];
+
+      if (!pool.length) {
+        throw new Error("No similar manga available.");
+      }
+
+      const random = new Uint32Array(1);
+      window.crypto.getRandomValues(random);
+      const index = random[0] % pool.length;
+      const pick = pool[index];
+
+      setExitMenuOpen(false);
+      router.push(`/manga/${pick.id}`);
+    } catch {
+      setExitMenuOpen(false);
+      router.push("/browse?kind=popular");
+    } finally {
+      setSurpriseBusy(false);
+    }
   }
 
   if (loading) {
@@ -656,9 +881,61 @@ export default function ReaderPage() {
         inert={!controlsVisible ? true : undefined}
       >
         <div className="reader-chrome-main">
-          <Link className="reader-chrome-back" href={chaptersHref}>
-            ← Chapters
-          </Link>
+          <div className="reader-exit-wrap" ref={exitMenuRef}>
+            <button
+              className="reader-chrome-back"
+              type="button"
+              aria-haspopup="menu"
+              aria-expanded={exitMenuOpen}
+              onClick={() =>
+                setExitMenuOpen((open) => !open)
+              }
+            >
+              ← Back
+            </button>
+
+            {exitMenuOpen ? (
+              <div
+                className="reader-exit-menu"
+                role="menu"
+                aria-label="Leave reader"
+              >
+                <Link
+                  href="/dashboard#library"
+                  role="menuitem"
+                  onClick={() => setExitMenuOpen(false)}
+                >
+                  <strong>Library</strong>
+                  <span>Return to your saved reading.</span>
+                </Link>
+
+                <Link
+                  href="/browse?kind=popular"
+                  role="menuitem"
+                  onClick={() => setExitMenuOpen(false)}
+                >
+                  <strong>Discover more</strong>
+                  <span>Browse more manga.</span>
+                </Link>
+
+                <button
+                  type="button"
+                  role="menuitem"
+                  disabled={surpriseBusy}
+                  onClick={() => void surpriseMe()}
+                >
+                  <strong>
+                    {surpriseBusy
+                      ? "Rolling…"
+                      : "Surprise me"}
+                  </strong>
+                  <span>
+                    Pick a random manga with similar signals.
+                  </span>
+                </button>
+              </div>
+            ) : null}
+          </div>
 
           {mangaMeta?.coverUrl ? (
             <div className="reader-chrome-cover" aria-hidden="true">
@@ -694,6 +971,7 @@ export default function ReaderPage() {
         <div className="reader-chrome-meta">
           <ReaderChapterJump
             mangaId={data.chapter.mangaId}
+            currentChapterId={chapterId}
             currentChapter={data.chapter.chapter}
             querySuffix={querySuffix}
             language={readerPreferences.language}
@@ -745,6 +1023,11 @@ export default function ReaderPage() {
             chapterId={chapterId}
             index={page.index}
             dataSaver={dataSaver}
+            eager={
+              resumeTarget !== null &&
+              page.index <= resumeTarget
+            }
+            onSettled={handleResumePageSettled}
           />
         ))}
       </div>
@@ -774,8 +1057,8 @@ export default function ReaderPage() {
         <Link
           className="reader-home-button"
           href={chaptersHref}
-          aria-label="Back to manga chapters"
-          title="Back to chapters"
+          aria-label="Open current manga page"
+          title="Manga page"
         >
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M3.5 10.5 12 3l8.5 7.5v9a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5z" />
@@ -850,13 +1133,13 @@ export default function ReaderPage() {
           <Link
             className="reader-end-home"
             href={chaptersHref}
-            aria-label="Back to manga chapters"
+            aria-label="Open current manga page"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M3.5 10.5 12 3l8.5 7.5v9a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5z" />
               <path d="M9 21v-6h6v6" />
             </svg>
-            Chapters
+            Manga page
           </Link>
 
           {nextChapter ? (

@@ -11,7 +11,8 @@ v1.1.1  ████████████████████  ✅
 v1.1.2  ████████████████████  ✅
 v1.1.3  ████████████████████  ✅
 v1.1.4  ████████████████████  ✅
-v1.1.5+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
+v1.1.5  ████████████████████  ✅
+v1.1.6+ ░░░░░░░░░░░░░░░░░░░░  ← FINAL QA ONLY
 v1.2.x  Profiles & Community
 v1.3.x  Following & Notifications
 v1.4.x  Discovery & Personalization
@@ -22,7 +23,7 @@ v2.x    Multi-Source + Platform Expansion
 v3.x    Advanced MangaFlux
 ~~~
 
-We are not rushing toward v2 or v3. **v1.1.4 — Reader Typography & Accessibility is complete.** The remaining v1.1.x work is now a final physical-device QA/regression pass before MangaFlux moves to v1.2.x.
+We are not rushing toward v2 or v3. **v1.1.5 — Reader Navigation & Resume Fixes is complete.** The remaining v1.1.x space is reserved only for final physical-device regression fixes before MangaFlux moves to v1.2.x.
 
 ---
 
@@ -164,17 +165,41 @@ The original stable MangaFlux foundation:
 
 ---
 
-### ➡️ v1.1.5+ — Final Reading Quality QA — NEXT
+### ✅ v1.1.5 — Reader Navigation & Resume Fixes
 
-No new feature family is planned here by default.
+#### Resume stability
+- Keep Continue Reading anchored to the saved page while preceding manga images settle
+- Eager-load only the pages needed to reach the saved position
+- Pause page observation/progress writes during the resume handoff
+- Return to normal reader tracking after the saved page is stable
 
-This is the final v1.1.x validation/fix window:
+#### Chapter jump
+- Replace chapter-number key-in with a scrollable chapter list
+- Highlight and center the current chapter as Reading now
+- Continue loading older chapters while scrolling
 
-- physical phone/tablet reader QA
-- portrait and landscape Reader Settings QA
+#### Reader navigation
+- Back menu: Library / Discover more / Surprise me
+- Surprise me uses similarity signals instead of unrestricted randomness
+- Home icon opens the current manga page
+
+#### Interaction polish
+- Visual pressed-state feedback for primary controls/cards/navigation
+- Reduced-motion-safe press behavior
+
+---
+
+### ➡️ v1.1.6+ — Final Sign-off Only
+
+No new feature family is planned here.
+
+Use this only if final physical-device testing finds a regression:
+
+- resume-page verification on slow image loading
+- chapter-list scrolling on long manga
+- reader navigation/back-menu checks
+- portrait and landscape regression checks
 - keyboard/screen-reader regression checks
-- Library/history regression checks
-- fix only issues discovered during final QA
 - move to v1.2.x once the Library & Reading Quality phase is signed off
 
 Once the entire Library & Reading Quality phase is satisfactory, move forward to v1.2.x.

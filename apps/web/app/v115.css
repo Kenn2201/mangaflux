@@ -1,0 +1,255 @@
+/* MangaFlux v1.1.5 — Reader Navigation & Resume Fixes */
+
+/* Chapter jump is now a scrollable position-aware list. */
+.reader-jump-list-sheet {
+  width: min(620px, 100%);
+}
+
+.reader-jump-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.reader-jump-heading > div {
+  min-width: 0;
+}
+
+.reader-jump-heading p:last-child {
+  margin-bottom: 0;
+  color: #8c8c8c;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.reader-jump-close {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  border: 1px solid #343434;
+  border-radius: 50%;
+  background: #171717;
+  color: #b7b7b7;
+  font-size: 22px;
+}
+
+.reader-jump-list {
+  max-height: min(58dvh, 560px);
+  display: grid;
+  gap: 7px;
+  margin-top: 18px;
+  padding: 2px 3px 2px 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.reader-jump-list > button {
+  width: 100%;
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #2c2c2c;
+  border-radius: 13px;
+  background: #111;
+  color: #d4d4d4;
+  text-align: left;
+}
+
+.reader-jump-list > button > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.reader-jump-list > button > small {
+  max-width: 220px;
+  overflow: hidden;
+  color: #707070;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reader-jump-list > button.is-current {
+  border-color: #ededed;
+  background: #ededed;
+  color: #090909;
+}
+
+.reader-jump-list > button.is-current > strong {
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #151515;
+  color: #f0f0f0;
+  font-size: 8px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.reader-jump-loading,
+.reader-jump-end {
+  padding: 16px 12px;
+  color: #797979;
+  font-size: 10px;
+  text-align: center;
+}
+
+/* Reader back/exit menu. */
+.reader-exit-wrap {
+  position: relative;
+  justify-self: start;
+}
+
+.reader-exit-wrap > .reader-chrome-back {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.reader-exit-menu {
+  position: absolute;
+  z-index: 70;
+  top: calc(100% + 9px);
+  left: 0;
+  width: min(310px, calc(100vw - 24px));
+  display: grid;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid #343434;
+  border-radius: 16px;
+  background: rgba(12,12,12,.98);
+  box-shadow: 0 18px 55px rgba(0,0,0,.58);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.reader-exit-menu > a,
+.reader-exit-menu > button {
+  min-height: 58px;
+  display: grid;
+  gap: 3px;
+  align-content: center;
+  padding: 9px 11px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: #151515;
+  color: #d8d8d8;
+  text-align: left;
+}
+
+.reader-exit-menu > button {
+  width: 100%;
+  font: inherit;
+}
+
+.reader-exit-menu > a:hover,
+.reader-exit-menu > button:hover {
+  border-color: #3d3d3d;
+  background: #1a1a1a;
+}
+
+.reader-exit-menu strong {
+  font-size: 11px;
+}
+
+.reader-exit-menu span {
+  color: #777;
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.reader-exit-menu button:disabled {
+  opacity: .62;
+  cursor: wait;
+}
+
+/* Give primary interactions a small physical press response. */
+button:not(:disabled):not([class*="backdrop"]),
+.reader-chrome-back,
+.reader-chrome-bottom > a,
+.reader-home-button,
+.reader-end-card a,
+.chapter-row,
+.continue-card,
+.bookmark-card,
+.manga-card,
+.discovery-card,
+.mobile-bottom-nav a,
+.header-dashboard-link,
+.site-brand {
+  transition:
+    transform .11s ease,
+    filter .11s ease,
+    border-color .11s ease,
+    background-color .11s ease;
+  transform-origin: center;
+}
+
+button:not(:disabled):not([class*="backdrop"]):active,
+.reader-chrome-back:active,
+.reader-chrome-bottom > a:active,
+.reader-home-button:active,
+.reader-end-card a:active,
+.chapter-row:active,
+.continue-card:active,
+.bookmark-card:active,
+.manga-card:active,
+.discovery-card:active,
+.mobile-bottom-nav a:active,
+.header-dashboard-link:active,
+.site-brand:active {
+  transform: translateY(1px) scale(.975);
+  filter: brightness(1.09);
+}
+
+@media (max-width: 700px) {
+  .reader-jump-list-sheet {
+    max-height: min(86dvh, 760px);
+  }
+
+  .reader-jump-list {
+    max-height: min(62dvh, 590px);
+  }
+
+  .reader-jump-list > button {
+    min-height: 62px;
+  }
+
+  .reader-exit-menu {
+    left: 0;
+  }
+
+  .reader-exit-menu strong,
+  .reader-exit-menu span {
+    color: inherit;
+  }
+
+  .reader-exit-menu span {
+    opacity: .62;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button:not(:disabled):not([class*="backdrop"]):active,
+  .reader-chrome-back:active,
+  .reader-chrome-bottom > a:active,
+  .reader-home-button:active,
+  .reader-end-card a:active,
+  .chapter-row:active,
+  .continue-card:active,
+  .bookmark-card:active,
+  .manga-card:active,
+  .discovery-card:active,
+  .mobile-bottom-nav a:active,
+  .header-dashboard-link:active,
+  .site-brand:active {
+    transform: none;
+  }
+}
