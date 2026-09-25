@@ -93,7 +93,7 @@ export default async function Home({
       </section>
 
       <div className="landing-version">
-        v1.3.5 · Email Notification Delivery
+        v1.3.6 · Notification Delivery Safety
       </div>
     </main>
   );

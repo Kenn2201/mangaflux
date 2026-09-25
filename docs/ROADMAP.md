@@ -24,7 +24,8 @@ v1.3.2  ████████████████████  ✅
 v1.3.3  ████████████████████  ✅
 v1.3.4  ████████████████████  ✅
 v1.3.5  ████████████████████  ✅
-v1.3.6+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
+v1.3.6  ████████████████████  ✅
+v1.3.7+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT
 v1.3.x  Following & Notifications
 v1.4.x  Discovery & Personalization
 v1.5+   Product Polish
@@ -34,7 +35,7 @@ v2.x    Multi-Source + Platform Expansion
 v3.x    Advanced MangaFlux
 ~~~
 
-**v1.1.x — Library & Reading Quality** and **v1.2.x — Profiles & Community Depth** are signed off after physical QA. MangaFlux is now in **v1.3.x — Following & Notifications**. **v1.3.5 — Email Notification Delivery** is complete, and v1.3.6+ continues with quiet/disable controls and delivery rate limiting.
+**v1.1.x — Library & Reading Quality** and **v1.2.x — Profiles & Community Depth** are signed off after physical QA. MangaFlux is now in **v1.3.x — Following & Notifications**. **v1.3.6 — Notification Delivery Safety** is complete, and v1.3.7+ continues with account quiet-hours controls before optional external delivery integrations.
 
 ---
 
@@ -390,12 +391,22 @@ Introduce a proper following system separate from bookmarks.
 - Inbox/checkpoint state remains durable when email delivery fails
 - No new database migration
 
-### ➡️ v1.3.6+ — Notification Delivery Controls — NEXT
+### ✅ v1.3.6 — Notification Delivery Safety
+
+- Hardened checker-to-email delivery for newly created chapter events
+- Existing global Email notifications switch remains the account disable control
+- Verified email and per-manga Alerts remain required gates
+- Maximum 20 successful notification emails per checker invocation
+- Excess eligible deliveries reported through emailRateLimited
+- Sent / skipped / failed / rate-limited aggregate counters
+- Durable inbox/checkpoint state remains independent from delivery outcome
+- No new database migration
+
+### ➡️ v1.3.7+ — Quiet Hours & Delivery Maturity — NEXT
 
 Continue in focused slices:
 
-- quiet / disable controls
-- notification rate limiting
+- account quiet-hours controls
 - optional Discord/webhook notifications only after core delivery is stable
 
 ---
