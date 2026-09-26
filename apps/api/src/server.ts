@@ -28,7 +28,7 @@ import type {
   MangaSummary
 } from "@mangaflux/sources";
 
-const APP_VERSION = "1.4.6";
+const APP_VERSION = "1.4.7";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LANGUAGE_RE = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i;
@@ -36,7 +36,8 @@ const DISCOVERY_KINDS = new Set<MangaDiscoveryKind>([
   "popular",
   "top",
   "latest",
-  "hot"
+  "hot",
+  "trending"
 ]);
 const MANGA_STATUSES = new Set([
   "ongoing",
@@ -287,40 +288,6 @@ function parseDiscoveryKind(
   }
 
   return value as MangaDiscoveryKind;
-}
-
-function buildHomeHot(
-  popular: MangaSummary[],
-  latest: MangaSummary[],
-  limit = 10
-) {
-  const ranked = new Map<
-    string,
-    { item: MangaSummary; score: number }
-  >();
-
-  latest.forEach((item, index) => {
-    ranked.set(item.id, {
-      item,
-      score: ((latest.length - index) / latest.length) * 0.62
-    });
-  });
-
-  popular.forEach((item, index) => {
-    const current = ranked.get(item.id);
-    const score =
-      ((popular.length - index) / popular.length) * 0.38;
-
-    ranked.set(item.id, {
-      item: current?.item ?? item,
-      score: (current?.score ?? 0) + score
-    });
-  });
-
-  return [...ranked.values()]
-    .sort((left, right) => right.score - left.score)
-    .slice(0, limit)
-    .map((entry) => entry.item);
 }
 
 const database = process.env.DATABASE_URL?.trim()
@@ -779,28 +746,51 @@ app.get<{
 );
 
 app.get<{
-  Querystring: { language?: string };
+  Querystring: { language?: string; status?: string };
 }>(
   "/api/discovery/home",
   { preHandler: discoveryRateLimit },
   async (request, reply) => {
     const language =
       request.query.language?.trim().toLowerCase() || "en";
+    const status = request.query.status?.trim();
 
-    if (!DISCOVERY_LANGUAGES.has(language)) {
+    if (
+      !DISCOVERY_LANGUAGES.has(language) ||
+      (status && !MANGA_STATUSES.has(status))
+    ) {
       return reply.code(400).send({
         error: "INVALID_REQUEST",
-        message: "Invalid discovery language."
+        message: "Invalid discovery language or preferred status."
       });
     }
 
-    const [popular, top, latest] = await Promise.all([
-      mangaDexSource.discover("popular", { limit: 16, language }),
-      mangaDexSource.discover("top", { limit: 16, language }),
-      mangaDexSource.discover("latest", { limit: 16, language })
-    ]);
+    const preferredStatus = status as
+      | "ongoing"
+      | "completed"
+      | "hiatus"
+      | "cancelled"
+      | undefined;
 
-    const hot = buildHomeHot(popular.items, latest.items, 10);
+    const [hot, popular, trending, top, latest] = await Promise.all([
+      mangaDexSource.discover("hot", {
+        limit: 10,
+        language,
+        status: preferredStatus
+      }),
+      mangaDexSource.discover("popular", {
+        limit: 10,
+        language,
+        status: preferredStatus
+      }),
+      mangaDexSource.discover("trending", {
+        limit: 10,
+        language,
+        status: preferredStatus
+      }),
+      mangaDexSource.discover("top", { limit: 10, language }),
+      mangaDexSource.discover("latest", { limit: 10, language })
+    ]);
 
     reply.header(
       "Cache-Control",
@@ -810,26 +800,8 @@ app.get<{
     return {
       source: mangaDexSource.id,
       language,
-      sections: {
-        hot: {
-          items: hot,
-          total: hot.length,
-          limit: hot.length,
-          offset: 0
-        },
-        popular: {
-          ...popular,
-          items: popular.items.slice(0, 10)
-        },
-        top: {
-          ...top,
-          items: top.items.slice(0, 10)
-        },
-        latest: {
-          ...latest,
-          items: latest.items.slice(0, 10)
-        }
-      }
+      preferredStatus: preferredStatus ?? null,
+      sections: { hot, popular, trending, top, latest }
     };
   }
 );

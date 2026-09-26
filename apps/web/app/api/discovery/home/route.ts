@@ -11,6 +11,8 @@ export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   const language =
     request.nextUrl.searchParams.get("language")?.trim().toLowerCase() ?? "en";
+  const status = request.nextUrl.searchParams.get("status")?.trim();
+  const statuses = new Set(["ongoing", "completed", "hiatus", "cancelled"]);
   const supported = new Set([
     "en",
     "ja",
@@ -27,16 +29,19 @@ export async function GET(request: NextRequest) {
     "th"
   ]);
 
-  if (!supported.has(language)) {
+  if (
+    !supported.has(language) ||
+    (status && !statuses.has(status))
+  ) {
     return NextResponse.json(
-      { error: "INVALID_REQUEST", message: "Invalid discovery language" },
+      { error: "INVALID_REQUEST", message: "Invalid discovery preference" },
       { status: 400 }
     );
   }
 
   try {
     const upstream = await fetch(
-      `${API_URL.replace(/\/$/, "")}/api/discovery/home?language=${encodeURIComponent(language)}`,
+      `${API_URL.replace(/\/$/, "")}/api/discovery/home?language=${encodeURIComponent(language)}${status ? `&status=${encodeURIComponent(status)}` : ""}`,
       {
         cache: "no-store",
         signal: AbortSignal.timeout(20_000)

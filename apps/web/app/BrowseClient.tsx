@@ -14,7 +14,7 @@ import { reliableFetch } from "../lib/reliableFetch";
 import BrowseFilters from "./BrowseFilters";
 import { useDiscoveryLanguage } from "../lib/useDiscoveryLanguage";
 
-type DiscoveryKind = "hot" | "popular" | "top" | "latest";
+type DiscoveryKind = "hot" | "popular" | "top" | "latest" | "trending";
 
 type PagePayload = {
   items: MangaTileItem[];
@@ -35,8 +35,13 @@ const labels: Record<
   },
   popular: {
     eyebrow: "Popular",
-    title: "Most followed manga",
-    description: "Browse titles ordered by MangaDex follow popularity."
+    title: "Popular right now",
+    description: "MangaDex follow popularity with a light freshness signal."
+  },
+  trending: {
+    eyebrow: "Trending",
+    title: "Popular and active",
+    description: "Titles ranking strongly across both popularity and recent chapter activity."
   },
   top: {
     eyebrow: "Top rated",
@@ -243,7 +248,7 @@ export default function BrowseClient({
 
             <span>
               Page {page}
-              {kind !== "hot" ? ` of ${totalPages}` : ""}
+              {kind !== "hot" && kind !== "trending" ? ` of ${totalPages}` : ""}
             </span>
 
             {page < totalPages ? (

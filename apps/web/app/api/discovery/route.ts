@@ -6,7 +6,7 @@ const API_URL =
   process.env.NEXT_PUBLIC_API_URL ??
   "https://api.manga.kenncode.me";
 
-const kinds = new Set(["hot", "popular", "top", "latest"]);
+const kinds = new Set(["hot", "popular", "top", "latest", "trending"]);
 const languages = new Set([
   "en",
   "ja",

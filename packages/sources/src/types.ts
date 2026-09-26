@@ -40,7 +40,8 @@ export type MangaDiscoveryKind =
   | "popular"
   | "top"
   | "latest"
-  | "hot";
+  | "hot"
+  | "trending";
 
 export type MangaPublicationStatus =
   | "ongoing"

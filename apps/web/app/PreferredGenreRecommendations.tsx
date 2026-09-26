@@ -10,6 +10,7 @@ import MangaTile, {
 import { reliableFetch } from "../lib/reliableFetch";
 import { useDiscoveryLanguage } from "../lib/useDiscoveryLanguage";
 import { usePreferredGenres } from "../lib/usePreferredGenres";
+import { usePreferredStatus } from "../lib/usePreferredStatus";
 
 type RankedItem = {
   item: MangaTileItem;
@@ -25,6 +26,7 @@ type Recommendation = {
 export default function PreferredGenreRecommendations() {
   const { language } = useDiscoveryLanguage();
   const { genres } = usePreferredGenres();
+  const { status } = usePreferredStatus();
   const [items, setItems] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -49,7 +51,7 @@ export default function PreferredGenreRecommendations() {
             const response = await reliableFetch(
               `/api/discovery?kind=${kind}&limit=12&tag=${encodeURIComponent(
                 genre.id
-              )}&language=${encodeURIComponent(language)}`,
+              )}&language=${encodeURIComponent(language)}${status ? `&status=${encodeURIComponent(status)}` : ""}`,
               {
                 cache: "no-store",
                 signal: controller.signal
@@ -119,7 +121,7 @@ export default function PreferredGenreRecommendations() {
 
     void load();
     return () => controller.abort();
-  }, [genreKey, language]);
+  }, [genreKey, language, status]);
 
   if (!genres.length) return null;
   if (!loading && !items.length) return null;

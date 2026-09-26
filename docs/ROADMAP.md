@@ -33,8 +33,9 @@ v1.4.2  ████████████████████  ✅ QA
 v1.4.3  ████████████████████  ✅ QA
 v1.4.4  ████████████████████  ✅ QA
 v1.4.5  ████████████████████  ✅ QA
-v1.4.6  ████████████████████  🧪 CURRENT
-v1.4.7+ ░░░░░░░░░░░░░░░░░░░░  ← NEXT AFTER QA
+v1.4.6  ████████████████████  ✅ QA
+v1.4.7  ████████████████████  🧪 CURRENT
+v1.5+   ░░░░░░░░░░░░░░░░░░░░  ← NEXT AFTER QA
 v1.4.x  Discovery & Personalization
 v1.5+   Product Polish
          ↓
@@ -43,7 +44,7 @@ v2.x    Multi-Source + Platform Expansion
 v3.x    Advanced MangaFlux
 ~~~
 
-**v1.1.x — Library & Reading Quality**, **v1.2.x — Profiles & Community Depth**, and **v1.3.x — Following & Notifications** are signed off after physical QA. Optional Discord/webhook delivery is deferred. **v1.4.0 — Recommendation Explanations**, **v1.4.1 — Activity-Based Recommendations**, **v1.4.2 — Saved Discovery Filters**, **v1.4.3 — Recently Viewed Controls**, **v1.4.4 — Search History Controls**, and **v1.4.5 — Discovery Language Preference** have also passed physical QA. MangaFlux is now implementing **v1.4.6 — Genre Preferences** inside **v1.4.x — Discovery & Personalization**.
+**v1.1.x — Library & Reading Quality**, **v1.2.x — Profiles & Community Depth**, and **v1.3.x — Following & Notifications** are signed off after physical QA. Optional Discord/webhook delivery is deferred. **v1.4.0 — Recommendation Explanations**, **v1.4.1 — Activity-Based Recommendations**, **v1.4.2 — Saved Discovery Filters**, **v1.4.3 — Recently Viewed Controls**, **v1.4.4 — Search History Controls**, and **v1.4.5 — Discovery Language Preference** have also passed physical QA. **v1.4.6 — Genre Preferences** has now also passed physical QA. MangaFlux is implementing the final planned v1.4.x release, **v1.4.7 — Personalization Depth**.
 
 ---
 
@@ -503,7 +504,7 @@ Make discovery increasingly personalized.
 - Physical production QA passed
 - No new database migration
 
-### 🧪 v1.4.6 — Genre Preferences — CURRENT
+### ✅ v1.4.6 — Genre Preferences — QA SIGNED OFF
 
 - Choose up to three explicit preferred genres on the current device
 - Keep genre preferences separate from saved Browse filter presets
@@ -513,14 +514,21 @@ Make discovery increasingly personalized.
 - Merge duplicate manga across preferred-genre discovery groups
 - Rank explicit preferences while preserving normal global discovery rankings
 - Respect the current Discovery language
+- Physical production QA passed
 - No new database migration
 
-### ➡️ v1.4.7+ — Remaining Personalization Depth — NEXT AFTER QA
+### 🧪 v1.4.7 — Personalization Depth — CURRENT / FINAL v1.4.x QA TARGET
 
-- Manga-status preferences
-- Better Hot discovery
-- Better Popular discovery
-- Better Trending discovery
+- Add an optional device-local manga-status preference
+- Apply preferred status to Hot, Popular, Trending, and preferred-genre recommendations
+- Improve Hot as a freshness-led popularity blend
+- Improve Popular with follow popularity dominant and bounded freshness reinforcement
+- Add first-class Trending discovery based on popularity + recent chapter activity overlap
+- Add Trending to Home/Dashboard and Browse
+- Keep Top rated and Latest available as global reference rankings
+- Keep language, genre, status, and saved-filter preferences independent
+- No new database migration
+- After physical QA passes, v1.4.x is complete and v1.5+ Product Polish becomes next
 
 ---
 
