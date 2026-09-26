@@ -7,7 +7,29 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- v1.5+ product polish, PWA, and performance work after v1.4.7 physical QA
+- v2.x multi-source platform expansion after v1.5.0 physical QA
+- shared Redis/edge rate limiting only when multi-instance production traffic requires shared counters
+
+## 1.5.0 - 2026-09-27 — Product Polish
+
+### PWA and resilience
+- Accepted physical QA sign-off for v1.4.7 and the full v1.4.x Discovery & Personalization phase.
+- Added installable manifest metadata and MangaFlux app icons.
+- Added a conservative same-origin service worker for offline fallback and static shell assets.
+- Excluded API, authenticated state, and reader chapter routes from service-worker caching.
+- Added a dedicated offline page and online/offline status announcements.
+
+### Shell, accessibility, and performance
+- Added route-level loading, recoverable error, and not-found experiences.
+- Move keyboard focus to route content after client navigation.
+- Added off-screen rendering containment for major content surfaces.
+- Preserve existing reduced-motion and focus-visible behavior.
+
+### Production hardening
+- Added explicit no-stale policy for the service worker/offline fallback and bounded caching for app icons.
+- Retained security headers, diagnostics, proxy cache controls, request limits, and bounded in-memory rate-limit buckets.
+- Assessed shared Redis/edge rate limiting and intentionally deferred it until MangaFlux needs multi-instance shared counters.
+- No database migration is required.
 
 ## 1.4.7 - 2026-09-27 — Personalization Depth
 

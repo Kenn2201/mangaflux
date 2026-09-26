@@ -63,6 +63,9 @@ export default function AppChrome({
   const reader = pathname.startsWith("/read/");
 
   useEffect(() => {
+    if (!reader) {
+      requestAnimationFrame(() => contentRef.current?.focus({ preventScroll: true }));
+    }
     if (reader || !contentRef.current) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return;
