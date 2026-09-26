@@ -62,8 +62,17 @@ export default function AppChrome({
   const contentRef = useRef<HTMLDivElement | null>(null);
   const reader = pathname.startsWith("/read/");
 
+  const previousPathRef = useRef(pathname);
+
   useEffect(() => {
-    if (!reader) {
+    const previousPath = previousPathRef.current;
+    previousPathRef.current = pathname;
+
+    if (
+      previousPath !== pathname &&
+      !reader &&
+      window.matchMedia("(pointer: fine)").matches
+    ) {
       requestAnimationFrame(() => contentRef.current?.focus({ preventScroll: true }));
     }
     if (reader || !contentRef.current) return;
