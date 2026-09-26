@@ -333,11 +333,27 @@
 - [x] respect the active Discovery language
 - [x] preserve normal global discovery rankings
 - [x] no new database migration
+- [x] physical production QA signed off
+
+## v1.4.7 — Personalization Depth
+
+- [x] add optional device-local manga-status preference
+- [x] support ongoing/completed/hiatus/cancelled preference values
+- [x] apply preferred status to Hot, Popular, and Trending
+- [x] apply preferred status to preferred-genre recommendations
+- [x] improve Hot ranking while keeping recent activity dominant
+- [x] improve Popular with bounded freshness reinforcement
+- [x] add first-class Trending discovery
+- [x] prioritize titles strong in both popularity and recent activity for Trending
+- [x] expose Trending on Home/Dashboard
+- [x] expose Trending in Browse and saved-filter validation
+- [x] preserve Top rated and Latest as global reference views
+- [x] no new database migration
 
 ## Remaining v1.4.x
 
-- [ ] manga-status preferences
-- [ ] improve Hot / Popular / Trending
+- [x] all planned implementation is included in v1.4.7
+- [ ] physical production QA for v1.4.7
 
 ## Future V1.x
 

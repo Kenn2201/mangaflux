@@ -11,7 +11,7 @@ import { notify } from "../lib/toast";
 import { discoveryLanguageOptions } from "../lib/discoveryPreferences";
 import { useDiscoveryLanguage } from "../lib/useDiscoveryLanguage";
 
-type DiscoveryKind = "hot" | "popular" | "top" | "latest";
+type DiscoveryKind = "hot" | "popular" | "top" | "latest" | "trending";
 
 type Genre = {
   id: string;
@@ -37,7 +37,8 @@ const DISCOVERY_KINDS = new Set<DiscoveryKind>([
   "hot",
   "popular",
   "top",
-  "latest"
+  "latest",
+  "trending"
 ]);
 const MANGA_STATUSES = new Set([
   "ongoing",
@@ -50,7 +51,8 @@ const KIND_LABELS: Record<DiscoveryKind, string> = {
   popular: "Popular",
   top: "Top rated",
   latest: "Latest",
-  hot: "Hot"
+  hot: "Hot",
+  trending: "Trending"
 };
 
 function readSavedFilters(): SavedDiscoveryFilter[] {
@@ -346,6 +348,7 @@ export default function BrowseFilters({
             <option value="top">Top rated</option>
             <option value="latest">Latest updates</option>
             <option value="hot">MangaFlux Hot</option>
+            <option value="trending">Trending</option>
           </select>
         </label>
 

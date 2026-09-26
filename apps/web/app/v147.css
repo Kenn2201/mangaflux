@@ -1,0 +1,51 @@
+/* MangaFlux v1.4.7 — Personalization Depth */
+
+.status-preference {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: -8px 0 24px;
+  padding: 13px;
+  border: 1px solid #292929;
+  border-radius: 14px;
+  background: #0d0d0d;
+}
+
+.status-preference strong {
+  display: block;
+  color: #d6d6d6;
+  font-size: 11px;
+}
+
+.status-preference span {
+  display: block;
+  margin-top: 2px;
+  color: #737373;
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.status-preference select {
+  width: min(220px, 42vw);
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid #303030;
+  border-radius: 11px;
+  outline: 0;
+  background: #111;
+  color: #d9d9d9;
+  font-size: 11px;
+}
+
+@media (max-width: 700px) {
+  .status-preference {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .status-preference select {
+    width: 100%;
+    min-height: 44px;
+  }
+}

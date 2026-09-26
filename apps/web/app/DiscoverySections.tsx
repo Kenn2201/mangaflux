@@ -16,6 +16,8 @@ import {
 import { useDiscoveryLanguage } from "../lib/useDiscoveryLanguage";
 import GenrePreferences from "./GenrePreferences";
 import PreferredGenreRecommendations from "./PreferredGenreRecommendations";
+import StatusPreference from "./StatusPreference";
+import { usePreferredStatus } from "../lib/usePreferredStatus";
 
 type DiscoveryPage = {
   items: MangaTileItem[];
@@ -28,6 +30,7 @@ type Payload = {
   sections: {
     hot: DiscoveryPage;
     popular: DiscoveryPage;
+    trending: DiscoveryPage;
     top: DiscoveryPage;
     latest: DiscoveryPage;
   };
@@ -43,8 +46,14 @@ const sections = [
   {
     key: "popular" as const,
     eyebrow: "Popular",
-    title: "Most followed",
-    description: "Manga readers keep coming back to."
+    title: "Popular right now",
+    description: "Strong follow popularity with a light freshness signal."
+  },
+  {
+    key: "trending" as const,
+    eyebrow: "Trending",
+    title: "Popular and active",
+    description: "Titles ranking strongly in both popularity and recent chapter activity."
   },
   {
     key: "top" as const,
@@ -68,6 +77,7 @@ export default function DiscoverySections({
   const [data, setData] = useState<Payload | null>(null);
   const [failed, setFailed] = useState(false);
   const { language, setLanguage } = useDiscoveryLanguage();
+  const { status } = usePreferredStatus();
 
   useEffect(() => {
     let cancelled = false;
@@ -77,7 +87,7 @@ export default function DiscoverySections({
     async function load() {
       try {
         const response = await reliableFetch(
-          `/api/discovery/home?language=${encodeURIComponent(language)}`,
+          `/api/discovery/home?language=${encodeURIComponent(language)}${status ? `&status=${encodeURIComponent(status)}` : ""}`,
           { cache: "no-store" }
         );
 
@@ -94,7 +104,7 @@ export default function DiscoverySections({
     return () => {
       cancelled = true;
     };
-  }, [language]);
+  }, [language, status]);
 
   if (failed) {
     return (
@@ -137,6 +147,7 @@ export default function DiscoverySections({
       </div>
 
       <GenrePreferences compact={compact} />
+      <StatusPreference />
       <PreferredGenreRecommendations />
 
       {sections.map((section) => {
@@ -151,7 +162,16 @@ export default function DiscoverySections({
                 {!compact ? <p>{section.description}</p> : null}
               </div>
 
-              <Link href={`/browse?kind=${section.key}`}>
+              <Link
+                href={`/browse?kind=${section.key}${
+                  status &&
+                  (section.key === "hot" ||
+                    section.key === "popular" ||
+                    section.key === "trending")
+                    ? `&status=${encodeURIComponent(status)}`
+                    : ""
+                }`}
+              >
                 Show all <span aria-hidden="true">→</span>
               </Link>
             </div>

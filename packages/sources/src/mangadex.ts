@@ -22,7 +22,7 @@ import type {
 const BASE = process.env.MANGADEX_BASE_URL ?? "https://api.mangadex.org";
 const HOSTS = ["api.mangadex.org"];
 const COVER_BASE = "https://uploads.mangadex.org/covers";
-const USER_AGENT = "MangaFlux/1.4.6 (+https://manga.kenncode.me)";
+const USER_AGENT = "MangaFlux/1.4.7 (+https://manga.kenncode.me)";
 const MANIFEST_TTL_MS = 60_000;
 const SEARCH_TTL_MS = 30_000;
 const DETAILS_TTL_MS = 5 * 60_000;
@@ -453,6 +453,7 @@ async function buildHotPool(
   options: DiscoveryOptions = {}
 ) {
   const cacheKey = [
+    "hot-v147",
     options.tagId?.trim() || "all",
     options.year ?? "any-year",
     options.creatorId?.trim() || "any-creator",
@@ -485,23 +486,28 @@ async function buildHotPool(
 
   const ranked = new Map<
     string,
-    { item: MangaSummary; score: number }
+    { item: MangaSummary; score: number; signals: number }
   >();
 
   latest.items.forEach((item, index) => {
     ranked.set(item.id, {
       item,
-      score: ((100 - index) / 100) * 0.62
+      score: ((100 - index) / 100) * 0.65,
+      signals: 1
     });
   });
 
   popular.items.forEach((item, index) => {
     const current = ranked.get(item.id);
-    const score = ((100 - index) / 100) * 0.38;
+    const popularity = ((100 - index) / 100) * 0.35;
 
     ranked.set(item.id, {
       item: current?.item ?? item,
-      score: (current?.score ?? 0) + score
+      score:
+        (current?.score ?? 0) +
+        popularity +
+        (current ? 0.12 : 0),
+      signals: (current?.signals ?? 0) + 1
     });
   });
 
@@ -513,17 +519,155 @@ async function buildHotPool(
   return pool;
 }
 
+async function buildPopularPool(
+  options: DiscoveryOptions = {}
+) {
+  const cacheKey = [
+    "popular-v147",
+    options.tagId?.trim() || "all",
+    options.year ?? "any-year",
+    options.creatorId?.trim() || "any-creator",
+    options.status ?? "any-status",
+    options.language?.trim().toLowerCase() || "en"
+  ].join(":");
+  const cached = readCache(hotPoolCache, cacheKey);
+  if (cached) return cached;
+
+  const [popular, latest] = await Promise.all([
+    fetchOrderedManga("popular", {
+      limit: 100,
+      offset: 0,
+      tagId: options.tagId,
+      year: options.year,
+      creatorId: options.creatorId,
+      status: options.status,
+      language: options.language
+    }),
+    fetchOrderedManga("latest", {
+      limit: 100,
+      offset: 0,
+      tagId: options.tagId,
+      year: options.year,
+      creatorId: options.creatorId,
+      status: options.status,
+      language: options.language
+    })
+  ]);
+
+  const ranked = new Map<string, { item: MangaSummary; score: number }>();
+
+  popular.items.forEach((item, index) => {
+    ranked.set(item.id, {
+      item,
+      score: ((100 - index) / 100) * 0.85
+    });
+  });
+
+  latest.items.forEach((item, index) => {
+    const current = ranked.get(item.id);
+    const freshness = ((100 - index) / 100) * 0.15;
+    ranked.set(item.id, {
+      item: current?.item ?? item,
+      score: (current?.score ?? 0) + freshness
+    });
+  });
+
+  const pool = [...ranked.values()]
+    .sort((left, right) => right.score - left.score)
+    .map((entry) => entry.item);
+
+  writeCache(hotPoolCache, cacheKey, pool, HOT_TTL_MS);
+  return pool;
+}
+
+async function buildTrendingPool(
+  options: DiscoveryOptions = {}
+) {
+  const cacheKey = [
+    "trending-v147",
+    options.tagId?.trim() || "all",
+    options.year ?? "any-year",
+    options.creatorId?.trim() || "any-creator",
+    options.status ?? "any-status",
+    options.language?.trim().toLowerCase() || "en"
+  ].join(":");
+  const cached = readCache(hotPoolCache, cacheKey);
+  if (cached) return cached;
+
+  const [latest, popular] = await Promise.all([
+    fetchOrderedManga("latest", {
+      limit: 100,
+      offset: 0,
+      tagId: options.tagId,
+      year: options.year,
+      creatorId: options.creatorId,
+      status: options.status,
+      language: options.language
+    }),
+    fetchOrderedManga("popular", {
+      limit: 100,
+      offset: 0,
+      tagId: options.tagId,
+      year: options.year,
+      creatorId: options.creatorId,
+      status: options.status,
+      language: options.language
+    })
+  ]);
+
+  const ranked = new Map<
+    string,
+    { item: MangaSummary; score: number; signals: number }
+  >();
+
+  latest.items.forEach((item, index) => {
+    ranked.set(item.id, {
+      item,
+      score: ((100 - index) / 100) * 0.5,
+      signals: 1
+    });
+  });
+
+  popular.items.forEach((item, index) => {
+    const current = ranked.get(item.id);
+    ranked.set(item.id, {
+      item: current?.item ?? item,
+      score:
+        (current?.score ?? 0) +
+        ((100 - index) / 100) * 0.5,
+      signals: (current?.signals ?? 0) + 1
+    });
+  });
+
+  const pool = [...ranked.values()]
+    .sort((left, right) => {
+      if (left.signals !== right.signals) {
+        return right.signals - left.signals;
+      }
+      return right.score - left.score;
+    })
+    .map((entry) => entry.item);
+
+  writeCache(hotPoolCache, cacheKey, pool, HOT_TTL_MS);
+  return pool;
+}
+
 async function discoverManga(
   kind: MangaDiscoveryKind,
   options: DiscoveryOptions = {}
 ): Promise<MangaListPage> {
-  if (kind !== "hot") {
+  if (kind === "top" || kind === "latest") {
     return fetchOrderedManga(kind, options);
   }
 
   const limit = boundedLimit(options.limit, 24);
   const offset = boundedOffset(options.offset);
-  const pool = await buildHotPool(options);
+  const pool =
+    kind === "hot"
+      ? await buildHotPool(options)
+      : kind === "trending"
+        ? await buildTrendingPool(options)
+        : await buildPopularPool(options);
 
   return {
     items: pool.slice(offset, offset + limit),

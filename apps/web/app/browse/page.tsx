@@ -1,11 +1,12 @@
 import BrowseClient from "../BrowseClient";
 
-type DiscoveryKind = "hot" | "popular" | "top" | "latest";
+type DiscoveryKind = "hot" | "popular" | "top" | "latest" | "trending";
 const kinds = new Set<DiscoveryKind>([
   "hot",
   "popular",
   "top",
-  "latest"
+  "latest",
+  "trending"
 ]);
 
 export const metadata = {

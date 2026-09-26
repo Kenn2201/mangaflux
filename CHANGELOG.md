@@ -7,8 +7,21 @@ The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
 ## Unreleased
 
 ### Planned
-- stronger manga-status preferences
-- improved Hot / Popular / Trending discovery
+- v1.5+ product polish, PWA, and performance work after v1.4.7 physical QA
+
+## 1.4.7 - 2026-09-27 — Personalization Depth
+
+### Discovery preferences
+- Accepted physical QA sign-off for v1.4.6 Genre Preferences.
+- Added an optional device-local manga-status preference.
+- Apply preferred status to Hot, Popular, Trending, and preferred-genre recommendations.
+- Added a first-class Trending discovery category.
+- Keep Hot freshness-led with popularity reinforcement.
+- Keep Popular follow-popularity-led with a bounded freshness reinforcement.
+- Rank Trending by overlap between popularity and recent chapter activity before combined position score.
+- Added Trending to Browse and Home/Dashboard discovery.
+- Keep Top rated and Latest independent from preferred status so global reference views remain available.
+- No database migration is required.
 
 ## 1.4.6 - 2026-09-26 — Genre Preferences
 

@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v1.4.6--Genre_Preferences-indigo.svg)
+![Version](https://img.shields.io/badge/version-v1.4.7--Personalization_Depth-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v1.4.6 — Genre Preferences**
+**v1.4.7 — Personalization Depth**
 
-MangaFlux V1 remains a stable single-source MangaDex product. After v1.4.5 Discovery Language Preference passed physical QA, v1.4.6 adds explicit device-local preferred genres and a dedicated personalized discovery rail without changing normal global rankings.
+MangaFlux V1 remains a stable single-source MangaDex product. After v1.4.6 Genre Preferences passed physical QA, v1.4.7 completes the planned v1.4.x personalization depth with a device-local manga-status preference plus distinct improved Hot, Popular, and Trending discovery rankings.
 
 ### Library improvements
 
@@ -49,21 +49,17 @@ The settings sheet is available from manga chapter lists and inside the immersiv
 - an alternate-release count is shown when duplicates are collapsed
 - readers can opt back into all alternate releases
 
-### v1.4.6 refinements
+### v1.4.7 refinements
 
-- v1.4.5 Discovery Language Preference passed physical QA and is signed off
-- readers can choose up to three explicit preferred genres on the current device
-- genre preferences are independent from saved Browse filter presets
-- preferred genres can be added, removed individually, or cleared
-- a dedicated From your preferred genres rail blends results from the selected genres
-- duplicate manga across preferred-genre result groups are merged and ranked once
-- the preferred-genre rail respects the current Discovery language
-- normal Hot / Popular / Top / Latest rankings remain unchanged
+- v1.4.6 Genre Preferences passed physical QA and is signed off
+- readers can optionally prefer Ongoing, Completed, Hiatus, or Cancelled manga on the current device
+- preferred status personalizes Hot, Popular, Trending, and the preferred-genre rail
+- MangaFlux Hot is freshness-led, reinforced by popularity, and boosts titles strong in both signals
+- Popular keeps follow popularity dominant while adding a bounded freshness signal
+- Trending is a new discovery category that prioritizes titles strong in both popularity and recent chapter activity
+- Browse supports Trending alongside Hot, Popular, Top rated, and Latest
+- Discovery language and preferred status remain independent
 - no new database migration is required
-
-### Architecture boundary
-
-V1 remains MangaDex-only. MangaFlux does not bypass anti-bot protections, CAPTCHAs, paywalls, or login walls, and does not mirror manga page binaries into MangaFlux persistence.
 
 ## Branch workflow
 
