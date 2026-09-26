@@ -3,6 +3,7 @@ import type {
   Viewport
 } from "next";
 import AppChrome from "./AppChrome";
+import PwaRuntime from "./PwaRuntime";
 import "./styles.css";
 import "./v060.css";
 import "./v070.css";
@@ -36,6 +37,7 @@ import "./v144.css";
 import "./v145.css";
 import "./v146.css";
 import "./v147.css";
+import "./v150.css";
 
 export const metadata: Metadata = {
   title: {
@@ -43,7 +45,17 @@ export const metadata: Metadata = {
     template: "%s · MangaFlux"
   },
   description:
-    "A mobile-first manga discovery and reading platform powered by source adapters."
+    "A mobile-first manga discovery and reading platform powered by source adapters.",
+  applicationName: "MangaFlux",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "MangaFlux",
+    statusBarStyle: "black-translucent"
+  },
+  formatDetection: {
+    telephone: false
+  }
 };
 
 export const viewport: Viewport = {
@@ -61,6 +73,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <PwaRuntime />
         <AppChrome>{children}</AppChrome>
       </body>
     </html>

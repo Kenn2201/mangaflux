@@ -517,7 +517,7 @@ Make discovery increasingly personalized.
 - Physical production QA passed
 - No new database migration
 
-### 🧪 v1.4.7 — Personalization Depth — CURRENT / FINAL v1.4.x QA TARGET
+### ✅ v1.4.7 — Personalization Depth — QA SIGNED OFF
 
 - Add an optional device-local manga-status preference
 - Apply preferred status to Hot, Popular, Trending, and preferred-genre recommendations
@@ -528,24 +528,30 @@ Make discovery increasingly personalized.
 - Keep Top rated and Latest available as global reference rankings
 - Keep language, genre, status, and saved-filter preferences independent
 - No new database migration
-- After physical QA passes, v1.4.x is complete and v1.5+ Product Polish becomes next
+- Physical production QA passed
+- v1.4.x Discovery & Personalization is complete
 
 ---
 
-## v1.5+ — Product Polish
+## 🧪 v1.5.0 — Product Polish — CURRENT / CONSOLIDATED QA TARGET
 
 Finish maturing MangaFlux V1 before changing its underlying source architecture.
 
-- PWA/installability
-- Faster application shell
-- Accessibility improvements
-- Performance improvements
-- Offline-safe shell/state where appropriate
-- Production hardening
-- Scaling only when real traffic requires it
-- Shared Redis/edge rate limiting only once MangaFlux actually needs multi-instance infrastructure
-
-Then the major architectural evolution begins.
+- Installable PWA manifest and app identity
+- Same-origin service worker with conservative static-shell caching
+- Offline-safe fallback without caching private API/state or reader traffic
+- Live online/offline status feedback
+- Faster route shell with loading state
+- Recoverable application error state
+- Dedicated not-found state
+- Keyboard-focus restoration after route navigation
+- Existing focus-visible and reduced-motion accessibility retained
+- Off-screen rendering containment for major content surfaces
+- Explicit service-worker/offline/icon cache policies
+- Existing security headers, diagnostics, cache controls, and bounded rate limits retained
+- Shared Redis/edge rate limiting assessed and deferred until real multi-instance traffic requires shared counters
+- No new database migration
+- After physical QA passes, v1.5.0 closes the planned V1 Product Polish phase and v2.x becomes next
 
 ---
 

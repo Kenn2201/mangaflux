@@ -353,7 +353,27 @@
 ## Remaining v1.4.x
 
 - [x] all planned implementation is included in v1.4.7
-- [ ] physical production QA for v1.4.7
+- [x] physical production QA for v1.4.7
+- [x] v1.4.x Discovery & Personalization signed off
+
+## v1.5.0 — Product Polish
+
+- [x] add installable PWA manifest and app icons
+- [x] add conservative same-origin service worker
+- [x] add offline-safe fallback page
+- [x] exclude API/state and reader traffic from service-worker caching
+- [x] add live online/offline status feedback
+- [x] add route-level loading state
+- [x] add recoverable error state
+- [x] add dedicated not-found state
+- [x] restore keyboard focus to route content after navigation
+- [x] preserve focus-visible and reduced-motion accessibility
+- [x] defer off-screen rendering work for major content surfaces
+- [x] add explicit service-worker/offline/icon cache policies
+- [x] retain existing security headers, diagnostics, cache controls, and bounded rate limits
+- [x] assess shared Redis/edge rate limiting; defer until multi-instance traffic requires it
+- [x] no new database migration
+- [ ] physical production QA for consolidated v1.5.0
 
 ## Future V1.x
 

@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v1.4.7--Personalization_Depth-indigo.svg)
+![Version](https://img.shields.io/badge/version-v1.5.0--Product_Polish-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v1.4.7 — Personalization Depth**
+**v1.5.0 — Product Polish**
 
-MangaFlux V1 remains a stable single-source MangaDex product. After v1.4.6 Genre Preferences passed physical QA, v1.4.7 completes the planned v1.4.x personalization depth with a device-local manga-status preference plus distinct improved Hot, Popular, and Trending discovery rankings.
+MangaFlux V1 remains a stable single-source MangaDex product. v1.4.7 and the full v1.4.x Discovery & Personalization phase passed physical QA. v1.5.0 consolidates the complete planned Product Polish scope into one final V1 QA target: installability, offline-safe fallback, faster shell states, accessibility, performance, and production hardening.
 
 ### Library improvements
 
@@ -49,16 +49,19 @@ The settings sheet is available from manga chapter lists and inside the immersiv
 - an alternate-release count is shown when duplicates are collapsed
 - readers can opt back into all alternate releases
 
-### v1.4.7 refinements
+### v1.5.0 refinements
 
-- v1.4.6 Genre Preferences passed physical QA and is signed off
-- readers can optionally prefer Ongoing, Completed, Hiatus, or Cancelled manga on the current device
-- preferred status personalizes Hot, Popular, Trending, and the preferred-genre rail
-- MangaFlux Hot is freshness-led, reinforced by popularity, and boosts titles strong in both signals
-- Popular keeps follow popularity dominant while adding a bounded freshness signal
-- Trending is a new discovery category that prioritizes titles strong in both popularity and recent chapter activity
-- Browse supports Trending alongside Hot, Popular, Top rated, and Latest
-- Discovery language and preferred status remain independent
+- v1.4.7 and the full v1.4.x phase passed physical QA and are signed off
+- add an installable web-app manifest with MangaFlux icons and standalone metadata
+- add a conservative service worker that caches only the offline fallback and same-origin static shell assets
+- never cache authenticated API/state traffic or reader chapter traffic in the service worker
+- add a dedicated offline fallback and live offline-status announcement
+- add route-level loading, error recovery, and not-found states
+- move keyboard focus to new route content for clearer navigation
+- add content-visibility containment to defer off-screen rendering work
+- add explicit service-worker/offline/icon cache policies
+- retain existing reduced-motion, focus-visible, security-header, diagnostics, and bounded rate-limit protections
+- shared Redis/edge rate limiting remains intentionally deferred until MangaFlux runs multiple API instances or real traffic proves the need
 - no new database migration is required
 
 ## Branch workflow
