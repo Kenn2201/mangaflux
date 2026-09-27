@@ -557,149 +557,206 @@ Finish maturing MangaFlux V1 before changing its underlying source architecture.
 
 # v2.x — Multi-Source + Platform Expansion
 
-This is intentionally a **large and expandable phase**.
+This is intentionally a **large and expandable phase**. The repository inspection after v1.5.0 confirmed that V1 already stores `source` beside manga IDs in core library/progress/follow/notification records and already exposes normalized `MangaSource` contracts. The remaining coupling is primarily source dispatch, MangaDex-only validation, routes/URLs, cover-host policy, reader preferences, UI labels, and operations.
 
-v2 is not simply "add another manga source."
-
-It gives MangaFlux room for:
+The safe migration path is therefore incremental:
 
 ~~~text
-sources → architecture → identity → data → migration → adapters
-        → operations → scaling → platform maturity
+existing source-aware V1 data
+→ source registry + capabilities + dispatch
+→ second permitted source
+→ unified search
+→ canonical identity/dedup
+→ source selection/fallback
+→ library migration/reconciliation
+→ adapter SDK
+→ operations/scale
 ~~~
 
-We can add **v2.7 → v2.8 → v2.9 → v2.10 → v2.11...** if necessary.
-
-**Do not rush into v3.**
+MangaDex remains the default/only enabled production source until another source is explicitly implemented and validated. Existing MangaDex IDs and user data must remain valid throughout v2.
 
 ---
 
-## v2.0.x — Source Platform Foundation
+## ➡️ v2.0.x — Source Platform Foundation — NEXT
 
-Build the architecture that allows MangaFlux to stop being tightly coupled to MangaDex.
+Build the source abstraction without changing current MangaDex user behavior.
 
-- Source registry
-- Source capability model
-- Normalized manga contracts
-- Normalized chapter contracts
-- Normalized search contracts
-- Source configuration
-- Source health monitoring
-- Attribution requirements
-- Per-source caching policies
-- Per-source rate policies
+### v2.0.0 — Source Registry & Identity Contracts
+- Add a central source registry instead of importing/dispatching MangaDex directly
+- Define stable source IDs and source descriptors
+- Define source-aware manga and chapter references
+- Keep existing MangaDex IDs backward compatible
+- Add registry lookup/validation helpers
+- Replace new MangaDex-only source validation with registry-backed validation where safe
+- Keep MangaDex as the only enabled source
+- No user-facing second source yet
+
+### v2.0.1 — Source Capability Model
+- Declare capabilities per source: search, discovery, tags, details, related titles, chapters, pages, health
+- Declare supported discovery kinds
+- Declare language/content capabilities where relevant
+- Fail explicitly when a source does not support an operation
+- Never silently pretend capabilities exist
+
+### v2.0.2 — Source-Aware API Dispatch
+- Route source operations through the registry
+- Make search/details/chapters/pages/health dispatch source-aware
+- Preserve backward-compatible MangaDex routes during migration
+- Introduce source-aware request/response contracts without breaking V1 clients
+- Remove direct MangaDex assumptions from shared dispatch paths
+
+### v2.0.3 — Source Policy & Attribution
+- Per-source attribution metadata
+- Per-source allowed image/content hosts
+- Per-source caching policy
+- Per-source request/rate policy
 - Prefer official/public APIs
 - HTML adapters only where explicitly permitted
-- No CAPTCHA bypass
-- No paywall bypass
-- No login-wall bypass
-- No anti-bot bypass
+- No CAPTCHA, paywall, login-wall, or anti-bot bypass
+- Surface the real source instead of disguising it
+
+### v2.0.4 — Source Health & Diagnostics
+- Registry-wide source health model
+- Per-source latency/status
+- Capability-aware diagnostics
+- Admin/status visibility
+- Degraded/unavailable source states
+- Preserve MangaDex diagnostics and cache statistics
+
+### v2.0.5 — V1 Compatibility Gate
+- Regression-test bookmarks, history, progress, follows, notifications, reader preferences, community, discovery, and reader
+- Verify existing `source=mangadex` records require no destructive rewrite
+- Verify existing MangaDex URLs/IDs remain usable
+- Document compatibility guarantees before enabling source #2
 
 ---
 
-## v2.1.x — Unified Multi-Source Search
+## v2.1.x — Second Source + Unified Multi-Source Search
 
-Actually expose multiple permitted sources through MangaFlux.
+Do not choose or integrate a source until its API/access terms and MangaFlux requirements are verified.
 
-- Search multiple sources
-- Normalize results
-- Merge results
-- Source badges
-- Source-aware metadata
-- Deterministic title matching
-- Filter by source
-- Preserve source attribution
+### v2.1.0 — Second Permitted Source Adapter
+- Select one permitted source with stable/public access
+- Implement only capabilities genuinely supported by that source
+- Add source-specific attribution, host allowlists, rate policy, and health
+- Keep adapter independently disableable
+
+### v2.1.1 — Unified Search
+- Search enabled sources
+- Normalize results through the shared contracts
+- Isolate per-source failures
+- Preserve provenance on every result
+- Source badges and source filter
+- Deterministic ordering
+
+### v2.1.2 — Multi-Source Search Quality
+- Normalize titles/alternate titles
+- Improve deterministic cross-source title matching
+- Avoid obvious duplicate result spam
+- Preserve source editions before canonical identity exists
+- Search latency/degraded-source UX
 
 ---
 
 ## v2.2.x — Canonical Manga Identity & Deduplication
 
-This solves a major multi-source problem: the same manga can appear on multiple sources.
+Only introduce canonical identity after real cross-source data exists so matching rules are based on observed data rather than guesses.
 
-MangaFlux gets its own canonical title identity.
+### v2.2.0 — Canonical Identity Schema
+- MangaFlux canonical manga ID
+- Source-edition mapping table
+- Provenance and mapping timestamps
+- Existing MangaDex IDs remain resolvable
 
-- Canonical MangaFlux manga ID
-- Map source editions to canonical titles
-- Duplicate-candidate detection
-- Confidence-based matching
-- Admin/manual corrections
-- Preserve source provenance
-- Avoid duplicated Library titles
+### v2.2.1 — Duplicate Candidate Detection
+- Normalized title and alternate-title matching
+- Creator/year/language metadata signals where available
+- Confidence-based candidate generation
+- Never auto-merge ambiguous titles
+
+### v2.2.2 — Mapping Review & Corrections
+- Admin/manual mapping correction
+- Merge/split correction workflow
+- Audit provenance
+- Safe rollback of incorrect mappings
+
+### v2.2.3 — Canonical Product Surfaces
+- Canonical manga detail identity
+- Source editions shown explicitly
+- Avoid duplicate Library titles
+- Preserve source-specific chapter provenance
 
 ---
 
 ## v2.3.x — Source Selection & Safe Fallback
 
-Readers gain control over where content comes from.
-
-- Preferred source per manga
-- Source availability awareness
-- Safe source fallback
-- Per-source language preferences
-- Per-source quality preferences
+- Preferred source per canonical manga
 - Explicit source switching
-- Preserve attribution
-- Never silently disguise the source
+- Availability-aware source selector
+- Safe fallback only to mapped editions
+- Per-source language preferences where supported
+- Per-source quality preferences where meaningful
+- Preserve attribution on every reader path
+- Never silently disguise or substitute a source
+- Never claim chapter equivalence without reconciliation
 
 ---
 
 ## v2.4.x — Cross-Source Library Migration & Provenance
 
-Move existing MangaFlux data safely into the new architecture.
-
-- Map MangaDex bookmarks to canonical MangaFlux titles
-- Map reading progress
+- Map existing MangaDex bookmarks to canonical titles
+- Map follows and notification state
+- Map reading history/progress
 - Preserve original MangaDex references
-- Migration confidence indicators
-- Migration status UI
+- Migration confidence/status UI
 - Cross-source chapter reconciliation
 - Cross-source progress reconciliation
-- Repair bad mappings
-- Roll back incorrect mappings
+- Repair incorrect mappings
+- Roll back mappings safely
+- Idempotent migrations and explicit migration journal entries
 
 ---
 
 ## v2.5.x — Adapter SDK & Testing
 
-Make adding and maintaining permitted sources systematic.
-
-- Source adapter fixtures
+- Adapter fixtures
 - Contract tests
 - Source test harness
-- Adapter documentation
-- Internal adapter documentation
 - Capability validation
 - Compatibility checks
 - Adapter version checks
+- Failure/timeout fixtures
+- Attribution-policy tests
+- Host-allowlist tests
+- Internal adapter documentation
+- Contributor/developer adapter documentation
 
 ---
 
 ## v2.6.x — Multi-Source Operations & Scale
 
-Prepare the backend to operate the platform reliably.
-
 - Source-specific diagnostics
-- Source health
-- Background jobs where needed
-- Queues where justified
-- Shared caching where justified
+- Source health history where justified
+- Background jobs where required
+- Queues only when justified by workload
+- Shared caching when multiple instances require it
 - Distributed rate limiting when multiple API instances actually exist
 - Source incident controls
-- Degraded-state handling
-- Admin source controls
-- Operational source controls
+- Per-source disable/degraded controls
+- Admin operational controls
+- Observability for adapter latency/error rates
+- Safe partial-platform operation when one source fails
 
 ---
 
 ## v2.7+ — Platform Expansion & Maturity
 
-Intentionally open-ended.
+Intentionally open-ended. Add v2.7.x, v2.8.x, v2.9.x, v2.10.x and beyond as real platform requirements emerge.
 
-Possible future v2.x releases:
-
+Potential work:
 - Additional permitted sources
 - Better migration tooling
-- Improved canonical manga matching
+- Improved canonical matching
 - Source-quality signals
 - Better availability detection
 - Data architecture improvements
@@ -709,8 +766,9 @@ Possible future v2.x releases:
 - Adapter improvements
 - Operational tooling
 - Multi-source UX improvements
+- Cross-source discovery improvements
 
-If another major platform feature logically belongs here, create **v2.7.x, v2.8.x, v2.9.x, v2.10.x, v2.11.x...** rather than dumping it into v3.
+**Do not rush into v3.** v2 remains the home for source/platform architecture until it is mature.
 
 ---
 
