@@ -48,7 +48,7 @@ type StatusPayload = {
   };
 };
 
-function labelFor(status: HealthState | undefined) {
+function labelFor(status: string | undefined) {
   if (!status) return "Unknown";
 
   return status
