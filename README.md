@@ -12,7 +12,7 @@
 
 **v2.1.2 — Multi-Source Search Quality**
 
-MangaFlux V1, v2.0.x, v2.1.0, and v2.1.1 are physically QA signed off. v2.1.2 strengthens unified search with normalized title/alternate-title keys, conservative same-source duplicate suppression, per-source latency metadata, and degraded-source UX while preserving distinct source editions for the later canonical-identity phase. MangaDex remains the only enabled production source until another reader-capable source passes the audit gate.
+MangaFlux V1, v2.0.x, and v2.1.0 through v2.1.2 are physically QA signed off. v2.1.2 strengthens unified search with normalized title/alternate-title keys, conservative same-source duplicate suppression, per-source latency metadata, and degraded-source UX while preserving distinct source editions for the later canonical-identity phase. v2.1.3 Manhwa Coverage is blocked at the source gate: MangaDex remains the only enabled production reader source until another reader-capable source passes the audit.
 
 ### Library improvements
 

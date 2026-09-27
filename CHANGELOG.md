@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased — v2.1.3 source gate
+
+- Marked v2.1.2 Multi-Source Search Quality physical QA signed off.
+- Rechecked the source gate before starting v2.1.3 Manhwa Coverage.
+- Kept v2.1.3 blocked because no verified second reader/manhwa source currently passes MangaFlux's production-source policy.
+- Kept MangaDex as the only enabled production source.
+- No runtime, package-version, database, or migration change.
+
+
 ## 2.1.2 — Multi-Source Search Quality
 
 - Marked v2.1.1 Unified Search Foundation physical QA signed off.
