@@ -95,7 +95,7 @@ export default async function Home({
       </section>
 
       <div className="landing-version">
-        v2.0.5 · Source Platform Foundation
+        v2.1.0 · Source Candidate Audit
       </div>
     </main>
   );

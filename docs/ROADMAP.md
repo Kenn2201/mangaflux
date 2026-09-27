@@ -591,21 +591,21 @@ Build the source abstraction without changing current MangaDex user behavior.
 - Keep MangaDex as the only enabled source
 - No user-facing second source yet
 
-### ➡️ v2.0.1 — Source Capability Model — IMPLEMENTED / PHYSICAL QA PENDING
+### ✅ v2.0.1 — Source Capability Model — PHYSICAL QA SIGNED OFF
 - Declare capabilities per source: search, discovery, tags, details, related titles, chapters, pages, health
 - Declare supported discovery kinds
 - Declare language/content capabilities where relevant
 - Fail explicitly when a source does not support an operation
 - Never silently pretend capabilities exist
 
-### ➡️ v2.0.2 — Source-Aware API Dispatch — IMPLEMENTED / PHYSICAL QA PENDING
+### ✅ v2.0.2 — Source-Aware API Dispatch — PHYSICAL QA SIGNED OFF
 - Route source operations through the registry
 - Make search/details/chapters/pages/health dispatch source-aware
 - Preserve backward-compatible MangaDex routes during migration
 - Introduce source-aware request/response contracts without breaking V1 clients
 - Remove direct MangaDex assumptions from shared dispatch paths
 
-### ➡️ v2.0.3 — Source Policy & Attribution — IMPLEMENTED / PHYSICAL QA PENDING
+### ✅ v2.0.3 — Source Policy & Attribution — PHYSICAL QA SIGNED OFF
 - Per-source attribution metadata
 - Per-source allowed image/content hosts
 - Per-source caching policy
@@ -615,7 +615,7 @@ Build the source abstraction without changing current MangaDex user behavior.
 - No CAPTCHA, paywall, login-wall, or anti-bot bypass
 - Surface the real source instead of disguising it
 
-### ➡️ v2.0.4 — Source Health & Diagnostics — IMPLEMENTED / PHYSICAL QA PENDING
+### ✅ v2.0.4 — Source Health & Diagnostics — PHYSICAL QA SIGNED OFF
 - Registry-wide source health model
 - Per-source latency/status
 - Capability-aware diagnostics
@@ -623,7 +623,7 @@ Build the source abstraction without changing current MangaDex user behavior.
 - Degraded/unavailable source states
 - Preserve MangaDex diagnostics and cache statistics
 
-### ➡️ v2.0.5 — V1 Compatibility Gate — IMPLEMENTED / PHYSICAL QA PENDING
+### ✅ v2.0.5 — V1 Compatibility Gate — PHYSICAL QA SIGNED OFF
 - Regression-test bookmarks, history, progress, follows, notifications, reader preferences, community, discovery, and reader
 - Verify existing `source=mangadex` records require no destructive rewrite
 - Verify existing MangaDex URLs/IDs remain usable
@@ -635,12 +635,13 @@ Build the source abstraction without changing current MangaDex user behavior.
 
 Do not choose or integrate a source until its API/access terms and MangaFlux requirements are verified.
 
-### v2.1.0 — Source Candidate Audit & Second Permitted Adapter
+### ➡️ v2.1.0 — Source Candidate Audit — AUDIT COMPLETE / PHYSICAL QA PENDING
 - Audit candidate manga/manhwa APIs before execution or production use: ownership/upstream, repository/dependencies where available, maintenance, license/terms, rate limits, content hosts, and whether the service is an API or an unofficial scraper
 - Candidate research pool includes the GitHub manga-api ecosystem and API-directory candidates; inclusion in a directory is not approval
 - Explicitly evaluate the Manhwa Reader API as a manhwa coverage candidate
 - Select the first permitted/stable source based on verified access and MangaFlux coverage needs
-- Implement only capabilities genuinely supported by that source
+- Current audit outcome: no second reader-capable source passes the production gate; keep MangaDex as the only enabled source
+- Implement an adapter only after a candidate passes the re-entry gate; do not fabricate or enable a scraper-backed source
 - Add source-specific attribution, host allowlists, rate policy, and health
 - Keep every adapter independently disableable
 - Do not run/install arbitrary third-party repositories merely to test them
