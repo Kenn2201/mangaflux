@@ -22,13 +22,15 @@ type StatusPayload = {
     api?: {
       status: HealthState;
     };
-    source?: {
+    sources?: Array<{
       id: string;
       name: string;
       status: HealthState;
       latencyMs: number;
       checkedAt: string;
-    };
+      role: "primary" | "coverage" | "experimental";
+      mediaTypes: string[];
+    }>;
     persistence?: {
       status: HealthState;
       latencyMs: number;
@@ -116,7 +118,7 @@ export default function StatusClient() {
   }, [load]);
 
   const overall = data?.status;
-  const source = data?.components?.source;
+  const sources = data?.components?.sources ?? [];
   const persistence = data?.components?.persistence;
 
   return (
@@ -133,7 +135,7 @@ export default function StatusClient() {
                   : "Some systems are degraded."}
             </h1>
             <p>
-              Live health for MangaFlux, MangaDex connectivity, and core
+              Live health for MangaFlux, configured reading sources, and core
               account persistence.
             </p>
           </div>
@@ -196,25 +198,40 @@ export default function StatusClient() {
           <p>Fastify API, proxy boundary, and application routes.</p>
         </article>
 
-        <article>
-          <div className="status-card-heading">
-            <div>
-              <p className="eyebrow">Source</p>
-              <h2>{source?.name ?? "MangaDex"}</h2>
+        {sources.length ? (
+          sources.map((source) => (
+            <article key={source.id}>
+              <div className="status-card-heading">
+                <div>
+                  <p className="eyebrow">
+                    Source · {labelFor(source.role)}
+                  </p>
+                  <h2>{source.name}</h2>
+                </div>
+                <span
+                  className={`status-dot ${toneFor(source.status)}`}
+                />
+              </div>
+              <strong>{labelFor(source.status)}</strong>
+              <p>
+                {source.mediaTypes.join(" · ")} · {source.latencyMs} ms · checked{" "}
+                {formatChecked(source.checkedAt)}
+              </p>
+            </article>
+          ))
+        ) : (
+          <article>
+            <div className="status-card-heading">
+              <div>
+                <p className="eyebrow">Sources</p>
+                <h2>Reading providers</h2>
+              </div>
+              <span className="status-dot warn" />
             </div>
-            <span
-              className={`status-dot ${toneFor(source?.status)}`}
-            />
-          </div>
-          <strong>{labelFor(source?.status)}</strong>
-          <p>
-            {source
-              ? `${source.latencyMs} ms · checked ${formatChecked(
-                  source.checkedAt
-                )}`
-              : "Waiting for source health."}
-          </p>
-        </article>
+            <strong>Unknown</strong>
+            <p>Waiting for source health.</p>
+          </article>
+        )}
 
         <article>
           <div className="status-card-heading">
@@ -300,9 +317,10 @@ export default function StatusClient() {
         <p className="eyebrow">What this means</p>
         <h2>Graceful degradation first.</h2>
         <p>
-          If MangaDex is degraded, your MangaFlux account and saved library can
-          still remain available. If persistence is degraded, discovery and
-          reading may still work while account-backed saves wait for recovery.
+          Primary, coverage, and experimental providers are monitored independently.
+          Optional-source failures do not take down healthy primary-source flows.
+          If persistence is degraded, discovery and reading may still work while
+          account-backed saves wait for recovery.
         </p>
       </section>
     </main>
