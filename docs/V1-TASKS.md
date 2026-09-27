@@ -373,8 +373,9 @@
 - [x] retain existing security headers, diagnostics, cache controls, and bounded rate limits
 - [x] assess shared Redis/edge rate limiting; defer until multi-instance traffic requires it
 - [x] no new database migration
-- [ ] physical production QA for consolidated v1.5.0
+- [x] physical production QA for consolidated v1.5.0
 
-## Future V1.x
+## V1.x sign-off
 
-- [ ] v1.5+ Product polish/PWA/performance
+- [x] v1.5.0 Product Polish physically QA signed off
+- [x] V1.x closed; active development moved to v2.x

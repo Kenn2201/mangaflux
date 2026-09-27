@@ -1,3 +1,22 @@
+export type SourceId = string & { readonly __sourceId: unique symbol };
+
+export type SourceDescriptor = {
+  id: SourceId;
+  name: string;
+  enabled: boolean;
+  homepageUrl: string;
+};
+
+export type MangaRef = {
+  source: SourceId;
+  mangaId: string;
+};
+
+export type ChapterRef = {
+  source: SourceId;
+  chapterId: string;
+};
+
 export type MangaSummary = {
   id: string;
   source: string;

@@ -95,7 +95,7 @@ export default async function Home({
       </section>
 
       <div className="landing-version">
-        v1.5.0 · Product Polish
+        v2.0.0 · Source Platform Foundation
       </div>
     </main>
   );

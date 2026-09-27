@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.0.0 — Source Registry & Identity Contracts
+
+- Added a central source registry with MangaDex as the only enabled production source.
+- Added stable source IDs/descriptors and registry lookup/validation helpers.
+- Added source-aware manga and chapter reference contracts.
+- Preserved existing MangaDex IDs and direct adapter exports for V1 compatibility.
+- No database migration.
+
+
 All notable changes to MangaFlux are documented here.
 
 The format follows Keep a Changelog, and MangaFlux follows Semantic Versioning.
