@@ -394,6 +394,7 @@ app.get(
           capabilities: { ...descriptor.capabilities },
           policy: {
             attributionRequired: descriptor.policy.attributionRequired,
+            failureMode: descriptor.policy.failureMode,
             allowedImageHosts: [...descriptor.policy.allowedImageHosts],
             cache: { ...descriptor.policy.cache },
             requests: { ...descriptor.policy.requests }
@@ -436,12 +437,12 @@ app.get(
     ]);
 
     const persistenceStatus = databaseHealth.status;
-    const primarySourceHealth = sourceHealth.filter(
-      (source) => source.role === "primary"
+    const criticalSourceHealth = sourceHealth.filter(
+      (source) => source.policy.failureMode === "critical"
     );
     const overall =
-      primarySourceHealth.length > 0 &&
-      primarySourceHealth.every((source) => source.status === "operational") &&
+      criticalSourceHealth.length > 0 &&
+      criticalSourceHealth.every((source) => source.status === "operational") &&
       persistenceStatus === "operational"
         ? "operational"
         : "degraded";
