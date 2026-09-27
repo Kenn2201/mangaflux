@@ -28,7 +28,7 @@ export default function SearchClient({
   const [items, setItems] = useState<MangaSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [sources, setSources] = useState<Array<{ id: string; name: string; status: "ok" | "error" }>>([]);
+  const [sources, setSources] = useState<Array<{ id: string; name: string; status: "ok" | "error"; latencyMs?: number }>>([]);
   const [sourceFilter, setSourceFilter] = useState("all");
 
   const performSearch = useCallback(async (rawQuery: string) => {
@@ -56,7 +56,7 @@ export default function SearchClient({
 
       const payload = (await response.json()) as {
         items: MangaSummary[];
-        sources?: Array<{ id: string; name: string; status: "ok" | "error" }>;
+        sources?: Array<{ id: string; name: string; status: "ok" | "error"; latencyMs?: number }>;
       };
       setItems(payload.items);
       setSources(payload.sources ?? []);
@@ -167,9 +167,18 @@ export default function SearchClient({
         </div>
       ) : null}
 
+      {sources.some((source) => source.status === "error") ? (
+        <p className="message" role="status">
+          Some sources are temporarily unavailable. Results from healthy sources are still shown.
+        </p>
+      ) : null}
+
       {initialQuery && !loading ? (
         <p className="search-context">
           Showing results for <strong>{initialQuery}</strong>
+          {sources.length > 0
+            ? ` · ${sources.filter((source) => source.status === "ok").length}/${sources.length} sources available`
+            : ""}
         </p>
       ) : null}
 
