@@ -654,7 +654,7 @@ The goal is not merely to add another API. MangaFlux must eventually distinguish
 - Healthy sources remain usable when another source fails
 - No database migration
 
-### ➡️ v2.1.3 — Regional Coverage Sources — IMPLEMENTED / PHYSICAL QA PENDING
+### ✅ v2.1.3 — Regional Coverage Sources — PHYSICAL QA SIGNED OFF
 - Model provider roles explicitly: primary, coverage, experimental
 - Model regional/content coverage explicitly: manga, manhwa, manhua
 - Keep MangaDex as the primary enabled production source
@@ -664,11 +664,16 @@ The goal is not merely to add another API. MangaFlux must eventually distinguish
 - Explicit/adult sources remain isolated for v2.7.x
 - No database migration
 
-### v2.1.4 — Provider Reliability & Coverage Classification
-- Surface provider role and media coverage through diagnostics/product contracts where useful
-- Track provider capabilities, health, latency, failure behavior, image hosts, and cache/rate policy
-- Ensure coverage/experimental failures never take down primary-source flows
+### ➡️ v2.1.4 — Provider Reliability & Coverage Classification — IMPLEMENTED / PHYSICAL QA PENDING
+- Surface provider role and media coverage through status and source contracts
+- Track capabilities, health, latency, failure mode, image hosts, cache policy, and request pacing
+- Mark providers as critical or isolated for health aggregation
+- Isolate failed provider health probes from the full status endpoint
+- Keep experimental providers out of ordinary unified search unless explicitly requested
+- Render enabled providers dynamically on the status page with role, media coverage, latency, and health
 - Define promotion/demotion criteria between experimental and coverage roles
+- Keep MangaDex as the only enabled production source
+- No database migration
 
 ### v2.1.5 — Real Multi-Source Coverage QA
 - Test titles absent from MangaDex against approved coverage sources

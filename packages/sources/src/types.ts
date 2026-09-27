@@ -32,6 +32,7 @@ export type SourceCapability =
 export type SourceContentClass = "general" | "explicit";
 export type SourceRole = "primary" | "coverage" | "experimental";
 export type SourceMediaType = "manga" | "manhwa" | "manhua";
+export type SourceFailureMode = "critical" | "isolated";
 
 export type SourceCapabilities = Readonly<{
   search: boolean;
@@ -53,6 +54,7 @@ export type SourcePolicy = Readonly<{
   contentClass: SourceContentClass;
   role: SourceRole;
   mediaTypes: readonly SourceMediaType[];
+  failureMode: SourceFailureMode;
   allowedImageHosts: readonly string[];
   cache: {
     searchSeconds: number;
@@ -63,6 +65,8 @@ export type SourcePolicy = Readonly<{
     publicApiOnly: boolean;
     htmlAdapterAllowed: boolean;
     bypassProtectedAccess: false;
+    minIntervalMs: number;
+    maxConcurrentRequests: number;
   };
 }>;
 

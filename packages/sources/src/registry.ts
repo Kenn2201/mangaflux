@@ -56,6 +56,7 @@ const registeredSources = new Map<SourceId, RegisteredSource>([
         contentClass: "general",
         role: "primary",
         mediaTypes: ["manga", "manhwa", "manhua"],
+        failureMode: "critical",
         allowedImageHosts: ["uploads.mangadex.org"],
         cache: {
           searchSeconds: 30,
@@ -65,7 +66,9 @@ const registeredSources = new Map<SourceId, RegisteredSource>([
         requests: {
           publicApiOnly: true,
           htmlAdapterAllowed: false,
-          bypassProtectedAccess: false
+          bypassProtectedAccess: false,
+          minIntervalMs: 250,
+          maxConcurrentRequests: 1
         }
       }
     },

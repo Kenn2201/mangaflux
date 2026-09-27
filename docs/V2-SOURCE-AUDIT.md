@@ -78,6 +78,28 @@ Coverage is also declared by media family: Japanese manga, Korean manhwa, and Ch
 
 This lets MangaFlux investigate useful fallback providers without weakening provenance. A missing chapter on MangaDex remains "missing from MangaDex," not "nonexistent everywhere." Actual cross-source identity and chapter reconciliation remain v2.2.x/v2.3.x work.
 
+## Reliability classification and promotion gate
+
+Provider roles are operational states, not marketing labels.
+
+**Experimental → Coverage promotion requires:**
+- independently verified upstream/access provenance still passes the source gate;
+- advertised search/details/chapters/pages capabilities behave consistently for the capabilities MangaFlux enables;
+- stable source and chapter identifiers;
+- declared image hosts, cache policy, request pacing, and attribution are accurate;
+- health checks can fail without breaking primary-source operation;
+- no dependency on CAPTCHA, Cloudflare bypass, login/paywall bypass, referer spoofing, or other protected-access workarounds;
+- physical QA across representative manga/manhwa/manhua titles relevant to that provider.
+
+**Coverage → Experimental/disabled demotion is required when:**
+- upstream ownership/access terms become unclear or materially change;
+- the provider begins requiring protected-access bypasses;
+- identifiers or reader-page behavior become persistently unstable;
+- image hosts or operational policy change without a safe update path;
+- repeated provider failures make fallback behavior misleading or unreliable.
+
+A **critical** failure mode is reserved for sources whose outage should affect overall source-health status. **Isolated** providers report their own degradation without taking healthy critical providers down with them.
+
 ## Decision
 
 No second reading source currently passes the production coverage gate.
