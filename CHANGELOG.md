@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.1.1 — Unified Search Foundation
+
+- Added a unified search API that fans out across every enabled, search-capable general-content source.
+- Isolated per-source failures so one degraded adapter does not fail healthy-source results.
+- Added deterministic round-robin result ordering while preserving each result's source provenance.
+- Added source status/name metadata to unified search responses.
+- Updated the web search experience with source badges and an enabled-source filter.
+- Preserved the existing single-source search endpoint for compatibility.
+- Kept MangaDex as the only enabled production source; no unapproved adapter was added.
+- Recorded OmegaAPI as not approved for production because it is third-party middleware over OmegaScans and its hosted instance is documented as testing-only / subject to pausing.
+- No database migration is required.
+
+
 ## Unreleased — v2.1 source discovery gate
 
 - Marked v2.1.0 physical QA signed off.

@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v2.1.0--Source_Candidate_Audit-indigo.svg)
+![Version](https://img.shields.io/badge/version-v2.1.1--Unified_Search_Foundation-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v2.1.0 — Source Candidate Audit**
+**v2.1.1 — Unified Search Foundation**
 
-MangaFlux V1 and the v2.0.x source-platform foundation are physically QA signed off. v2.1.0 records the production source-candidate audit. No second reading source currently passes the access and reader-page gate, so MangaDex remains the only enabled source and unified multi-source search is intentionally blocked rather than backed by an unsafe scraper.
+MangaFlux V1, v2.0.x, and the v2.1.0 source-candidate audit are physically QA signed off. v2.1.1 implements the unified-search foundation: enabled general-content sources are searched independently, failures are isolated, provenance is preserved, results are deterministically interleaved, and the web UI exposes source badges/filtering. MangaDex remains the only enabled production source until another reader-capable source passes the audit gate.
 
 ### Library improvements
 

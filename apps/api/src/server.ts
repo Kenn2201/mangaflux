@@ -35,7 +35,7 @@ import type {
   MangaSummary
 } from "@mangaflux/sources";
 
-const APP_VERSION = "2.1.0";
+const APP_VERSION = "2.1.1";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LANGUAGE_RE = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i;
@@ -698,6 +698,103 @@ app.get<{ Querystring: { q?: string; limit?: string; source?: string } }>(
     );
 
     return { source: source.id, items };
+  }
+);
+
+app.get<{ Querystring: { q?: string; limit?: string; source?: string } }>(
+  "/api/search/unified",
+  { preHandler: searchRateLimit },
+  async (request, reply) => {
+    const query = request.query.q?.trim();
+    const limit = parseBoundedInt(request.query.limit, 24, 1, 24);
+    const requested = request.query.source?.trim();
+
+    if (!query || query.length > 120 || limit === null) {
+      return reply.code(400).send({
+        error: "INVALID_REQUEST",
+        message: "q must contain between 1 and 120 characters and limit must be 1-24"
+      });
+    }
+
+    const eligible = listSourceDescriptors().filter(
+      (descriptor) =>
+        descriptor.enabled &&
+        descriptor.capabilities.search &&
+        descriptor.policy.contentClass === "general" &&
+        (!requested || descriptor.id === requested)
+    );
+
+    if (requested && eligible.length === 0) {
+      return reply.code(404).send({
+        error: "NOT_FOUND",
+        message: "The requested search source is unknown, disabled, or unavailable."
+      });
+    }
+
+    const results = await Promise.all(
+      eligible.map(async (descriptor) => {
+        try {
+          const source = requireSourceCapability(descriptor.id, "search");
+          const items = await source.search(query, { limit });
+          return {
+            source: descriptor.id,
+            name: descriptor.name,
+            status: "ok" as const,
+            items
+          };
+        } catch (error) {
+          request.log.warn(
+            { err: error, source: descriptor.id },
+            "Unified search source failed"
+          );
+          return {
+            source: descriptor.id,
+            name: descriptor.name,
+            status: "error" as const,
+            items: [] as MangaSummary[]
+          };
+        }
+      })
+    );
+
+    const items: MangaSummary[] = [];
+    for (let index = 0; items.length < limit; index += 1) {
+      let added = false;
+      for (const result of results) {
+        const item = result.items[index];
+        if (item && items.length < limit) {
+          items.push(item);
+          added = true;
+        }
+      }
+      if (!added) break;
+    }
+
+    const successful = results.filter((result) => result.status === "ok");
+    const cacheSeconds = successful.length
+      ? Math.min(
+          ...successful.map(
+            (result) =>
+              getSourceDescriptor(result.source)?.policy.cache.searchSeconds ?? 0
+          )
+        )
+      : 0;
+
+    reply.header(
+      "Cache-Control",
+      `public, max-age=${cacheSeconds}, s-maxage=${cacheSeconds}, stale-while-revalidate=${cacheSeconds * 2}`
+    );
+
+    return {
+      query,
+      source: requested ?? "all",
+      sources: results.map(({ source, name, status }) => ({
+        id: source,
+        name,
+        status
+      })),
+      items
+    };
   }
 );
 
