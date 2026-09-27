@@ -95,7 +95,7 @@ export default async function Home({
       </section>
 
       <div className="landing-version">
-        v2.1.2 · Multi-Source Search Quality
+        v2.1.3 · Regional Coverage Sources
       </div>
     </main>
   );
