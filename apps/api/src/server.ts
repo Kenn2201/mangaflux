@@ -35,7 +35,7 @@ import type {
   MangaSummary
 } from "@mangaflux/sources";
 
-const APP_VERSION = "2.1.1";
+const APP_VERSION = "2.1.2";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LANGUAGE_RE = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i;
@@ -731,15 +731,45 @@ app.get<{ Querystring: { q?: string; limit?: string; source?: string } }>(
       });
     }
 
+    const normalizeTitle = (value: string) =>
+      value
+        .normalize("NFKC")
+        .toLocaleLowerCase("en")
+        .replace(/[\\p{P}\\p{S}]+/gu, " ")
+        .replace(/\\s+/g, " ")
+        .trim();
+
+    const titleKeys = (item: MangaSummary) =>
+      [...new Set([item.title, ...(item.altTitles ?? [])]
+        .map(normalizeTitle)
+        .filter(Boolean))];
+
     const results = await Promise.all(
       eligible.map(async (descriptor) => {
+        const startedAt = Date.now();
         try {
           const source = requireSourceCapability(descriptor.id, "search");
-          const items = await source.search(query, { limit });
+          const rawItems = await source.search(query, { limit });
+          const seenIds = new Set<string>();
+          const seenTitleKeys = new Set<string>();
+          const items = rawItems.filter((item) => {
+            const identity = `${item.source}:${item.id}`;
+            if (seenIds.has(identity)) return false;
+            seenIds.add(identity);
+
+            const keys = titleKeys(item);
+            if (keys.length > 0 && keys.every((key) => seenTitleKeys.has(key))) {
+              return false;
+            }
+            keys.forEach((key) => seenTitleKeys.add(key));
+            return true;
+          });
+
           return {
             source: descriptor.id,
             name: descriptor.name,
             status: "ok" as const,
+            latencyMs: Date.now() - startedAt,
             items
           };
         } catch (error) {
@@ -751,6 +781,7 @@ app.get<{ Querystring: { q?: string; limit?: string; source?: string } }>(
             source: descriptor.id,
             name: descriptor.name,
             status: "error" as const,
+            latencyMs: Date.now() - startedAt,
             items: [] as MangaSummary[]
           };
         }
@@ -763,6 +794,7 @@ app.get<{ Querystring: { q?: string; limit?: string; source?: string } }>(
       for (const result of results) {
         const item = result.items[index];
         if (item && items.length < limit) {
+          // Preserve separate source editions. Canonical cross-source merging belongs to v2.2.
           items.push(item);
           added = true;
         }
@@ -788,10 +820,11 @@ app.get<{ Querystring: { q?: string; limit?: string; source?: string } }>(
     return {
       query,
       source: requested ?? "all",
-      sources: results.map(({ source, name, status }) => ({
+      sources: results.map(({ source, name, status, latencyMs }) => ({
         id: source,
         name,
-        status
+        status,
+        latencyMs
       })),
       items
     };

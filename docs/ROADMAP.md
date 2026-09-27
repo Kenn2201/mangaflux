@@ -652,22 +652,25 @@ Do not choose or integrate a source until its API/access terms and MangaFlux req
 - Do not advance Unified Search with only MangaDex or a fake/unsafe adapter
 - Current additional rejects: Nyora (JS SDK no longer maintained / parser aggregator), undocumented MANGA Plus app endpoints as a general integration, and third-party INKR extraction wrappers
 
-### ➡️ v2.1.1 — Unified Search Foundation — IMPLEMENTED / PHYSICAL QA PENDING
-- Search enabled sources through the unified fan-out endpoint (implemented)
-- Normalize results through the shared contracts (implemented)
-- Isolate per-source failures (implemented)
-- Preserve provenance on every result (implemented)
-- Source badges and source filter (implemented)
-- Deterministic round-robin ordering (implemented)
+### ✅ v2.1.1 — Unified Search Foundation — PHYSICAL QA SIGNED OFF
+- Search enabled sources through the unified fan-out endpoint
+- Normalize results through the shared contracts
+- Isolate per-source failures
+- Preserve provenance on every result
+- Source badges and source filter
+- Deterministic round-robin ordering
+- Physical production QA passed
 
-### v2.1.2 — Multi-Source Search Quality
-- Normalize titles/alternate titles
-- Improve deterministic cross-source title matching
-- Avoid obvious duplicate result spam
-- Preserve source editions before canonical identity exists
-- Search latency/degraded-source UX
-- Measure chapter-coverage gaps so MangaFlux can show when another verified source has older/missing chapters
+### ➡️ v2.1.2 — Multi-Source Search Quality — IMPLEMENTED / PHYSICAL QA PENDING
+- Normalize titles/alternate titles with Unicode-aware deterministic keys
+- Improve deterministic title matching without claiming canonical identity
+- Suppress obvious duplicate result spam within a source
+- Preserve distinct source editions before canonical identity exists
+- Expose per-source search latency and degraded-source UX
+- Keep healthy-source results usable when another enabled source fails
+- Chapter-coverage comparison remains deferred until a verified second reader source exists
 - Treat incomplete upstream chapter feeds as source coverage, not as proof that chapters do not exist
+- No database migration
 
 ### v2.1.3 — Manhwa Coverage
 - Add a dedicated permitted manhwa adapter when candidate audit passes
