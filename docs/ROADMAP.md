@@ -664,7 +664,7 @@ The goal is not merely to add another API. MangaFlux must eventually distinguish
 - Explicit/adult sources remain isolated for v2.7.x
 - No database migration
 
-### ➡️ v2.1.4 — Provider Reliability & Coverage Classification — IMPLEMENTED / PHYSICAL QA PENDING
+### ✅ v2.1.4 — Provider Reliability & Coverage Classification — PHYSICAL QA SIGNED OFF
 - Surface provider role and media coverage through status and source contracts
 - Track capabilities, health, latency, failure mode, image hosts, cache policy, and request pacing
 - Mark providers as critical or isolated for health aggregation
@@ -675,13 +675,16 @@ The goal is not merely to add another API. MangaFlux must eventually distinguish
 - Keep MangaDex as the only enabled production source
 - No database migration
 
-### v2.1.5 — Real Multi-Source Coverage QA
-- Test titles absent from MangaDex against approved coverage sources
-- Test incomplete chapter feeds without treating one source as proof of global absence
-- Test Japanese manga, Korean manhwa, and Chinese manhua coverage
-- Test metadata-only, chapter-capable, and reader-capable provider differences
-- Test source outages and degraded fallback behavior
-- Close v2.1.x only after at least one real additional reader source is safely enabled
+### ➡️ v2.1.5 — Coverage Gate & Real Multi-Source QA — PARTIALLY IMPLEMENTED / PHYSICAL QA PENDING
+- Revalidate the production source gate before claiming real multi-source coverage
+- MangaDex remains the only approved reader-capable production source; cross-provider coverage QA is BLOCKED AT SOURCE GATE
+- Preserve the QA matrix for titles absent from MangaDex, incomplete chapter feeds, manga/manhwa/manhua, provider capability differences, and degraded-provider behavior
+- Do not fabricate a second provider or weaken access/provenance policy merely to close v2.1.x
+- Add header profile menu: Account / Library / Sign out
+- Remove duplicate Account-page sign-out action
+- Synchronize sign-in/sign-out state immediately across the persistent app shell and client navigation
+- No database migration
+- v2.1.x remains open until at least one real additional reader source is safely enabled and the coverage QA matrix can actually run
 
 ---
 
