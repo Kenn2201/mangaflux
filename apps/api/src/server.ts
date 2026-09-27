@@ -35,7 +35,7 @@ import type {
   MangaSummary
 } from "@mangaflux/sources";
 
-const APP_VERSION = "2.1.3";
+const APP_VERSION = "2.1.4";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LANGUAGE_RE = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i;
@@ -385,8 +385,46 @@ app.get(
     const sourceDescriptors = listSourceDescriptors().filter((source) => source.enabled);
     const [sourceHealth, databaseHealth] = await Promise.all([
       Promise.all(sourceDescriptors.map(async (descriptor) => {
-        const source = requireSourceCapability(descriptor.id, "health");
-        return source.health();
+        const startedAt = Date.now();
+        const base = {
+          id: descriptor.id,
+          name: descriptor.name,
+          role: descriptor.policy.role,
+          mediaTypes: [...descriptor.policy.mediaTypes],
+          capabilities: { ...descriptor.capabilities },
+          policy: {
+            attributionRequired: descriptor.policy.attributionRequired,
+            allowedImageHosts: [...descriptor.policy.allowedImageHosts],
+            cache: { ...descriptor.policy.cache },
+            requests: { ...descriptor.policy.requests }
+          }
+        };
+
+        if (!descriptor.capabilities.health) {
+          return {
+            ...base,
+            status: "unavailable" as const,
+            latencyMs: 0,
+            checkedAt: new Date().toISOString()
+          };
+        }
+
+        try {
+          const source = requireSourceCapability(descriptor.id, "health");
+          const health = await source.health();
+          return { ...base, ...health };
+        } catch (error) {
+          app.log.warn(
+            { err: error, source: descriptor.id, role: descriptor.policy.role },
+            "Source health probe failed"
+          );
+          return {
+            ...base,
+            status: "unavailable" as const,
+            latencyMs: Date.now() - startedAt,
+            checkedAt: new Date().toISOString()
+          };
+        }
       })),
       database
         ? probeDatabase(database)
@@ -398,8 +436,12 @@ app.get(
     ]);
 
     const persistenceStatus = databaseHealth.status;
+    const primarySourceHealth = sourceHealth.filter(
+      (source) => source.role === "primary"
+    );
     const overall =
-      sourceHealth.every((source) => source.status === "operational") &&
+      primarySourceHealth.length > 0 &&
+      primarySourceHealth.every((source) => source.status === "operational") &&
       persistenceStatus === "operational"
         ? "operational"
         : "degraded";
@@ -721,7 +763,9 @@ app.get<{ Querystring: { q?: string; limit?: string; source?: string } }>(
         descriptor.enabled &&
         descriptor.capabilities.search &&
         descriptor.policy.contentClass === "general" &&
-        (!requested || descriptor.id === requested)
+        (requested
+          ? descriptor.id === requested
+          : descriptor.policy.role !== "experimental")
     );
 
     if (requested && eligible.length === 0) {
