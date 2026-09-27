@@ -60,11 +60,17 @@ Status: not approved for production.
 
 OmegaAPI exposes a useful normalized search/details/chapters/pages REST surface, but it is third-party middleware over the OmegaScans API rather than an independently approved upstream. Its own documentation says the hosted instance is for testing only and may be paused because of request volume. MangaFlux will not make production reading depend on that hosted middleware without independently verifiable upstream access and operational terms.
 
+## 2026-09-27 recheck after v2.1.2
+
+v2.1.1 and v2.1.2 were completed safely without pretending a second provider exists: unified search, provenance, normalization, failure isolation, same-source duplicate suppression, and degraded-source UX are source-independent foundations.
+
+A fresh candidate recheck still does not establish a production-safe second reader source. Newly surfaced multi-source/manhwa wrappers rely on scraping, image proxies, referer/header workarounds, or undocumented/internal upstream interfaces. Those mechanisms remain outside MangaFlux's source policy. MANGA Plus remains an official reading service, but MangaFlux still does not have a documented public developer integration contract suitable for treating it as a general production API.
+
 ## Decision
 
-No second reading source passes the v2.1.0 production gate today.
+No second reading source currently passes the production gate.
 
-MangaFlux therefore keeps only MangaDex enabled and does not add a fake/unsafe adapter merely to advance the roadmap. v2.1.1 Unified Search remains blocked until a second permitted adapter exists.
+MangaFlux therefore keeps only MangaDex enabled and does not add a fake/unsafe adapter merely to advance the roadmap. v2.1.3 Manhwa Coverage is blocked at the source gate because its core deliverable requires a real permitted manhwa reader adapter. This is a source-approval blocker, not a code-architecture blocker.
 
 ## Re-entry gate
 
