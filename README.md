@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v2.1.3--Regional_Coverage_Sources-indigo.svg)
+![Version](https://img.shields.io/badge/version-v2.1.4--Provider_Reliability_Coverage-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v2.1.3 — Regional Coverage Sources**
+**v2.1.4 — Provider Reliability & Coverage Classification**
 
-MangaFlux V1, v2.0.x, and v2.1.0 through v2.1.2 are physically QA signed off. v2.1.3 introduces the regional-coverage source model: providers declare a primary, coverage, or experimental role plus manga/manhwa/manhua coverage. MangaDex remains the only enabled production reader source while additional adapters are audited individually; no unverified source is silently enabled.
+MangaFlux V1, v2.0.x, and v2.1.0 through v2.1.3 are physically QA signed off. v2.1.4 makes provider reliability operational: status contracts expose provider role, media coverage, health, latency, capabilities, host/cache/request policy, and failure mode; optional provider health failures are isolated from critical primary-source health; experimental sources remain opt-in rather than joining ordinary unified search automatically.
 
 ### Library improvements
 
