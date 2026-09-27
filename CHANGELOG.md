@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.1.0 — Source Candidate Audit
+
+- Marked v2.0.x physically QA signed off.
+- Audited the planned second-source candidates against MangaFlux's production source policy.
+- Recorded that no second reading source currently passes the verified access + chapter-page gate.
+- Kept MangaDex as the only enabled source.
+- Rejected scraper-wrapper, Cloudflare/anti-bot bypass, referer-spoofing, and hotlink-proxy approaches for source #2.
+- Deferred unified multi-source search until a permitted reader-capable source is verified.
+- Added `docs/V2-SOURCE-AUDIT.md`.
+- No database migration.
+
+
 ## 2.0.5 — Source Platform Foundation Compatibility Gate
 
 - Completed the v2.0.1-v2.0.5 source-platform foundation in one consolidated release.
