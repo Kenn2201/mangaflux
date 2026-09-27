@@ -577,11 +577,11 @@ MangaDex remains the default/only enabled production source until another source
 
 ---
 
-## ➡️ v2.0.x — Source Platform Foundation — NEXT
+## ➡️ v2.0.x — Source Platform Foundation — CURRENT
 
 Build the source abstraction without changing current MangaDex user behavior.
 
-### v2.0.0 — Source Registry & Identity Contracts
+### ➡️ v2.0.0 — Source Registry & Identity Contracts — IMPLEMENTED / PHYSICAL QA PENDING
 - Add a central source registry instead of importing/dispatching MangaDex directly
 - Define stable source IDs and source descriptors
 - Define source-aware manga and chapter references
