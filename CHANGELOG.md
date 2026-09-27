@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.1.2 — Multi-Source Search Quality
+
+- Marked v2.1.1 Unified Search Foundation physical QA signed off.
+- Added Unicode-aware normalized title and alternate-title keys for search quality.
+- Added conservative duplicate suppression within each source while preserving distinct source editions for the future canonical-identity phase.
+- Added per-source search latency metadata and degraded-source UX so healthy results remain usable when another enabled source fails.
+- Kept deterministic round-robin source ordering.
+- Kept MangaDex as the only enabled production reader source; no unapproved source was added.
+- Deferred real cross-source chapter-gap comparison until a verified second reader source exists; incomplete upstream feeds remain source coverage rather than proof that chapters do not exist.
+- No database migration is required.
+
+
 ## 2.1.1 — Unified Search Foundation
 
 - Added a unified search API that fans out across every enabled, search-capable general-content source.
