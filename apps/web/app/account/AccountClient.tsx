@@ -9,8 +9,8 @@ import {
 } from "react";
 import { notify } from "../../lib/toast";
 import { AccountSkeleton } from "../Skeletons";
-import ConfirmDialog from "../ConfirmDialog";
 import PublicProfileModal from "../PublicProfileModal";
+import { announceAuthSessionChanged } from "../AccountStatus";
 
 type Session = {
   authenticated: boolean;
@@ -164,7 +164,6 @@ export default function AccountClient() {
   const [avatarDraft, setAvatarDraft] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [needsVerification, setNeedsVerification] = useState(false);
-  const [signOutConfirm, setSignOutConfirm] = useState(false);
   const [profilePreviewOpen, setProfilePreviewOpen] = useState(false);
 
   async function refreshSession() {
@@ -317,6 +316,7 @@ export default function AccountClient() {
       }
 
       await refreshSession();
+      announceAuthSessionChanged();
       setMessage("");
 
       notify({
@@ -506,46 +506,6 @@ export default function AccountClient() {
       });
     } finally {
       setProfileBusy(false);
-    }
-  }
-
-  async function logout() {
-    if (busy) return;
-
-    setBusy(true);
-    setMessage("");
-
-    try {
-      const response = await fetch("/api/auth/logout", {
-        method: "POST",
-        headers: { "x-mangaflux-client": "web" }
-      });
-
-      if (!response.ok) {
-        throw new Error("Could not sign out.");
-      }
-
-      setSession({ authenticated: false, user: null });
-      setSummary(null);
-
-      notify({
-        tone: "success",
-        title: "Signed out",
-        message: "This browser is no longer using your account session."
-      });
-    } catch (error) {
-      const text =
-        error instanceof Error ? error.message : "Could not sign out.";
-
-      setMessage(text);
-
-      notify({
-        tone: "error",
-        title: "Sign out failed",
-        message: text
-      });
-    } finally {
-      setBusy(false);
     }
   }
 
@@ -1021,15 +981,6 @@ export default function AccountClient() {
             <Link className="account-primary-link" href="/dashboard#library">
               Open library
             </Link>
-
-            <button
-              className="secondary-button account-button"
-              type="button"
-              onClick={() => setSignOutConfirm(true)}
-              disabled={busy}
-            >
-              {busy ? "Signing out…" : "Sign out"}
-            </button>
           </div>
         </div>
       ) : (
@@ -1157,19 +1108,6 @@ export default function AccountClient() {
         onClose={() => setProfilePreviewOpen(false)}
       />
 
-      <ConfirmDialog
-        open={signOutConfirm}
-        title="Sign out of MangaFlux?"
-        description="This browser will lose its active account session. Your bookmarks, reading progress, profile, and comments stay saved to your account."
-        confirmLabel="Sign out"
-        danger
-        busy={busy}
-        onCancel={() => setSignOutConfirm(false)}
-        onConfirm={() => {
-          setSignOutConfirm(false);
-          void logout();
-        }}
-      />
     </section>
   );
 }

@@ -95,7 +95,7 @@ export default async function Home({
       </section>
 
       <div className="landing-version">
-        v2.1.4 · Provider Reliability & Coverage
+        v2.1.5 · Coverage Gate & Account Sync
       </div>
     </main>
   );

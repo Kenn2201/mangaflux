@@ -106,6 +106,20 @@ No second reading source currently passes the production coverage gate.
 
 MangaFlux therefore keeps only MangaDex enabled and does not add a fake/unsafe adapter merely to advance the roadmap. v2.1.3 therefore establishes the Regional Coverage Sources model without pretending an external adapter has passed. MangaDex remains the only enabled production reader source. Additional manga/manhwa/manhua adapters can enter as experimental or coverage candidates only after their individual upstream/access requirements are understood; real multi-source coverage QA remains gated on at least one approved reader-capable source.
 
+## v2.1.5 real coverage QA gate
+
+The v2.1.5 QA matrix is ready but cannot honestly execute cross-provider coverage while MangaDex is the only approved reader-capable production source.
+
+When a second source passes the re-entry gate, v2.1.5 must verify:
+- representative titles missing from MangaDex can be found on the approved coverage source without implying global absence when neither source has them;
+- known incomplete chapter feeds remain source-specific and do not become false global chapter gaps;
+- representative Japanese manga, Korean manhwa, and Chinese manhua behavior matches each provider's declared media coverage;
+- metadata-only, chapter-capable, and reader-capable distinctions are respected by product flows;
+- coverage/experimental outage or latency does not take down healthy critical primary flows;
+- every surfaced title, chapter, and reader page preserves its real provider provenance.
+
+Until then, the gate is **BLOCKED**, not passed.
+
 ## Re-entry gate
 
 A candidate can reopen v2.1.0 implementation when its current upstream access, reader-page capability, attribution/terms, host policy, and operational behavior can be verified without bypass mechanisms.

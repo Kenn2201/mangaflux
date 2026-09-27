@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.1.5 — Coverage Gate & Account Sync
+
+- Marked v2.1.4 Provider Reliability & Coverage Classification physical QA signed off.
+- Revalidated the real multi-source coverage gate: MangaDex remains the only approved reader-capable production source, so cross-provider title/chapter QA is explicitly blocked rather than fabricated.
+- Preserved the v2.1.5 multi-source QA matrix for immediate execution once an audited second reader source is approved.
+- Added an authenticated header profile menu with Account, Library, and Sign out.
+- Removed the duplicate sign-out control from the bottom of the Account page.
+- Fixed stale persistent-shell authentication UI by broadcasting login/logout changes immediately and refreshing header session state on client navigation, focus, and visibility restoration.
+- No database migration is required.
+
+
 ## 2.1.4 — Provider Reliability & Coverage Classification
 
 - Marked v2.1.3 Regional Coverage Sources physical QA signed off.

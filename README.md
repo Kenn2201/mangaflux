@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v2.1.4--Provider_Reliability_Coverage-indigo.svg)
+![Version](https://img.shields.io/badge/version-v2.1.5--Coverage_Gate_Account_Sync-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v2.1.4 — Provider Reliability & Coverage Classification**
+**v2.1.5 — Coverage Gate & Account Sync**
 
-MangaFlux V1, v2.0.x, and v2.1.0 through v2.1.3 are physically QA signed off. v2.1.4 makes provider reliability operational: status contracts expose provider role, media coverage, health, latency, capabilities, host/cache/request policy, and failure mode; optional provider health failures are isolated from critical primary-source health; experimental sources remain opt-in rather than joining ordinary unified search automatically.
+MangaFlux V1, v2.0.x, and v2.1.0 through v2.1.4 are physically QA signed off. v2.1.5 closes the currently testable v2.1 foundation without pretending a second reader provider has passed the production gate: real multi-source coverage QA remains blocked until an audited reader-capable source is approved. This release also fixes persistent-shell authentication UI by synchronizing sign-in/sign-out state immediately and moves Account / Library / Sign out into the header profile menu.
 
 ### Library improvements
 
