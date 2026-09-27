@@ -28,6 +28,8 @@ export default function SearchClient({
   const [items, setItems] = useState<MangaSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [sources, setSources] = useState<Array<{ id: string; name: string; status: "ok" | "error" }>>([]);
+  const [sourceFilter, setSourceFilter] = useState("all");
 
   const performSearch = useCallback(async (rawQuery: string) => {
     const value = rawQuery.trim();
@@ -44,7 +46,7 @@ export default function SearchClient({
 
     try {
       const response = await fetch(
-        `/api/search?q=${encodeURIComponent(value)}`,
+        `/api/search?q=${encodeURIComponent(value)}${sourceFilter !== "all" ? `&source=${encodeURIComponent(sourceFilter)}` : ""}`,
         { cache: "no-store" }
       );
 
@@ -52,11 +54,15 @@ export default function SearchClient({
         throw new Error("Search is temporarily unavailable.");
       }
 
-      const payload = (await response.json()) as { items: MangaSummary[] };
+      const payload = (await response.json()) as {
+        items: MangaSummary[];
+        sources?: Array<{ id: string; name: string; status: "ok" | "error" }>;
+      };
       setItems(payload.items);
+      setSources(payload.sources ?? []);
 
       if (payload.items.length === 0) {
-        setMessage("No MangaDex results found.");
+        setMessage("No results found from the selected source.");
       }
     } catch (error) {
       setItems([]);
@@ -66,7 +72,7 @@ export default function SearchClient({
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [sourceFilter]);
 
   useEffect(() => {
     const value = initialQuery.trim().slice(0, 120);
@@ -108,7 +114,7 @@ export default function SearchClient({
   return (
     <section id="search" className="search-section">
       <div className="section-kicker">
-        <p className="eyebrow">Explore MangaDex</p>
+        <p className="eyebrow">Explore MangaFlux sources</p>
         <h2>Find your next read.</h2>
       </div>
 
@@ -143,6 +149,24 @@ export default function SearchClient({
         </div>
       </form>
 
+      {sources.length > 0 ? (
+        <div className="search-source-filter">
+          <label htmlFor="search-source">Source</label>
+          <select
+            id="search-source"
+            value={sourceFilter}
+            onChange={(event) => setSourceFilter(event.target.value)}
+          >
+            <option value="all">All enabled sources</option>
+            {sources.map((source) => (
+              <option value={source.id} key={source.id}>
+                {source.name}{source.status === "error" ? " (unavailable)" : ""}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : null}
+
       {initialQuery && !loading ? (
         <p className="search-context">
           Showing results for <strong>{initialQuery}</strong>
@@ -159,7 +183,7 @@ export default function SearchClient({
             <Link
               className="manga-card"
               href={`/manga/${item.id}${mangaQuerySuffix}`}
-              key={item.id}
+              key={`${item.source}:${item.id}`}
             >
               <div className="cover-shell">
                 {item.coverUrl ? (
@@ -174,7 +198,7 @@ export default function SearchClient({
                 )}
               </div>
               <strong>{item.title}</strong>
-              <span>MangaDex</span>
+              <span>{sources.find((source) => source.id === item.source)?.name ?? item.source}</span>
             </Link>
           ))}
         </div>

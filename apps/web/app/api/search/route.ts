@@ -17,6 +17,7 @@ export async function GET(request: NextRequest) {
     Number.isInteger(rawLimit) && rawLimit >= 1 && rawLimit <= 24
       ? rawLimit
       : 24;
+  const source = request.nextUrl.searchParams.get("source")?.trim();
 
   if (!query || query.length > 120) {
     return NextResponse.json(
@@ -25,11 +26,15 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  const search = new URLSearchParams({
+    q: query,
+    limit: String(limit)
+  });
+  if (source) search.set("source", source);
+
   try {
     const upstream = await fetch(
-      `${API_URL.replace(/\/$/, "")}/api/search?q=${encodeURIComponent(
-        query
-      )}&limit=${limit}`,
+      `${API_URL.replace(/\/$/, "")}/api/search/unified?${search.toString()}`,
       {
         cache: "no-store",
         signal: AbortSignal.timeout(15_000)

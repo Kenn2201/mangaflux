@@ -646,19 +646,19 @@ Do not choose or integrate a source until its API/access terms and MangaFlux req
 - Keep every adapter independently disableable
 - Do not run/install arbitrary third-party repositories merely to test them
 
-### ⏸ Source #2 Re-entry Gate — CURRENT BLOCKER
+### ⏸ Source #2 Re-entry Gate — CURRENT SOURCE-EXPANSION BLOCKER
 - Continue evidence-based source discovery without weakening the v2.0.5 source policy
 - Require a maintained, reader-capable source with verifiable upstream access before implementation
 - Do not advance Unified Search with only MangaDex or a fake/unsafe adapter
 - Current additional rejects: Nyora (JS SDK no longer maintained / parser aggregator), undocumented MANGA Plus app endpoints as a general integration, and third-party INKR extraction wrappers
 
-### v2.1.1 — Unified Search — BLOCKED ON SOURCE #2
-- Search enabled sources
-- Normalize results through the shared contracts
-- Isolate per-source failures
-- Preserve provenance on every result
-- Source badges and source filter
-- Deterministic ordering
+### ➡️ v2.1.1 — Unified Search Foundation — IMPLEMENTED / PHYSICAL QA PENDING
+- Search enabled sources through the unified fan-out endpoint (implemented)
+- Normalize results through the shared contracts (implemented)
+- Isolate per-source failures (implemented)
+- Preserve provenance on every result (implemented)
+- Source badges and source filter (implemented)
+- Deterministic round-robin ordering (implemented)
 
 ### v2.1.2 — Multi-Source Search Quality
 - Normalize titles/alternate titles

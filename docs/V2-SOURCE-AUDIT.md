@@ -55,6 +55,11 @@ Status: rejected via third-party API wrapper.
 
 INKR is an official comics service, but no documented public developer API was found. The structured API candidate is a third-party managed extraction service and does not establish official upstream API permission. Paid/locked chapters also expose only previews. It does not satisfy the source #2 gate.
 
+### OmegaAPI
+Status: not approved for production.
+
+OmegaAPI exposes a useful normalized search/details/chapters/pages REST surface, but it is third-party middleware over the OmegaScans API rather than an independently approved upstream. Its own documentation says the hosted instance is for testing only and may be paused because of request volume. MangaFlux will not make production reading depend on that hosted middleware without independently verifiable upstream access and operational terms.
+
 ## Decision
 
 No second reading source passes the v2.1.0 production gate today.

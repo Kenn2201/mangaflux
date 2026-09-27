@@ -23,6 +23,7 @@ import {
 
 type SearchPayload = {
   items: MangaTileItem[];
+  sources?: Array<{ id: string; name: string; status: "ok" | "error" }>;
 };
 
 export default function HeaderSearch() {
@@ -31,6 +32,7 @@ export default function HeaderSearch() {
   const shellRef = useRef<HTMLDivElement | null>(null);
   const [query, setQuery] = useState("");
   const [items, setItems] = useState<MangaTileItem[]>([]);
+  const [sourceNames, setSourceNames] = useState<Record<string, string>>({});
   const [recentSearches, setRecentSearches] = useState<SearchHistoryItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -121,6 +123,7 @@ export default function HeaderSearch() {
 
         const payload = (await response.json()) as SearchPayload;
         setItems(payload.items);
+        setSourceNames(Object.fromEntries((payload.sources ?? []).map((source) => [source.id, source.name])));
         setOpen(true);
         setActiveIndex(-1);
       } catch (error) {
@@ -320,14 +323,14 @@ export default function HeaderSearch() {
           {showSuggestions
             ? items.map((item, index) => {
                 const meta = [
-                  "Manga",
+                  sourceNames[item.source] ?? item.source,
                   item.year ? String(item.year) : undefined,
                   item.tags?.[0]
                 ].filter(Boolean);
 
                 return (
                   <Link
-                    key={item.id}
+                    key={`${item.source}:${item.id}`}
                     className={`search-suggestion ${
                       index === activeIndex ? "is-active" : ""
                     }`}

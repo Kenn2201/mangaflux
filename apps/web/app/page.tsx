@@ -95,7 +95,7 @@ export default async function Home({
       </section>
 
       <div className="landing-version">
-        v2.1.0 · Source Candidate Audit
+        v2.1.1 · Unified Search Foundation
       </div>
     </main>
   );
