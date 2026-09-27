@@ -661,7 +661,7 @@ Do not choose or integrate a source until its API/access terms and MangaFlux req
 - Deterministic round-robin ordering
 - Physical production QA passed
 
-### ➡️ v2.1.2 — Multi-Source Search Quality — IMPLEMENTED / PHYSICAL QA PENDING
+### ✅ v2.1.2 — Multi-Source Search Quality — PHYSICAL QA SIGNED OFF
 - Normalize titles/alternate titles with Unicode-aware deterministic keys
 - Improve deterministic title matching without claiming canonical identity
 - Suppress obvious duplicate result spam within a source
@@ -671,8 +671,9 @@ Do not choose or integrate a source until its API/access terms and MangaFlux req
 - Chapter-coverage comparison remains deferred until a verified second reader source exists
 - Treat incomplete upstream chapter feeds as source coverage, not as proof that chapters do not exist
 - No database migration
+- Physical production QA passed
 
-### v2.1.3 — Manhwa Coverage
+### ⛔ v2.1.3 — Manhwa Coverage — BLOCKED AT SOURCE GATE
 - Add a dedicated permitted manhwa adapter when candidate audit passes
 - Normalize manhwa metadata/chapters/pages into MangaFlux contracts
 - Preserve the actual source on every result/chapter/page
