@@ -5,6 +5,8 @@ export type SourceDescriptor = {
   name: string;
   enabled: boolean;
   homepageUrl: string;
+  capabilities: SourceCapabilities;
+  policy: SourcePolicy;
 };
 
 export type MangaRef = {
@@ -16,6 +18,59 @@ export type ChapterRef = {
   source: SourceId;
   chapterId: string;
 };
+
+export type SourceCapability =
+  | "search"
+  | "discovery"
+  | "tags"
+  | "details"
+  | "related"
+  | "chapters"
+  | "pages"
+  | "health";
+
+export type SourceContentClass = "general" | "explicit";
+
+export type SourceCapabilities = Readonly<{
+  search: boolean;
+  discovery: boolean;
+  tags: boolean;
+  details: boolean;
+  related: boolean;
+  chapters: boolean;
+  pages: boolean;
+  health: boolean;
+  discoveryKinds: readonly MangaDiscoveryKind[];
+  languages: readonly string[];
+}>;
+
+export type SourcePolicy = Readonly<{
+  attributionRequired: boolean;
+  attributionName: string;
+  attributionUrl: string;
+  contentClass: SourceContentClass;
+  allowedImageHosts: readonly string[];
+  cache: {
+    searchSeconds: number;
+    metadataSeconds: number;
+    chaptersSeconds: number;
+  };
+  requests: {
+    publicApiOnly: boolean;
+    htmlAdapterAllowed: boolean;
+    bypassProtectedAccess: false;
+  };
+}>;
+
+export class UnsupportedSourceCapabilityError extends Error {
+  constructor(
+    public readonly sourceId: string,
+    public readonly capability: SourceCapability
+  ) {
+    super(`Source ${sourceId} does not support ${capability}`);
+    this.name = "UnsupportedSourceCapabilityError";
+  }
+}
 
 export type MangaSummary = {
   id: string;

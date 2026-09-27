@@ -21,14 +21,21 @@ import { registerStateRoutes } from "./state.js";
 import { attachDiagnostics } from "./diagnostics.js";
 import {
   fetchMangaDexPageImage,
-  mangaDexSource
+  getSourceDescriptor,
+  listSourceDescriptors,
+  requireSourceCapability,
+  sourceSupportsDiscoveryKind,
+  sourceSupportsLanguage,
+  validateSourceChapterId,
+  validateSourceMangaId,
+  UnsupportedSourceCapabilityError
 } from "@mangaflux/sources";
 import type {
   MangaDiscoveryKind,
   MangaSummary
 } from "@mangaflux/sources";
 
-const APP_VERSION = "2.0.0";
+const APP_VERSION = "2.0.5";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LANGUAGE_RE = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i;
@@ -280,6 +287,17 @@ function parseBoundedInt(
   return parsed;
 }
 
+function requestedSource(value: string | undefined, capability: Parameters<typeof requireSourceCapability>[1]) {
+  return requireSourceCapability(value?.trim() || "mangadex", capability);
+}
+
+function sourceCacheControl(sourceId: string, kind: "search" | "metadata" | "chapters") {
+  const seconds = getSourceDescriptor(sourceId)?.policy.cache[
+    kind === "search" ? "searchSeconds" : kind === "chapters" ? "chaptersSeconds" : "metadataSeconds"
+  ] ?? 0;
+  return `public, max-age=${seconds}, s-maxage=${seconds}, stale-while-revalidate=${Math.max(seconds, seconds * 2)}`;
+}
+
 function parseDiscoveryKind(
   value: string | undefined
 ): MangaDiscoveryKind | null {
@@ -311,24 +329,30 @@ app.setErrorHandler((error, request, reply) => {
   const statusCode =
     authRequest || persistenceRequest
       ? 503
-      : error instanceof RangeError
-        ? 404
+      : error instanceof UnsupportedSourceCapabilityError
+        ? 501
+        : error instanceof RangeError
+          ? 404
         : errorName === "AbortError" || errorName === "TimeoutError"
           ? 504
           : 502;
 
   return reply.code(statusCode).send({
     error:
-      statusCode === 404
-        ? "NOT_FOUND"
+      statusCode === 501
+        ? "SOURCE_CAPABILITY_UNAVAILABLE"
+        : statusCode === 404
+          ? "NOT_FOUND"
         : authRequest
           ? "AUTH_UNAVAILABLE"
           : persistenceRequest
             ? "PERSISTENCE_UNAVAILABLE"
             : "UPSTREAM_ERROR",
     message:
-      statusCode === 404
-        ? "The requested resource was not found."
+      statusCode === 501
+        ? "The selected source does not support this operation."
+        : statusCode === 404
+          ? "The requested resource was not found."
         : authRequest
           ? "Authentication is temporarily unavailable."
           : persistenceRequest
@@ -344,7 +368,7 @@ app.get("/health", async () => ({
   ok: true,
   service: "mangaflux-api",
   version: APP_VERSION,
-  source: "mangadex",
+  sources: listSourceDescriptors().filter((source) => source.enabled).map((source) => source.id),
   persistence: database ? "configured" : "disabled",
   auth:
     database && authProxySecret
@@ -358,8 +382,12 @@ app.get(
   "/api/status",
   { preHandler: statusRateLimit },
   async (_request, reply) => {
+    const sourceDescriptors = listSourceDescriptors().filter((source) => source.enabled);
     const [sourceHealth, databaseHealth] = await Promise.all([
-      mangaDexSource.health(),
+      Promise.all(sourceDescriptors.map(async (descriptor) => {
+        const source = requireSourceCapability(descriptor.id, "health");
+        return source.health();
+      })),
       database
         ? probeDatabase(database)
         : Promise.resolve({
@@ -371,7 +399,7 @@ app.get(
 
     const persistenceStatus = databaseHealth.status;
     const overall =
-      sourceHealth.status === "operational" &&
+      sourceHealth.every((source) => source.status === "operational") &&
       persistenceStatus === "operational"
         ? "operational"
         : "degraded";
@@ -392,7 +420,7 @@ app.get(
         api: {
           status: "operational"
         },
-        source: sourceHealth,
+        sources: sourceHealth,
         persistence: databaseHealth,
         auth: {
           status:
@@ -483,13 +511,15 @@ app.post(
       for (const follow of follows) {
         eligible += 1;
 
-        if (follow.source !== "mangadex") {
+        const descriptor = getSourceDescriptor(follow.source);
+        if (!descriptor?.enabled || !descriptor.capabilities.chapters) {
           skipped += 1;
           continue;
         }
 
         try {
-          const page = await mangaDexSource.chapterPage(
+          const notificationSource = requireSourceCapability(follow.source, "chapters");
+          const page = await notificationSource.chapterPage(
             follow.mangaId,
             {
               language: "en",
@@ -640,13 +670,11 @@ app.get(
   "/api/sources",
   { preHandler: metadataRateLimit },
   async () => ({
-    sources: [
-      { id: mangaDexSource.id, name: mangaDexSource.name, enabled: true }
-    ]
+    sources: listSourceDescriptors()
   })
 );
 
-app.get<{ Querystring: { q?: string; limit?: string } }>(
+app.get<{ Querystring: { q?: string; limit?: string; source?: string } }>(
   "/api/search",
   { preHandler: searchRateLimit },
   async (request, reply) => {
@@ -661,14 +689,15 @@ app.get<{ Querystring: { q?: string; limit?: string } }>(
       });
     }
 
-    const items = await mangaDexSource.search(query, { limit });
+    const source = requestedSource(request.query.source, "search");
+    const items = await source.search(query, { limit });
 
     reply.header(
       "Cache-Control",
-      "public, max-age=30, s-maxage=30, stale-while-revalidate=60"
+      sourceCacheControl(source.id, "search")
     );
 
-    return { source: mangaDexSource.id, items };
+    return { source: source.id, items };
   }
 );
 
@@ -682,12 +711,14 @@ app.get<{
     creator?: string;
     status?: string;
     language?: string;
+    source?: string;
   };
 }>(
   "/api/discovery",
   { preHandler: discoveryRateLimit },
   async (request, reply) => {
     const kind = parseDiscoveryKind(request.query.kind);
+    const source = requestedSource(request.query.source, "discovery");
     const limit = parseBoundedInt(request.query.limit, 24, 1, 50);
     const offset = parseBoundedInt(request.query.offset, 0, 0, 10_000);
     const tagId = request.query.tag?.trim();
@@ -708,7 +739,9 @@ app.get<{
       (tagId && !UUID_RE.test(tagId)) ||
       (creatorId && !UUID_RE.test(creatorId)) ||
       (status && !MANGA_STATUSES.has(status)) ||
-      !DISCOVERY_LANGUAGES.has(language)
+      !DISCOVERY_LANGUAGES.has(language) ||
+      (kind && !sourceSupportsDiscoveryKind(source.id, kind)) ||
+      !sourceSupportsLanguage(source.id, language)
     ) {
       return reply.code(400).send({
         error: "INVALID_REQUEST",
@@ -717,7 +750,7 @@ app.get<{
       });
     }
 
-    const page = await mangaDexSource.discover(kind, {
+    const page = await source.discover(kind, {
       limit,
       offset,
       tagId,
@@ -738,7 +771,7 @@ app.get<{
     );
 
     return {
-      source: mangaDexSource.id,
+      source: source.id,
       kind,
       ...page
     };
@@ -746,17 +779,19 @@ app.get<{
 );
 
 app.get<{
-  Querystring: { language?: string; status?: string };
+  Querystring: { language?: string; status?: string; source?: string };
 }>(
   "/api/discovery/home",
   { preHandler: discoveryRateLimit },
   async (request, reply) => {
     const language =
       request.query.language?.trim().toLowerCase() || "en";
+    const source = requestedSource(request.query.source, "discovery");
     const status = request.query.status?.trim();
 
     if (
       !DISCOVERY_LANGUAGES.has(language) ||
+      !sourceSupportsLanguage(source.id, language) ||
       (status && !MANGA_STATUSES.has(status))
     ) {
       return reply.code(400).send({
@@ -773,23 +808,23 @@ app.get<{
       | undefined;
 
     const [hot, popular, trending, top, latest] = await Promise.all([
-      mangaDexSource.discover("hot", {
+      source.discover("hot", {
         limit: 10,
         language,
         status: preferredStatus
       }),
-      mangaDexSource.discover("popular", {
+      source.discover("popular", {
         limit: 10,
         language,
         status: preferredStatus
       }),
-      mangaDexSource.discover("trending", {
+      source.discover("trending", {
         limit: 10,
         language,
         status: preferredStatus
       }),
-      mangaDexSource.discover("top", { limit: 10, language }),
-      mangaDexSource.discover("latest", { limit: 10, language })
+      source.discover("top", { limit: 10, language }),
+      source.discover("latest", { limit: 10, language })
     ]);
 
     reply.header(
@@ -798,7 +833,7 @@ app.get<{
     );
 
     return {
-      source: mangaDexSource.id,
+      source: source.id,
       language,
       preferredStatus: preferredStatus ?? null,
       sections: { hot, popular, trending, top, latest }
@@ -806,11 +841,12 @@ app.get<{
   }
 );
 
-app.get(
+app.get<{ Querystring: { source?: string } }>(
   "/api/genres",
   { preHandler: discoveryRateLimit },
-  async (_request, reply) => {
-    const tags = await mangaDexSource.tags();
+  async (request, reply) => {
+    const source = requestedSource(request.query.source, "tags");
+    const tags = await source.tags();
 
     reply.header(
       "Cache-Control",
@@ -818,51 +854,57 @@ app.get(
     );
 
     return {
-      source: mangaDexSource.id,
+      source: source.id,
       items: tags
     };
   }
 );
 
-app.get<{ Params: { id: string } }>(
-  "/api/manga/mangadex/:id",
+app.get<{ Params: { source: string; id: string } }>(
+  "/api/manga/:source/:id",
   { preHandler: metadataRateLimit },
   async (request, reply) => {
-    if (!requireUuid(request.params.id, reply, "id")) return;
+    const source = requestedSource(request.params.source, "details");
+    if (!validateSourceMangaId(source.id, request.params.id)) {
+      return reply.code(400).send({ error: "INVALID_REQUEST", message: "id is invalid for the selected source" });
+    }
 
-    const item = await mangaDexSource.details(request.params.id);
+    const item = await source.details(request.params.id);
 
     reply.header(
       "Cache-Control",
-      "public, max-age=300, s-maxage=300, stale-while-revalidate=600"
+      sourceCacheControl(source.id, "metadata")
     );
 
-    return { source: mangaDexSource.id, item };
+    return { source: source.id, item };
   }
 );
 
-app.get<{ Params: { id: string } }>(
-  "/api/manga/mangadex/:id/related",
+app.get<{ Params: { source: string; id: string } }>(
+  "/api/manga/:source/:id/related",
   { preHandler: metadataRateLimit },
   async (request, reply) => {
-    if (!requireUuid(request.params.id, reply, "id")) return;
+    const source = requestedSource(request.params.source, "related");
+    if (!validateSourceMangaId(source.id, request.params.id)) {
+      return reply.code(400).send({ error: "INVALID_REQUEST", message: "id is invalid for the selected source" });
+    }
 
-    const items = await mangaDexSource.related(request.params.id);
+    const items = await source.related(request.params.id);
 
     reply.header(
       "Cache-Control",
-      "public, max-age=300, s-maxage=300, stale-while-revalidate=600"
+      sourceCacheControl(source.id, "metadata")
     );
 
     return {
-      source: mangaDexSource.id,
+      source: source.id,
       items
     };
   }
 );
 
 app.get<{
-  Params: { id: string };
+  Params: { source: string; id: string };
   Querystring: {
     language?: string;
     limit?: string;
@@ -871,10 +913,13 @@ app.get<{
     chapter?: string;
   };
 }>(
-  "/api/manga/mangadex/:id/chapters",
+  "/api/manga/:source/:id/chapters",
   { preHandler: metadataRateLimit },
   async (request, reply) => {
-    if (!requireUuid(request.params.id, reply, "id")) return;
+    const source = requestedSource(request.params.source, "chapters");
+    if (!validateSourceMangaId(source.id, request.params.id)) {
+      return reply.code(400).send({ error: "INVALID_REQUEST", message: "id is invalid for the selected source" });
+    }
 
     const language = request.query.language?.trim() || "en";
     const limit = parseBoundedInt(request.query.limit, 50, 1, 100);
@@ -902,7 +947,7 @@ app.get<{
       });
     }
 
-    const page = await mangaDexSource.chapterPage(request.params.id, {
+    const page = await source.chapterPage(request.params.id, {
       language,
       limit,
       offset,
@@ -912,11 +957,11 @@ app.get<{
 
     reply.header(
       "Cache-Control",
-      "public, max-age=60, s-maxage=60, stale-while-revalidate=120"
+      sourceCacheControl(source.id, "chapters")
     );
 
     return {
-      source: mangaDexSource.id,
+      source: source.id,
       language,
       ...page
     };
@@ -924,18 +969,21 @@ app.get<{
 );
 
 app.get<{
-  Params: { chapterId: string };
+  Params: { source: string; chapterId: string };
   Querystring: { dataSaver?: string };
 }>(
-  "/api/chapter/mangadex/:chapterId/pages",
+  "/api/chapter/:source/:chapterId/pages",
   { preHandler: metadataRateLimit },
   async (request, reply) => {
-    if (!requireUuid(request.params.chapterId, reply, "chapterId")) return;
+    const source = requestedSource(request.params.source, "pages");
+    if (!validateSourceChapterId(source.id, request.params.chapterId)) {
+      return reply.code(400).send({ error: "INVALID_REQUEST", message: "chapterId is invalid for the selected source" });
+    }
 
     const dataSaver = parseDataSaver(request.query.dataSaver, reply);
     if (dataSaver === null) return;
 
-    return mangaDexSource.pages(request.params.chapterId, { dataSaver });
+    return source.pages(request.params.chapterId, { dataSaver });
   }
 );
 

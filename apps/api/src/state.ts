@@ -31,6 +31,12 @@ import {
   upsertUserReaderPreferences
 } from "@mangaflux/db";
 import type { MangaFluxDatabase } from "@mangaflux/db";
+import {
+  getSourceDescriptor,
+  isAllowedSourceImageUrl,
+  validateSourceMangaId,
+  validateSourceChapterId
+} from "@mangaflux/sources";
 import { authenticateSession } from "./auth.js";
 
 const UUID_RE =
@@ -228,7 +234,7 @@ function validateReaderPreferencesBody(
   };
 }
 
-function normalizeCoverUrl(value: unknown) {
+function normalizeCoverUrl(value: unknown, source = "mangadex") {
   if (value === undefined || value === null || value === "") {
     return { ok: true as const, value: undefined };
   }
@@ -239,10 +245,7 @@ function normalizeCoverUrl(value: unknown) {
 
   try {
     const parsed = new URL(value);
-    if (
-      parsed.protocol !== "https:" ||
-      parsed.hostname !== "uploads.mangadex.org"
-    ) {
+    if (!isAllowedSourceImageUrl(source, parsed.toString())) {
       return { ok: false as const };
     }
 
@@ -309,10 +312,14 @@ function validateSourceAndManga(
   mangaId: unknown,
   reply: FastifyReply
 ) {
-  if (source !== "mangadex" || !validMangaDexId(mangaId)) {
+  if (
+    typeof source !== "string" ||
+    !getSourceDescriptor(source)?.enabled ||
+    !validateSourceMangaId(source, mangaId)
+  ) {
     reply.code(400).send({
       error: "INVALID_REQUEST",
-      message: "Only valid MangaDex manga identifiers are accepted."
+      message: "A valid enabled source and manga identifier are required."
     });
     return false;
   }
@@ -336,7 +343,7 @@ function validateBookmarkBody(
     return null;
   }
 
-  const cover = normalizeCoverUrl(body.coverUrl);
+  const cover = normalizeCoverUrl(body.coverUrl, body.source);
   if (!cover.ok) {
     reply.code(400).send({
       error: "INVALID_REQUEST",
@@ -361,10 +368,10 @@ function validateProgressBody(
     return null;
   }
 
-  if (!validMangaDexId(body.chapterId)) {
+  if (!validateSourceChapterId(body.source!, body.chapterId)) {
     reply.code(400).send({
       error: "INVALID_REQUEST",
-      message: "chapterId must be a valid MangaDex UUID"
+      message: "chapterId is invalid for the selected source"
     });
     return null;
   }
@@ -404,7 +411,7 @@ function validateProgressBody(
     return null;
   }
 
-  const cover = normalizeCoverUrl(body.coverUrl);
+  const cover = normalizeCoverUrl(body.coverUrl, body.source);
   if (!cover.ok) {
     reply.code(400).send({
       error: "INVALID_REQUEST",

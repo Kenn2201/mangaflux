@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.0.5 — Source Platform Foundation Compatibility Gate
+
+- Completed the v2.0.1-v2.0.5 source-platform foundation in one consolidated release.
+- Added explicit source capabilities, supported discovery kinds, languages, and unsupported-capability errors.
+- Routed search, discovery, tags, manga details/related/chapters, chapter pages, notification chapter checks, and health through the source registry.
+- Added per-source attribution, image-host, cache, request, and protected-access policies.
+- Added registry-wide source health and capability-aware source diagnostics.
+- Generalized bookmark/progress source and cover validation while preserving MangaDex-scoped reader preferences until a schema-safe migration is justified.
+- Added the V2 source compatibility contract and preserved all existing MangaDex route/data behavior.
+- No database migration.
+
+
 ## 2.0.0 — Source Registry & Identity Contracts
 
 - Added a central source registry with MangaDex as the only enabled production source.

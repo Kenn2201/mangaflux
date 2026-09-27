@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v1.5.0--Product_Polish-indigo.svg)
+![Version](https://img.shields.io/badge/version-v2.0.5--Source_Platform_Foundation-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v1.5.0 — Product Polish**
+**v2.0.5 — Source Platform Foundation**
 
-MangaFlux V1 remains a stable single-source MangaDex product. v1.4.7 and the full v1.4.x Discovery & Personalization phase passed physical QA. v1.5.0 consolidates the complete planned Product Polish scope into one final V1 QA target: installability, offline-safe fallback, faster shell states, accessibility, performance, and production hardening.
+MangaFlux V1 is physically QA signed off through v1.5.0. v2.0.5 completes the source-platform foundation: registry capabilities, source-aware dispatch, source policy/attribution, registry-wide health diagnostics, and the V1 compatibility gate. MangaDex remains the only enabled production source until the first additional source passes the v2.1.x audit.
 
 ### Library improvements
 
