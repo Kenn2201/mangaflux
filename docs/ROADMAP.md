@@ -635,11 +635,15 @@ Build the source abstraction without changing current MangaDex user behavior.
 
 Do not choose or integrate a source until its API/access terms and MangaFlux requirements are verified.
 
-### v2.1.0 — Second Permitted Source Adapter
-- Select one permitted source with stable/public access
+### v2.1.0 — Source Candidate Audit & Second Permitted Adapter
+- Audit candidate manga/manhwa APIs before execution or production use: ownership/upstream, repository/dependencies where available, maintenance, license/terms, rate limits, content hosts, and whether the service is an API or an unofficial scraper
+- Candidate research pool includes the GitHub manga-api ecosystem and API-directory candidates; inclusion in a directory is not approval
+- Explicitly evaluate the Manhwa Reader API as a manhwa coverage candidate
+- Select the first permitted/stable source based on verified access and MangaFlux coverage needs
 - Implement only capabilities genuinely supported by that source
 - Add source-specific attribution, host allowlists, rate policy, and health
-- Keep adapter independently disableable
+- Keep every adapter independently disableable
+- Do not run/install arbitrary third-party repositories merely to test them
 
 ### v2.1.1 — Unified Search
 - Search enabled sources
@@ -655,6 +659,15 @@ Do not choose or integrate a source until its API/access terms and MangaFlux req
 - Avoid obvious duplicate result spam
 - Preserve source editions before canonical identity exists
 - Search latency/degraded-source UX
+- Measure chapter-coverage gaps so MangaFlux can show when another verified source has older/missing chapters
+- Treat incomplete upstream chapter feeds as source coverage, not as proof that chapters do not exist
+
+### v2.1.3 — Manhwa Coverage
+- Add a dedicated permitted manhwa adapter when candidate audit passes
+- Normalize manhwa metadata/chapters/pages into MangaFlux contracts
+- Preserve the actual source on every result/chapter/page
+- Allow manhwa results to participate in unified search without disguising provenance
+- Apply source-specific host/rate/cache policies
 
 ---
 
@@ -688,8 +701,10 @@ Only introduce canonical identity after real cross-source data exists so matchin
 
 ---
 
-## v2.3.x — Source Selection & Safe Fallback
+## v2.3.x — Source Selection, Coverage & Safe Fallback
 
+- Show chapter coverage per mapped source/edition
+- Make missing/older chapter availability discoverable when another verified source covers it
 - Preferred source per canonical manga
 - Explicit source switching
 - Availability-aware source selector
@@ -699,6 +714,7 @@ Only introduce canonical identity after real cross-source data exists so matchin
 - Preserve attribution on every reader path
 - Never silently disguise or substitute a source
 - Never claim chapter equivalence without reconciliation
+- Never silently splice chapter feeds from titles that merely have similar names
 
 ---
 
@@ -717,7 +733,18 @@ Only introduce canonical identity after real cross-source data exists so matchin
 
 ---
 
-## v2.5.x — Adapter SDK & Testing
+## v2.5.x — Reader History Visibility & Adapter SDK
+
+### v2.5.0 — Read-State UX
+- Show the user's last-read chapter on manga detail pages
+- Visually mark chapters already read
+- Use approximately 80% opacity as a secondary visual treatment without relying on opacity alone
+- Add an explicit accessible Read indicator/state
+- Carry read-state context into reader chapter navigation where useful
+- Keep progress source-aware so editions are not accidentally conflated
+- Preserve existing resume/progress behavior
+
+### v2.5.1+ — Adapter SDK & Testing
 
 - Adapter fixtures
 - Contract tests
@@ -749,9 +776,35 @@ Only introduce canonical identity after real cross-source data exists so matchin
 
 ---
 
-## v2.7+ — Platform Expansion & Maturity
+## v2.7.x — Adult/Explicit Source Isolation
 
-Intentionally open-ended. Add v2.7.x, v2.8.x, v2.9.x, v2.10.x and beyond as real platform requirements emerge.
+Adult-content sources are never mixed silently into ordinary MangaFlux discovery.
+
+### v2.7.0 — Explicit Content Architecture
+- Separate explicit/adult source capability from normal manga/manhwa sources
+- Explicit opt-in boundary before adult-source discovery
+- Clear source/content labeling
+- Keep adult results out of normal search/discovery by default
+- Source-specific policy, host, cache, and health controls
+- Do not infer age from ordinary MangaFlux profile data
+
+### v2.7.1 — nHentai Candidate Audit
+- Evaluate the documented nHentai API as an adult-source candidate
+- Verify current API behavior, access expectations, attribution, rate behavior, image hosts, and maintenance before implementation
+- Do not integrate unofficial bypasses or anti-bot workarounds
+- Only proceed to an adapter if the source passes the same production-source audit
+
+### v2.7.2+ — Explicit Source Adapter & UX
+- If approved, implement nHentai through the same registry/capability system
+- Keep its catalog/search surfaces isolated from default MangaFlux manga/manhwa discovery
+- Preserve explicit provenance and content labeling
+- Independently disable the adapter without affecting normal MangaFlux
+
+---
+
+## v2.8+ — Platform Expansion & Maturity
+
+Intentionally open-ended. Add v2.8.x, v2.9.x, v2.10.x and beyond as real platform requirements emerge.
 
 Potential work:
 - Additional permitted sources
