@@ -5,9 +5,16 @@ export {
   createMangaRef,
   getSource,
   getSourceDescriptor,
+  isAllowedSourceImageUrl,
   isSourceId,
   listSourceDescriptors,
-  requireSource
+  requireSource,
+  requireSourceCapability,
+  sourceSupports,
+  sourceSupportsDiscoveryKind,
+  sourceSupportsLanguage,
+  validateSourceChapterId,
+  validateSourceMangaId
 } from "./registry.js";
 export {
   fetchMangaDexPageImage,

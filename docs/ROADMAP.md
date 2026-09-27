@@ -581,7 +581,7 @@ MangaDex remains the default/only enabled production source until another source
 
 Build the source abstraction without changing current MangaDex user behavior.
 
-### ➡️ v2.0.0 — Source Registry & Identity Contracts — IMPLEMENTED / PHYSICAL QA PENDING
+### ✅ v2.0.0 — Source Registry & Identity Contracts — PHYSICAL QA SIGNED OFF
 - Add a central source registry instead of importing/dispatching MangaDex directly
 - Define stable source IDs and source descriptors
 - Define source-aware manga and chapter references
@@ -591,21 +591,21 @@ Build the source abstraction without changing current MangaDex user behavior.
 - Keep MangaDex as the only enabled source
 - No user-facing second source yet
 
-### v2.0.1 — Source Capability Model
+### ➡️ v2.0.1 — Source Capability Model — IMPLEMENTED / PHYSICAL QA PENDING
 - Declare capabilities per source: search, discovery, tags, details, related titles, chapters, pages, health
 - Declare supported discovery kinds
 - Declare language/content capabilities where relevant
 - Fail explicitly when a source does not support an operation
 - Never silently pretend capabilities exist
 
-### v2.0.2 — Source-Aware API Dispatch
+### ➡️ v2.0.2 — Source-Aware API Dispatch — IMPLEMENTED / PHYSICAL QA PENDING
 - Route source operations through the registry
 - Make search/details/chapters/pages/health dispatch source-aware
 - Preserve backward-compatible MangaDex routes during migration
 - Introduce source-aware request/response contracts without breaking V1 clients
 - Remove direct MangaDex assumptions from shared dispatch paths
 
-### v2.0.3 — Source Policy & Attribution
+### ➡️ v2.0.3 — Source Policy & Attribution — IMPLEMENTED / PHYSICAL QA PENDING
 - Per-source attribution metadata
 - Per-source allowed image/content hosts
 - Per-source caching policy
@@ -615,7 +615,7 @@ Build the source abstraction without changing current MangaDex user behavior.
 - No CAPTCHA, paywall, login-wall, or anti-bot bypass
 - Surface the real source instead of disguising it
 
-### v2.0.4 — Source Health & Diagnostics
+### ➡️ v2.0.4 — Source Health & Diagnostics — IMPLEMENTED / PHYSICAL QA PENDING
 - Registry-wide source health model
 - Per-source latency/status
 - Capability-aware diagnostics
@@ -623,7 +623,7 @@ Build the source abstraction without changing current MangaDex user behavior.
 - Degraded/unavailable source states
 - Preserve MangaDex diagnostics and cache statistics
 
-### v2.0.5 — V1 Compatibility Gate
+### ➡️ v2.0.5 — V1 Compatibility Gate — IMPLEMENTED / PHYSICAL QA PENDING
 - Regression-test bookmarks, history, progress, follows, notifications, reader preferences, community, discovery, and reader
 - Verify existing `source=mangadex` records require no destructive rewrite
 - Verify existing MangaDex URLs/IDs remain usable
