@@ -40,6 +40,21 @@ Status: rejected for production source #2.
 
 Repositories audited in this class expose HTML scraping, Cloudflare/anti-bot bypasses, referer spoofing, hotlink proxies, or other access workarounds. MangaFlux will not inherit those mechanisms through a wrapper API.
 
+### Nyora
+Status: rejected as production source #2.
+
+Nyora exposes a complete typed search/details/chapters/pages flow across hundreds of parser-backed sources, but its JavaScript/TypeScript SDK is explicitly marked "No Longer Maintained". It is an aggregator/parser layer rather than one independently approved upstream content source. That fails the v2.1 production reliability/provenance gate.
+
+### MANGA Plus
+Status: official-service candidate; not approved as general source #2.
+
+MANGA Plus is an official Shueisha reading service and current clients demonstrate title/chapter/page access. However, the programmatic endpoints used by community clients are not presented as a documented public developer API, and free access is intentionally catalog/chapter limited. MangaFlux will not treat undocumented application endpoints as a general-purpose production API without a clearer supported integration contract.
+
+### INKR
+Status: rejected via third-party API wrapper.
+
+INKR is an official comics service, but no documented public developer API was found. The structured API candidate is a third-party managed extraction service and does not establish official upstream API permission. Paid/locked chapters also expose only previews. It does not satisfy the source #2 gate.
+
 ## Decision
 
 No second reading source passes the v2.1.0 production gate today.

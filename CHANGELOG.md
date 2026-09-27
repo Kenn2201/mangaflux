@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased — v2.1 source discovery gate
+
+- Marked v2.1.0 physical QA signed off.
+- Expanded the source audit with Nyora, MANGA Plus, and INKR findings.
+- Kept v2.1.1 explicitly blocked until a maintained reader-capable source with verifiable upstream access passes the gate.
+- No runtime, package-version, database, or migration change.
+
+
 ## 2.1.0 — Source Candidate Audit
 
 - Marked v2.0.x physically QA signed off.
