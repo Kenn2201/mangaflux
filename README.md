@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v2.1.2--Multi--Source_Search_Quality-indigo.svg)
+![Version](https://img.shields.io/badge/version-v2.1.3--Regional_Coverage_Sources-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v2.1.2 — Multi-Source Search Quality**
+**v2.1.3 — Regional Coverage Sources**
 
-MangaFlux V1, v2.0.x, and v2.1.0 through v2.1.2 are physically QA signed off. v2.1.2 strengthens unified search with normalized title/alternate-title keys, conservative same-source duplicate suppression, per-source latency metadata, and degraded-source UX while preserving distinct source editions for the later canonical-identity phase. v2.1.3 Manhwa Coverage is blocked at the source gate: MangaDex remains the only enabled production reader source until another reader-capable source passes the audit.
+MangaFlux V1, v2.0.x, and v2.1.0 through v2.1.2 are physically QA signed off. v2.1.3 introduces the regional-coverage source model: providers declare a primary, coverage, or experimental role plus manga/manhwa/manhua coverage. MangaDex remains the only enabled production reader source while additional adapters are audited individually; no unverified source is silently enabled.
 
 ### Library improvements
 

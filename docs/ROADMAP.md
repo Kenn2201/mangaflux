@@ -631,54 +631,52 @@ Build the source abstraction without changing current MangaDex user behavior.
 
 ---
 
-## v2.1.x — Second Source + Unified Multi-Source Search
+## v2.1.x — Multi-Source Discovery & Regional Coverage
 
-Do not choose or integrate a source until its API/access terms and MangaFlux requirements are verified.
+The goal is not merely to add another API. MangaFlux must eventually distinguish "this provider lacks the title/chapter" from "the title/chapter does not exist," while preserving provenance and never silently substituting sources.
 
 ### ✅ v2.1.0 — Source Candidate Audit — PHYSICAL QA SIGNED OFF
-- Audit candidate manga/manhwa APIs before execution or production use: ownership/upstream, repository/dependencies where available, maintenance, license/terms, rate limits, content hosts, and whether the service is an API or an unofficial scraper
-- Candidate research pool includes the GitHub manga-api ecosystem and API-directory candidates; inclusion in a directory is not approval
-- Explicitly evaluate the Manhwa Reader API as a manhwa coverage candidate
-- Select the first permitted/stable source based on verified access and MangaFlux coverage needs
-- Current audit outcome: no second reader-capable source passes the production gate; keep MangaDex as the only enabled source
-- Implement an adapter only after a candidate passes the re-entry gate; do not fabricate or enable a scraper-backed source
-- Add source-specific attribution, host allowlists, rate policy, and health
-- Keep every adapter independently disableable
-- Do not run/install arbitrary third-party repositories merely to test them
-
-### ⏸ Source #2 Re-entry Gate — CURRENT SOURCE-EXPANSION BLOCKER
-- Continue evidence-based source discovery without weakening the v2.0.5 source policy
-- Require a maintained, reader-capable source with verifiable upstream access before implementation
-- Do not advance Unified Search with only MangaDex or a fake/unsafe adapter
-- Current additional rejects: Nyora (JS SDK no longer maintained / parser aggregator), undocumented MANGA Plus app endpoints as a general integration, and third-party INKR extraction wrappers
+- Established source ownership/upstream, maintenance, access, reader-page, attribution, host, rate, and security gates
+- Candidate directories and GitHub topic pages are discovery pools, not automatic approval
+- Keep adapters independently disableable
+- Do not bypass CAPTCHA, Cloudflare, paywalls, login walls, anti-bot systems, or hotlink protection
 
 ### ✅ v2.1.1 — Unified Search Foundation — PHYSICAL QA SIGNED OFF
-- Search enabled sources through the unified fan-out endpoint
-- Normalize results through the shared contracts
-- Isolate per-source failures
-- Preserve provenance on every result
-- Source badges and source filter
-- Deterministic round-robin ordering
-- Physical production QA passed
+- Fan out search across enabled general-content sources
+- Normalize shared contracts and preserve provenance
+- Isolate source failures
+- Source badges/filter and deterministic round-robin ordering
 
 ### ✅ v2.1.2 — Multi-Source Search Quality — PHYSICAL QA SIGNED OFF
-- Normalize titles/alternate titles with Unicode-aware deterministic keys
-- Improve deterministic title matching without claiming canonical identity
-- Suppress obvious duplicate result spam within a source
-- Preserve distinct source editions before canonical identity exists
-- Expose per-source search latency and degraded-source UX
-- Keep healthy-source results usable when another enabled source fails
-- Chapter-coverage comparison remains deferred until a verified second reader source exists
-- Treat incomplete upstream chapter feeds as source coverage, not as proof that chapters do not exist
+- Unicode-aware title/alternate-title normalization
+- Conservative same-source duplicate suppression
+- Per-source latency and degraded-source UX
+- Healthy sources remain usable when another source fails
 - No database migration
-- Physical production QA passed
 
-### ⛔ v2.1.3 — Manhwa Coverage — BLOCKED AT SOURCE GATE
-- Add a dedicated permitted manhwa adapter when candidate audit passes
-- Normalize manhwa metadata/chapters/pages into MangaFlux contracts
-- Preserve the actual source on every result/chapter/page
-- Allow manhwa results to participate in unified search without disguising provenance
-- Apply source-specific host/rate/cache policies
+### ➡️ v2.1.3 — Regional Coverage Sources — IMPLEMENTED / PHYSICAL QA PENDING
+- Model provider roles explicitly: primary, coverage, experimental
+- Model regional/content coverage explicitly: manga, manhwa, manhua
+- Keep MangaDex as the primary enabled production source
+- Audit and add additional Japanese manga, Korean manhwa, and Chinese manhua adapters individually
+- Coverage/experimental providers must preserve their real source identity
+- Do not enable an unverified adapter merely to increase source count
+- Explicit/adult sources remain isolated for v2.7.x
+- No database migration
+
+### v2.1.4 — Provider Reliability & Coverage Classification
+- Surface provider role and media coverage through diagnostics/product contracts where useful
+- Track provider capabilities, health, latency, failure behavior, image hosts, and cache/rate policy
+- Ensure coverage/experimental failures never take down primary-source flows
+- Define promotion/demotion criteria between experimental and coverage roles
+
+### v2.1.5 — Real Multi-Source Coverage QA
+- Test titles absent from MangaDex against approved coverage sources
+- Test incomplete chapter feeds without treating one source as proof of global absence
+- Test Japanese manga, Korean manhwa, and Chinese manhua coverage
+- Test metadata-only, chapter-capable, and reader-capable provider differences
+- Test source outages and degraded fallback behavior
+- Close v2.1.x only after at least one real additional reader source is safely enabled
 
 ---
 

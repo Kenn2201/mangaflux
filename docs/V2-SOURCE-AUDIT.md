@@ -41,9 +41,9 @@ Status: rejected for production source #2.
 Repositories audited in this class expose HTML scraping, Cloudflare/anti-bot bypasses, referer spoofing, hotlink proxies, or other access workarounds. MangaFlux will not inherit those mechanisms through a wrapper API.
 
 ### Nyora
-Status: rejected as production source #2.
+Status: conditional candidate; individual upstream/parser audit required.
 
-Nyora exposes a complete typed search/details/chapters/pages flow across hundreds of parser-backed sources, but its JavaScript/TypeScript SDK is explicitly marked "No Longer Maintained". It is an aggregator/parser layer rather than one independently approved upstream content source. That fails the v2.1 production reliability/provenance gate.
+Nyora exposes a broad parser-backed search/details/chapters/pages surface. Its JavaScript/TypeScript SDK maintenance status and aggregator design mean MangaFlux must not treat "Nyora" as one trusted upstream. Individual underlying sources require their own access/provenance audit before any parser is enabled. Nyora may be useful as an experimental integration mechanism only for sources that independently pass MangaFlux policy.
 
 ### MANGA Plus
 Status: official-service candidate; not approved as general source #2.
@@ -56,7 +56,7 @@ Status: rejected via third-party API wrapper.
 INKR is an official comics service, but no documented public developer API was found. The structured API candidate is a third-party managed extraction service and does not establish official upstream API permission. Paid/locked chapters also expose only previews. It does not satisfy the source #2 gate.
 
 ### OmegaAPI
-Status: not approved for production.
+Status: experimental candidate only; not approved as a production coverage source.
 
 OmegaAPI exposes a useful normalized search/details/chapters/pages REST surface, but it is third-party middleware over the OmegaScans API rather than an independently approved upstream. Its own documentation says the hosted instance is for testing only and may be paused because of request volume. MangaFlux will not make production reading depend on that hosted middleware without independently verifiable upstream access and operational terms.
 
@@ -66,11 +66,23 @@ v2.1.1 and v2.1.2 were completed safely without pretending a second provider exi
 
 A fresh candidate recheck still does not establish a production-safe second reader source. Newly surfaced multi-source/manhwa wrappers rely on scraping, image proxies, referer/header workarounds, or undocumented/internal upstream interfaces. Those mechanisms remain outside MangaFlux's source policy. MANGA Plus remains an official reading service, but MangaFlux still does not have a documented public developer integration contract suitable for treating it as a general production API.
 
+## v2.1.3 coverage strategy
+
+MangaFlux now distinguishes source roles:
+
+- **primary** — preferred stable source for ordinary reading;
+- **coverage** — approved additional source used to broaden title/chapter/regional availability;
+- **experimental** — isolated candidate integration that must not be treated as reliable fallback until promoted.
+
+Coverage is also declared by media family: Japanese manga, Korean manhwa, and Chinese manhua. A source can support more than one family. These declarations describe provider intent/capability; they do not assert that every title or chapter exists there.
+
+This lets MangaFlux investigate useful fallback providers without weakening provenance. A missing chapter on MangaDex remains "missing from MangaDex," not "nonexistent everywhere." Actual cross-source identity and chapter reconciliation remain v2.2.x/v2.3.x work.
+
 ## Decision
 
-No second reading source currently passes the production gate.
+No second reading source currently passes the production coverage gate.
 
-MangaFlux therefore keeps only MangaDex enabled and does not add a fake/unsafe adapter merely to advance the roadmap. v2.1.3 Manhwa Coverage is blocked at the source gate because its core deliverable requires a real permitted manhwa reader adapter. This is a source-approval blocker, not a code-architecture blocker.
+MangaFlux therefore keeps only MangaDex enabled and does not add a fake/unsafe adapter merely to advance the roadmap. v2.1.3 therefore establishes the Regional Coverage Sources model without pretending an external adapter has passed. MangaDex remains the only enabled production reader source. Additional manga/manhwa/manhua adapters can enter as experimental or coverage candidates only after their individual upstream/access requirements are understood; real multi-source coverage QA remains gated on at least one approved reader-capable source.
 
 ## Re-entry gate
 

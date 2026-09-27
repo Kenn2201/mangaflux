@@ -54,6 +54,8 @@ const registeredSources = new Map<SourceId, RegisteredSource>([
         attributionName: "MangaDex",
         attributionUrl: "https://mangadex.org",
         contentClass: "general",
+        role: "primary",
+        mediaTypes: ["manga", "manhwa", "manhua"],
         allowedImageHosts: ["uploads.mangadex.org"],
         cache: {
           searchSeconds: 30,
@@ -83,6 +85,7 @@ function cloneDescriptor(descriptor: SourceDescriptor): SourceDescriptor {
     },
     policy: {
       ...descriptor.policy,
+      mediaTypes: [...descriptor.policy.mediaTypes],
       allowedImageHosts: [...descriptor.policy.allowedImageHosts],
       cache: { ...descriptor.policy.cache },
       requests: { ...descriptor.policy.requests }

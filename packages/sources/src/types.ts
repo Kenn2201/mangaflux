@@ -30,6 +30,8 @@ export type SourceCapability =
   | "health";
 
 export type SourceContentClass = "general" | "explicit";
+export type SourceRole = "primary" | "coverage" | "experimental";
+export type SourceMediaType = "manga" | "manhwa" | "manhua";
 
 export type SourceCapabilities = Readonly<{
   search: boolean;
@@ -49,6 +51,8 @@ export type SourcePolicy = Readonly<{
   attributionName: string;
   attributionUrl: string;
   contentClass: SourceContentClass;
+  role: SourceRole;
+  mediaTypes: readonly SourceMediaType[];
   allowedImageHosts: readonly string[];
   cache: {
     searchSeconds: number;

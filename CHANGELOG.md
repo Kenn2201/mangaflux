@@ -1,13 +1,15 @@
 # Changelog
 
-## Unreleased — v2.1.3 source gate
+## 2.1.3 — Regional Coverage Sources
 
 - Marked v2.1.2 Multi-Source Search Quality physical QA signed off.
-- Rechecked the source gate before starting v2.1.3 Manhwa Coverage.
-- Kept v2.1.3 blocked because no verified second reader/manhwa source currently passes MangaFlux's production-source policy.
-- Kept MangaDex as the only enabled production source.
-- No runtime, package-version, database, or migration change.
-
+- Reframed v2.1.3 around Japanese manga, Korean manhwa, and Chinese manhua coverage rather than one hard-coded provider.
+- Added first-class source roles: primary, coverage, and experimental.
+- Added source media declarations for manga, manhwa, and manhua.
+- Classified MangaDex as the primary source while preserving its existing broad catalog behavior.
+- Kept additional reader adapters disabled until their individual upstream/access audits pass.
+- Kept explicit/adult sources isolated for the later v2.7.x phase.
+- No database migration is required.
 
 ## 2.1.2 — Multi-Source Search Quality
 
