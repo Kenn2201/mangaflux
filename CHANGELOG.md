@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.1.4 — Provider Reliability & Coverage Classification
+
+- Marked v2.1.3 Regional Coverage Sources physical QA signed off.
+- Added explicit provider failure modes so critical and isolated providers can be handled differently.
+- Added provider request-pacing metadata, including minimum request interval and maximum concurrency.
+- Exposed provider role, media coverage, capabilities, health, latency, image-host, cache, request, and failure policy through status/source contracts.
+- Isolated per-provider health-probe failures so an optional provider cannot break the complete status response.
+- Made overall source health depend on critical providers rather than every optional provider.
+- Kept experimental providers out of ordinary unified search unless that source is explicitly requested.
+- Updated the status page to render enabled providers dynamically with role, media coverage, latency, and health.
+- Kept MangaDex as the only enabled production source.
+- No database migration is required.
+
+
 ## 2.1.3 — Regional Coverage Sources
 
 - Marked v2.1.2 Multi-Source Search Quality physical QA signed off.
