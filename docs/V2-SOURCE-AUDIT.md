@@ -123,3 +123,21 @@ Until then, the gate is **BLOCKED**, not passed.
 ## Re-entry gate
 
 A candidate can reopen v2.1.0 implementation when its current upstream access, reader-page capability, attribution/terms, host policy, and operational behavior can be verified without bypass mechanisms.
+
+
+## 2026-09-28 live recheck
+
+### v2.1.5 QA state
+The maintainer manually deployed v2.1.5 to Vercel and physically QA-signed-off the implemented Account/Auth scope. Cross-provider coverage remains blocked because no second reader source is enabled.
+
+### Manhwa Reader API
+Documentation currently advertises latest, all-series, info+chapters, and chapter-image endpoints. A fresh live recheck on 2026-09-28 found the documented data endpoints returning HTTP 500 during qualification. It therefore cannot be enabled as MangaFlux's production fallback at this time. Recheck later rather than coding against an unhealthy contract.
+
+### GitHub candidate pool
+The manga-api topic remains a discovery pool, not an approval list. Current candidates include projects that scrape upstream sites, proxy protected images, spoof Referer headers, or use browser/VRF bypasses. Those mechanisms do not pass MangaFlux's production gate merely because a wrapper exposes a clean JSON API.
+
+### Nyora
+Nyora demonstrates a broad typed search/details/chapters/pages model for manga, manhwa, and manhua, but the JS SDK currently identifies itself as no longer maintained and its hosted helper/parser model can proxy images and depends on many underlying sources. It remains conditional/experimental research, not a production fallback approval.
+
+### v2.1.6 decision
+The next milestone is Live Source Re-entry & Adapter Qualification. Candidates must pass a live end-to-end reader-path test before MangaFlux writes or enables an adapter. A passing candidate may enter as isolated experimental first; promotion to coverage still requires the existing provenance, stability, host-policy, failure-isolation, and physical-QA gates.
