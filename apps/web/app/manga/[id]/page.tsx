@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
   FormEvent,
   useEffect,
@@ -68,7 +68,9 @@ const CHAPTER_LIMIT = 50;
 export default function MangaPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const id = params.id;
+  const source = searchParams.get("source")?.trim() || "mangadex";
 
   const [manga, setManga] = useState<MangaDetails | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
@@ -119,7 +121,7 @@ export default function MangaPage() {
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [id, source]);
 
   useEffect(() => {
     let cancelled = false;
@@ -130,7 +132,7 @@ export default function MangaPage() {
 
       try {
         const response = await fetch(
-          `/api/manga/${encodeURIComponent(id)}`,
+          `/api/manga/${encodeURIComponent(id)}?source=${encodeURIComponent(source)}`,
           { cache: "no-store" }
         );
 
@@ -148,7 +150,7 @@ export default function MangaPage() {
           setManga(payload.item);
           recordRecentlyViewed({
             id: payload.item.id,
-            source: "mangadex",
+            source,
             title: payload.item.title,
             coverUrl: payload.item.coverUrl,
             year: payload.item.year,
@@ -195,7 +197,7 @@ export default function MangaPage() {
 
       try {
         const response = await fetch(
-          `/api/manga/${encodeURIComponent(id)}/chapters?${query.toString()}`,
+          `/api/manga/${encodeURIComponent(id)}/chapters?source=${encodeURIComponent(source)}&${query.toString()}`,
           { cache: "no-store" }
         );
 
@@ -236,6 +238,7 @@ export default function MangaPage() {
     };
   }, [
     id,
+    source,
     chapterPage,
     chapterOrder,
     chapterFilter,
@@ -250,7 +253,7 @@ export default function MangaPage() {
     async function loadBookmark() {
       try {
         const response = await fetch(
-          `/api/state/bookmark?source=mangadex&mangaId=${encodeURIComponent(id)}`,
+          `/api/state/bookmark?source=${encodeURIComponent(source)}&mangaId=${encodeURIComponent(id)}`,
           { cache: "no-store" }
         );
 
@@ -271,7 +274,7 @@ export default function MangaPage() {
     return () => {
       cancelled = true;
     };
-  }, [id, manga]);
+  }, [id, manga, source]);
 
   useEffect(() => {
     if (!manga) return;
@@ -281,7 +284,7 @@ export default function MangaPage() {
     async function loadFollow() {
       try {
         const response = await fetch(
-          `/api/state/follow?source=mangadex&mangaId=${encodeURIComponent(id)}`,
+          `/api/state/follow?source=${encodeURIComponent(source)}&mangaId=${encodeURIComponent(id)}`,
           { cache: "no-store" }
         );
 
@@ -327,14 +330,14 @@ export default function MangaPage() {
     try {
       const response = bookmarked
         ? await fetch(
-            `/api/state/bookmark?source=mangadex&mangaId=${encodeURIComponent(id)}`,
+            `/api/state/bookmark?source=${encodeURIComponent(source)}&mangaId=${encodeURIComponent(id)}`,
             { method: "DELETE" }
           )
         : await fetch("/api/state/bookmark", {
             method: "PUT",
             headers: { "content-type": "application/json" },
             body: JSON.stringify({
-              source: "mangadex",
+              source,
               mangaId: id,
               title: manga.title,
               coverUrl: manga.coverUrl
@@ -377,14 +380,14 @@ export default function MangaPage() {
     try {
       const response = followed
         ? await fetch(
-            `/api/state/follow?source=mangadex&mangaId=${encodeURIComponent(id)}`,
+            `/api/state/follow?source=${encodeURIComponent(source)}&mangaId=${encodeURIComponent(id)}`,
             { method: "DELETE" }
           )
         : await fetch("/api/state/follow", {
             method: "PUT",
             headers: { "content-type": "application/json" },
             body: JSON.stringify({
-              source: "mangadex",
+              source,
               mangaId: id,
               title: manga.title,
               coverUrl: manga.coverUrl
@@ -438,7 +441,7 @@ export default function MangaPage() {
         method: "PATCH",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          source: "mangadex",
+          source,
           mangaId: id,
           notificationsEnabled: nextEnabled
         })
@@ -946,7 +949,7 @@ export default function MangaPage() {
             {visibleChapters.map((chapter) => (
               <Link
                 className="chapter-row"
-                href={`/read/${chapter.id}${querySuffix}`}
+                href={`/read/${chapter.id}?source=${encodeURIComponent(source)}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ""}`}
                 key={chapter.id}
               >
                 <div>
