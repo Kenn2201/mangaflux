@@ -1,4 +1,5 @@
 import { mangaDexSource } from "./mangadex.js";
+import { mangaSterSource } from "./mangaster.js";
 import type {
   ChapterRef,
   MangaDiscoveryKind,
@@ -11,6 +12,7 @@ import type {
 import { UnsupportedSourceCapabilityError } from "./types.js";
 
 export const MANGADEX_SOURCE_ID = "mangadex" as SourceId;
+export const MANGASTER_SOURCE_ID = "mangaster" as SourceId;
 
 const MANGADEX_DISCOVERY_KINDS = [
   "popular", "top", "latest", "hot", "trending"
@@ -75,6 +77,37 @@ const registeredSources = new Map<SourceId, RegisteredSource>([
     source: mangaDexSource,
     validateMangaId: (id) => UUID_RE.test(id),
     validateChapterId: (id) => UUID_RE.test(id)
+  }],
+  [MANGASTER_SOURCE_ID, {
+    descriptor: {
+      id: MANGASTER_SOURCE_ID,
+      name: "MangaSter",
+      enabled: true,
+      homepageUrl: "https://ahm7xmakki.com/manga",
+      capabilities: {
+        search: true, discovery: false, tags: false, details: true, related: false,
+        chapters: true, pages: true, health: true,
+        discoveryKinds: [], languages: ["en"]
+      },
+      policy: {
+        attributionRequired: true,
+        attributionName: "MangaSter",
+        attributionUrl: "https://ahm7xmakki.com/manga",
+        contentClass: "general",
+        role: "coverage",
+        mediaTypes: ["manga", "manhwa"],
+        failureMode: "isolated",
+        allowedImageHosts: [],
+        cache: { searchSeconds: 30, metadataSeconds: 120, chaptersSeconds: 60 },
+        requests: {
+          publicApiOnly: true, htmlAdapterAllowed: false, bypassProtectedAccess: false,
+          minIntervalMs: 500, maxConcurrentRequests: 1
+        }
+      }
+    },
+    source: mangaSterSource,
+    validateMangaId: (id) => id.length > 0 && id.length <= 500,
+    validateChapterId: (id) => id.length > 0 && id.length <= 500
   }]
 ]);
 
