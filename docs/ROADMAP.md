@@ -7,24 +7,18 @@ This is the canonical MangaFlux roadmap.
 ~~~text
 v1.x     ████████████████████  ✅ COMPLETE
 v2.0.x   ████████████████████  ✅ SOURCE PLATFORM FOUNDATION
-v2.1.0   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
-v2.1.1   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
-v2.1.2   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
-v2.1.3   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
-v2.1.4   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
-v2.1.5   ████████████████████  ✅ IMPLEMENTED ACCOUNT/AUTH QA SIGNED OFF
-                                   ↳ cross-provider coverage QA remains BLOCKED AT SOURCE GATE
-v2.1.6   ████████████████████  🟡 IMPLEMENTED — SOURCE QUALIFICATION / QA PENDING
+v2.1.0-5 ████████████████████  ✅ PRIOR QA / ACCOUNT-AUTH SIGNED OFF
+v2.1.6   ████████████████████  ✅ SOURCE QUALIFICATION IMPLEMENTED
+v2.1.7   ████████████████████  🟡 MANGASTER SOURCE B IMPLEMENTED / PHYSICAL QA PENDING
 v2.2.x   ░░░░░░░░░░░░░░░░░░░░  Canonical Manga Identity & Deduplication
-v2.3.x   ░░░░░░░░░░░░░░░░░░░░  Missing-title/chapter fallback + explicit source selection
-v2.4+    ░░░░░░░░░░░░░░░░░░░░  Library migration, SDK, operations, explicit-source isolation
+v2.3.x   ░░░░░░░░░░░░░░░░░░░░  Missing-title/chapter coverage reconciliation + safe fallback
 ~~~
 
-**Current release:** v2.1.6 implements the source-qualification layer. v2.1.5's Account/Auth scope is physically QA signed off. MangaDex remains the only enabled production reader source; candidate APIs are now represented separately with explicit pass/fail/unverified checks and blockers.
+**Current release:** v2.1.7 enables MangaSter as MangaFlux's first additional isolated coverage reader source. MangaDex remains primary. The previous source-gate block is removed because Source B now exists; failed candidates remain disabled rather than blocking the whole roadmap.
 
-**v2.1.6 gate:** MangaPDF is the strongest newly documented candidate because it advertises a public developer API and complete reader path, but its advertised API hosts timed out during the live probe. Manhwa Reader returned HTTP 500 and Nyora remains maintenance/provenance-blocked. No candidate is enabled merely to advance the roadmap. Physical QA for v2.1.6 validates the qualification API and MangaDex regression behavior; real Source B reader QA remains blocked until a candidate's live reader path passes.
+**v2.1.7 physical QA gate:** verify unified search shows MangaSter when healthy, a MangaSter result opens with its source preserved, chapter lists load, a chapter opens with page images, MangaSter attribution is visible, and a MangaSter failure does not break MangaDex. The release is not physically signed off until this production QA passes.
 
-**Fallback goal:** once a second reader source is qualified, v2.2.x maps the same work across providers and v2.3.x compares chapter coverage so MangaFlux can find missing titles/chapters from approved sources while always preserving provenance and never silently splicing unrelated editions.
+**Next:** after Source B physical QA, v2.2.x establishes canonical cross-source identity. v2.3.x then reconciles chapter coverage so MangaFlux can expose missing titles/chapters from mapped editions without silently splicing unrelated feeds.
 
 ---
 
