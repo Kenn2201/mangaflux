@@ -12,11 +12,13 @@ export async function GET(
   { params }: { params: Promise<{ chapterId: string }> }
 ) {
   const { chapterId } = await params;
+  const source = request.nextUrl.searchParams.get("source")?.trim() || "mangadex";
+  if (!/^[a-z0-9-]{1,40}$/.test(source)) return NextResponse.json({ error: "INVALID_REQUEST" }, { status: 400 });
   const dataSaver = request.nextUrl.searchParams.get("dataSaver") === "true";
 
   try {
     const upstream = await fetch(
-      `${API_URL.replace(/\/$/, "")}/api/chapter/mangadex/${encodeURIComponent(chapterId)}/pages?dataSaver=${dataSaver}`,
+      `${API_URL.replace(/\/$/, "")}/api/chapter/${encodeURIComponent(source)}/${encodeURIComponent(chapterId)}/pages?dataSaver=${dataSaver}`,
       {
         cache: "no-store",
         signal: AbortSignal.timeout(20_000)
