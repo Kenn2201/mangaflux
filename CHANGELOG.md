@@ -1,13 +1,19 @@
 # Changelog
 
-## Unreleased — v2.1.6 source re-entry
+## 2.1.6 — Source Qualification
 
 - Recorded v2.1.5 Account/Auth physical QA sign-off after the maintainer's manual Vercel deployment.
 - Kept real cross-provider coverage QA explicitly blocked until a second reader-capable source is qualified.
 - Added v2.1.6 Live Source Re-entry & Adapter Qualification as the next milestone.
 - Rechecked Manhwa Reader live endpoints and recorded the current HTTP 500 qualification blocker.
 - Reconfirmed that GitHub source wrappers using scraping/proxy/referer/bypass mechanisms are candidates to audit, not automatic production approvals.
-- No runtime version bump and no database migration in this roadmap/status update.
+- Added a typed source-candidate qualification registry separate from enabled production sources.
+- Added `GET /api/sources/candidates` so candidate gate state, checks, media coverage, blockers, and last-check date are inspectable without exposing candidates to ordinary search.
+- Recorded MangaPDF as a promising public developer-API candidate but blocked it because both advertised API hosts timed out during the live qualification probe.
+- Preserved Manhwa Reader API as blocked after live reader endpoints returned HTTP 500.
+- Preserved Nyora as blocked/experimental because its JavaScript SDK identifies itself as no longer maintained and underlying parser sources still require individual provenance/access review.
+- Kept MangaDex as the only enabled source; no automatic fallback is activated in this release.
+- No database migration is required.
 
 
 ## 2.1.5 — Coverage Gate & Account Sync
