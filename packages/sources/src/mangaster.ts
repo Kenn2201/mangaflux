@@ -55,7 +55,7 @@ function chapterRows(body: Json, mangaId: string): Chapter[] {
     if (!id) return [];
     const number = text(row.chapter ?? row.number ?? row.chapterNumber) || undefined;
     const title = text(row.title ?? row.name) || (number ? `Chapter ${number}` : `Chapter ${index + 1}`);
-    return [{ id, mangaId, source: "mangaster", title, chapter: number, language: "en" }];
+    return [{ id: `${mangaId}::${id}`, mangaId, source: "mangaster", title, chapter: number, language: "en" }];
   });
 }
 
@@ -101,7 +101,10 @@ export const mangaSterSource: MangaSource = {
   },
 
   async pages(chapterId: string, _options?: PageOptions): Promise<ChapterPages> {
-    const body = await request({ action: "pages", id: chapterId });
+    const separator = chapterId.lastIndexOf("::");
+    const mangaId = separator >= 0 ? chapterId.slice(0, separator) : "";
+    const upstreamChapterId = separator >= 0 ? chapterId.slice(separator + 2) : chapterId;
+    const body = await request({ action: "pages", id: upstreamChapterId });
     const rawPages = Array.isArray(body.pages) ? body.pages : [];
     const pages = rawPages.flatMap((raw, index) => {
       const imageUrl = typeof raw === "string"
@@ -114,7 +117,7 @@ export const mangaSterSource: MangaSource = {
     });
     if (!pages.length) throw new Error("MangaSter returned no readable pages");
     return {
-      chapter: { id: chapterId, mangaId: text(body.mangaId ?? body.sourceId), source: "mangaster", title: text(body.title) || "Chapter" },
+      chapter: { id: chapterId, mangaId: mangaId || text(body.mangaId ?? body.sourceId), source: "mangaster", title: text(body.title) || "Chapter" },
       pages,
       dataSaver: false,
       attribution: { sourceName: "MangaSter", sourceUrl: HOME, scanlationGroups: [] }
