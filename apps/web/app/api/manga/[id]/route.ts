@@ -9,14 +9,16 @@ const API_URL =
 export const dynamic = "force-dynamic";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const source = new URL(request.url).searchParams.get("source")?.trim() || "mangadex";
+  if (!/^[a-z0-9-]{1,40}$/.test(source)) return NextResponse.json({ error: "INVALID_REQUEST" }, { status: 400 });
 
   try {
     const upstream = await fetch(
-      `${API_URL.replace(/\/$/, "")}/api/manga/mangadex/${encodeURIComponent(id)}`,
+      `${API_URL.replace(/\/$/, "")}/api/manga/${encodeURIComponent(source)}/${encodeURIComponent(id)}`,
       {
         cache: "no-store",
         signal: AbortSignal.timeout(15_000)

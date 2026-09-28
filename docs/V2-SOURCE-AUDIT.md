@@ -154,3 +154,11 @@ This is materially better aligned with MangaFlux policy than scraper wrappers th
 MangaFlux now keeps candidate qualification separate from enabled source registration. `GET /api/sources/candidates` exposes documented API status, live-health state, reader-path checks, stable-ID state, protected-access state, blockers, media families, and last-check date. Blocked candidates cannot enter ordinary unified search because they are not registered as enabled MangaFlux sources.
 
 v2.1.6 does not weaken the gate: MangaDex remains the only enabled production reader source. The next adapter is added only after a candidate passes the live `search → details → chapters → pages` path and its access/provenance/host behavior satisfies the existing promotion criteria.
+
+
+### v2.1.7 — MangaSter Source B
+MangaSter documents a public no-auth developer API with search, chapter listing, and page-image operations. MangaFlux integrates it as an enabled **coverage** source with **isolated** failure mode; MangaDex remains primary. The adapter does not use HTML scraping, CAPTCHA/Cloudflare bypass, login/paywall bypass, referer spoofing, or protected-access workarounds.
+
+The production physical-QA gate must verify search → title → chapters → pages and attribution. If MangaSter is unavailable, MangaDex must continue operating and MangaSter must be reported as degraded/unavailable rather than breaking the platform.
+
+MangaPDF, Manhwa Reader, and Nyora remain disabled candidates. Their individual blockers no longer represent a global Source B gate.

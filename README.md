@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v2.1.6--Source_Qualification-indigo.svg)
+![Version](https://img.shields.io/badge/version-v2.1.7--MangaSter_Coverage-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v2.1.6 — Source Qualification**
+**v2.1.7 — MangaSter Coverage**
 
-MangaFlux V1, v2.0.x, and v2.1.0 through v2.1.4 are physically QA signed off; the implemented v2.1.5 Account/Auth scope is also physically QA signed off. v2.1.6 adds a machine-readable source-candidate qualification registry and API without enabling an unverified reader provider. MangaPDF, Manhwa Reader API, and Nyora remain blocked candidates until their live reader path and source-policy requirements pass.
+MangaFlux V1 and the source-platform foundation remain stable. v2.1.7 enables MangaSter as the first isolated coverage reader source alongside MangaDex, adds source-aware web detail/chapter/reader routing, and keeps failed candidates independently disabled. MangaDex remains primary; MangaSter is used as additional coverage with explicit provenance.
 
 ### Library improvements
 

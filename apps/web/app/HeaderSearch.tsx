@@ -176,7 +176,7 @@ export default function HeaderSearch() {
     if (value) recordSearchHistory(value);
     setOpen(false);
     router.push(
-      `/manga/${item.id}?q=${encodeURIComponent(value)}`
+      `/manga/${item.id}?source=${encodeURIComponent(item.source)}&q=${encodeURIComponent(value)}`
     );
   }
 

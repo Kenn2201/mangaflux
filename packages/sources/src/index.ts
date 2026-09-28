@@ -1,6 +1,7 @@
 export * from "./types.js";
 export {
   MANGADEX_SOURCE_ID,
+  MANGASTER_SOURCE_ID,
   createChapterRef,
   createMangaRef,
   getSource,
@@ -16,6 +17,7 @@ export {
   validateSourceChapterId,
   validateSourceMangaId
 } from "./registry.js";
+export { mangaSterSource } from "./mangaster.js";
 export {
   fetchMangaDexPageImage,
   getMangaDexCacheStats,

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import {
   MouseEvent,
   useEffect,
@@ -37,6 +37,7 @@ type ReaderResponse = {
   };
   pages: Array<{
     index: number;
+    imageUrl?: string;
   }>;
   attribution: {
     sourceName: string;
@@ -76,22 +77,27 @@ type MangaMeta = {
 };
 
 function proxyImageUrl(
+  source: string,
   chapterId: string,
   index: number,
   dataSaver: boolean
 ) {
   const base = API_URL.replace(/\/$/, "");
-  return `${base}/api/chapter/mangadex/${encodeURIComponent(chapterId)}/image/${index}?dataSaver=${dataSaver}`;
+  return `${base}/api/chapter/${encodeURIComponent(source)}/${encodeURIComponent(chapterId)}/image/${index}?dataSaver=${dataSaver}`;
 }
 
 function ReaderImage({
+  source,
   chapterId,
+  imageUrl,
   index,
   dataSaver,
   eager = false,
   onSettled
 }: {
+  source: string;
   chapterId: string;
+  imageUrl?: string;
   index: number;
   dataSaver: boolean;
   eager?: boolean;
@@ -101,7 +107,9 @@ function ReaderImage({
   const [failed, setFailed] = useState(false);
   const settledRef = useRef(false);
   const useSaver = dataSaver || fallbackSaver;
-  const src = proxyImageUrl(chapterId, index, useSaver);
+  const src = source === "mangadex"
+    ? proxyImageUrl(source, chapterId, index, useSaver)
+    : imageUrl ?? "";
 
   useEffect(() => {
     setFallbackSaver(false);
@@ -180,7 +188,9 @@ function findDistinctNeighbor(
 
 export default function ReaderPage() {
   const params = useParams<{ chapterId: string }>();
+  const searchParams = useSearchParams();
   const chapterId = params.chapterId;
+  const source = searchParams.get("source")?.trim() || "mangadex";
   const pagesRef = useRef<HTMLDivElement | null>(null);
   const resumeTargetRef = useRef<number | null>(null);
   const settledPagesRef = useRef<Set<number>>(new Set());
@@ -237,7 +247,7 @@ export default function ReaderPage() {
       window.clearTimeout(resumeReleaseTimerRef.current);
       resumeReleaseTimerRef.current = null;
     }
-  }, [chapterId]);
+  }, [chapterId, source]);
 
   useEffect(() => {
     let cancelled = false;
@@ -256,7 +266,7 @@ export default function ReaderPage() {
 
       try {
         const response = await fetch(
-          `/api/chapter/${encodeURIComponent(chapterId)}/pages`,
+          `/api/chapter/${encodeURIComponent(chapterId)}/pages?source=${encodeURIComponent(source)}`,
           { cache: "no-store" }
         );
 
@@ -290,7 +300,7 @@ export default function ReaderPage() {
     return () => {
       cancelled = true;
     };
-  }, [chapterId]);
+  }, [chapterId, source]);
 
   useEffect(() => {
     if (!data?.chapter.mangaId) return;
@@ -321,7 +331,7 @@ export default function ReaderPage() {
 
       try {
         const detailsResponse = await fetch(
-          `/api/manga/${encodeURIComponent(mangaId)}`,
+          `/api/manga/${encodeURIComponent(mangaId)}?source=${encodeURIComponent(source)}`,
           { cache: "no-store" }
         );
 
@@ -664,9 +674,7 @@ export default function ReaderPage() {
     ? Math.min(100, Math.max(0, (currentPage / totalPages) * 100))
     : 0;
 
-  const querySuffix = searchQuery
-    ? `?q=${encodeURIComponent(searchQuery)}`
-    : "";
+  const querySuffix = `?source=${encodeURIComponent(source)}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ""}`;
 
   const chapterHref = (id: string) => `/read/${id}${querySuffix}`;
 
@@ -850,7 +858,9 @@ export default function ReaderPage() {
         {data.pages.map((page) => (
           <ReaderImage
             key={page.index}
+            source={source}
             chapterId={chapterId}
+            imageUrl={page.imageUrl}
             index={page.index}
             dataSaver={dataSaver}
             eager={
