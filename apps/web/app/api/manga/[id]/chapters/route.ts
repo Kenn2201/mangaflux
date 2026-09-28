@@ -13,6 +13,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const source = request.nextUrl.searchParams.get("source")?.trim() || "mangadex";
+  if (!/^[a-z0-9-]{1,40}$/.test(source)) return NextResponse.json({ error: "INVALID_REQUEST" }, { status: 400 });
   const language =
     request.nextUrl.searchParams.get("language")?.trim() || "en";
   const rawLimit = Number(
@@ -47,7 +49,7 @@ export async function GET(
 
   try {
     const upstream = await fetch(
-      `${API_URL.replace(/\/$/, "")}/api/manga/mangadex/${encodeURIComponent(
+      `${API_URL.replace(/\/$/, "")}/api/manga/${encodeURIComponent(source)}/${encodeURIComponent(
         id
       )}/chapters?${query.toString()}`,
       {
