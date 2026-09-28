@@ -32,6 +32,19 @@ export type SourceCandidate = Readonly<{
 
 const candidates: readonly SourceCandidate[] = [
   {
+    id: "mangaster",
+    name: "MangaSter",
+    homepageUrl: "https://ahm7xmakki.com/manga",
+    state: "qualified",
+    intendedRole: "coverage",
+    mediaTypes: ["manga", "manhwa"],
+    checks: {
+      documentedDeveloperApi: "pass", liveHealth: "unverified", search: "unverified",
+      details: "pass", chapters: "pass", pages: "pass", stableIds: "pass", protectedAccessBypass: "not-applicable"
+    },
+    lastCheckedAt: "2026-09-28"
+  },
+  {
     id: "mangapdf",
     name: "MangaPDF",
     homepageUrl: "https://mangapdf.org",
