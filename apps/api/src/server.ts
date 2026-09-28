@@ -23,6 +23,7 @@ import {
   fetchMangaDexPageImage,
   getSourceDescriptor,
   listSourceDescriptors,
+  listSourceCandidates,
   requireSourceCapability,
   sourceSupportsDiscoveryKind,
   sourceSupportsLanguage,
@@ -714,6 +715,14 @@ app.get(
   { preHandler: metadataRateLimit },
   async () => ({
     sources: listSourceDescriptors()
+  })
+);
+
+app.get(
+  "/api/sources/candidates",
+  { preHandler: metadataRateLimit },
+  async () => ({
+    candidates: listSourceCandidates()
   })
 );
 
