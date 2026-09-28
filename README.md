@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v2.1.5--Coverage_Gate_Account_Sync-indigo.svg)
+![Version](https://img.shields.io/badge/version-v2.1.6--Source_Qualification-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v2.1.5 — Coverage Gate & Account Sync**
+**v2.1.6 — Source Qualification**
 
-MangaFlux V1, v2.0.x, and v2.1.0 through v2.1.4 are physically QA signed off. v2.1.5 closes the currently testable v2.1 foundation without pretending a second reader provider has passed the production gate: real multi-source coverage QA remains blocked until an audited reader-capable source is approved. This release also fixes persistent-shell authentication UI by synchronizing sign-in/sign-out state immediately and moves Account / Library / Sign out into the header profile menu.
+MangaFlux V1, v2.0.x, and v2.1.0 through v2.1.4 are physically QA signed off; the implemented v2.1.5 Account/Auth scope is also physically QA signed off. v2.1.6 adds a machine-readable source-candidate qualification registry and API without enabling an unverified reader provider. MangaPDF, Manhwa Reader API, and Nyora remain blocked candidates until their live reader path and source-policy requirements pass.
 
 ### Library improvements
 

@@ -21,3 +21,13 @@ export {
   getMangaDexCacheStats,
   mangaDexSource
 } from "./mangadex.js";
+
+export {
+  getSourceCandidate,
+  listSourceCandidates
+} from "./candidates.js";
+export type {
+  SourceCandidate,
+  SourceCandidateCheck,
+  SourceCandidateState
+} from "./candidates.js";

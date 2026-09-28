@@ -1,7 +1,7 @@
 {
   "name": "mangaflux",
   "private": true,
-  "version": "2.1.5",
+  "version": "2.1.6",
   "engines": {
     "node": ">=22"
   },

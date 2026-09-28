@@ -23,6 +23,7 @@ import {
   fetchMangaDexPageImage,
   getSourceDescriptor,
   listSourceDescriptors,
+  listSourceCandidates,
   requireSourceCapability,
   sourceSupportsDiscoveryKind,
   sourceSupportsLanguage,
@@ -35,7 +36,7 @@ import type {
   MangaSummary
 } from "@mangaflux/sources";
 
-const APP_VERSION = "2.1.5";
+const APP_VERSION = "2.1.6";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LANGUAGE_RE = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i;
@@ -714,6 +715,14 @@ app.get(
   { preHandler: metadataRateLimit },
   async () => ({
     sources: listSourceDescriptors()
+  })
+);
+
+app.get(
+  "/api/sources/candidates",
+  { preHandler: metadataRateLimit },
+  async () => ({
+    candidates: listSourceCandidates()
   })
 );
 

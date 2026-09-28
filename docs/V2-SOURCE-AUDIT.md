@@ -141,3 +141,16 @@ Nyora demonstrates a broad typed search/details/chapters/pages model for manga, 
 
 ### v2.1.6 decision
 The next milestone is Live Source Re-entry & Adapter Qualification. Candidates must pass a live end-to-end reader-path test before MangaFlux writes or enables an adapter. A passing candidate may enter as isolated experimental first; promotion to coverage still requires the existing provenance, stability, host-policy, failure-isolation, and physical-QA gates.
+
+
+### MangaPDF
+Status: promising public-API candidate / live qualification blocked.
+
+MangaPDF documents a read-only public developer API intended for third-party apps and web readers. Its v1 contract advertises stable manga record IDs, search, manga details with chapters, chapter page lists, two API hosts, and image delivery through its own API/object-storage image path. It does not require an API key; developer clients are instructed to send `X-Client: api-consumer`.
+
+This is materially better aligned with MangaFlux policy than scraper wrappers that require Cloudflare/hotlink workarounds. However, both advertised API hosts timed out during independent live qualification probes on 2026-09-28. Search/details/chapters/pages therefore remain unverified live and the provider is not enabled.
+
+### v2.1.6 implementation
+MangaFlux now keeps candidate qualification separate from enabled source registration. `GET /api/sources/candidates` exposes documented API status, live-health state, reader-path checks, stable-ID state, protected-access state, blockers, media families, and last-check date. Blocked candidates cannot enter ordinary unified search because they are not registered as enabled MangaFlux sources.
+
+v2.1.6 does not weaken the gate: MangaDex remains the only enabled production reader source. The next adapter is added only after a candidate passes the live `search → details → chapters → pages` path and its access/provenance/host behavior satisfies the existing promotion criteria.
