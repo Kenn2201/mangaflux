@@ -5,46 +5,26 @@ This is the canonical MangaFlux roadmap.
 ## Where we are right now
 
 ~~~text
-v1.0.0  ████████████████████  ✅
-v1.1.0  ████████████████████  ✅
-v1.1.1  ████████████████████  ✅
-v1.1.2  ████████████████████  ✅
-v1.1.3  ████████████████████  ✅
-v1.1.4  ████████████████████  ✅
-v1.1.5  ████████████████████  ✅
-v1.2.0  ████████████████████  ✅
-v1.2.1  ████████████████████  ✅
-v1.2.2  ████████████████████  ✅
-v1.2.3  ████████████████████  ✅
-v1.2.4  ████████████████████  ✅
-v1.2.5  ████████████████████  ✅
-v1.3.0  ████████████████████  ✅
-v1.3.1  ████████████████████  ✅
-v1.3.2  ████████████████████  ✅
-v1.3.3  ████████████████████  ✅
-v1.3.4  ████████████████████  ✅
-v1.3.5  ████████████████████  ✅
-v1.3.6  ████████████████████  ✅
-v1.3.7  ████████████████████  ✅
-v1.3.x  ████████████████████  ✅ COMPLETE
-v1.4.0  ████████████████████  ✅ QA
-v1.4.1  ████████████████████  ✅ QA
-v1.4.2  ████████████████████  ✅ QA
-v1.4.3  ████████████████████  ✅ QA
-v1.4.4  ████████████████████  ✅ QA
-v1.4.5  ████████████████████  ✅ QA
-v1.4.6  ████████████████████  ✅ QA
-v1.4.7  ████████████████████  🧪 CURRENT
-v1.5+   ░░░░░░░░░░░░░░░░░░░░  ← NEXT AFTER QA
-v1.4.x  Discovery & Personalization
-v1.5+   Product Polish
-         ↓
-v2.x    Multi-Source + Platform Expansion
-         ↓ large/open-ended phase
-v3.x    Advanced MangaFlux
+v1.x     ████████████████████  ✅ COMPLETE
+v2.0.x   ████████████████████  ✅ SOURCE PLATFORM FOUNDATION
+v2.1.0   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
+v2.1.1   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
+v2.1.2   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
+v2.1.3   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
+v2.1.4   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
+v2.1.5   ████████████████████  ✅ IMPLEMENTED ACCOUNT/AUTH QA SIGNED OFF
+                                   ↳ cross-provider coverage QA remains BLOCKED AT SOURCE GATE
+v2.1.6   ░░░░░░░░░░░░░░░░░░░░  ➡️ NEXT — LIVE SOURCE RE-ENTRY & ADAPTER QUALIFICATION
+v2.2.x   ░░░░░░░░░░░░░░░░░░░░  Canonical Manga Identity & Deduplication
+v2.3.x   ░░░░░░░░░░░░░░░░░░░░  Missing-title/chapter fallback + explicit source selection
+v2.4+    ░░░░░░░░░░░░░░░░░░░░  Library migration, SDK, operations, explicit-source isolation
 ~~~
 
-**v1.1.x — Library & Reading Quality**, **v1.2.x — Profiles & Community Depth**, and **v1.3.x — Following & Notifications** are signed off after physical QA. Optional Discord/webhook delivery is deferred. **v1.4.0 — Recommendation Explanations**, **v1.4.1 — Activity-Based Recommendations**, **v1.4.2 — Saved Discovery Filters**, **v1.4.3 — Recently Viewed Controls**, **v1.4.4 — Search History Controls**, and **v1.4.5 — Discovery Language Preference** have also passed physical QA. **v1.4.6 — Genre Preferences** has now also passed physical QA. MangaFlux is implementing the final planned v1.4.x release, **v1.4.7 — Personalization Depth**.
+**Current release:** v2.1.5 is deployed by the maintainer and its implemented Account/Auth scope has passed physical QA. The cross-provider portion is not falsely signed off: MangaDex is still the only approved production reader source.
+
+**Next:** v2.1.6 qualifies real candidate APIs through live endpoint health plus a complete `search → details → chapters → pages` reader-path test. A candidate can be wired as an isolated experimental adapter only after that path works without protected-access bypasses. Production fallback remains disabled until the provider passes the promotion gate.
+
+**Fallback goal:** once a second reader source is qualified, v2.2.x maps the same work across providers and v2.3.x compares chapter coverage so MangaFlux can find missing titles/chapters from approved sources while always preserving provenance and never silently splicing unrelated editions.
 
 ---
 
