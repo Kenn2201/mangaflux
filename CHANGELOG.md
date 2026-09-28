@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.1.7 — MangaSter Coverage
+
+- Added MangaSter as the first enabled isolated coverage source beside primary MangaDex.
+- Added a MangaSter adapter for public API search, title/chapter context, chapter lists, page images, and health checks.
+- Fixed web search result and suggestion links to preserve source provenance.
+- Made manga details, chapter-list, and reader proxies source-aware instead of hardcoding MangaDex.
+- Made the reader carry source identity through chapter navigation and use MangaSter-provided HTTPS page URLs without protected-access bypasses.
+- Kept MangaPDF, Manhwa Reader, and Nyora disabled; their previous blockers no longer block Source B progress.
+- MangaSter is isolated: an outage must not take down MangaDex search or overall platform health.
+- No database migration is required.
+
+
 ## 2.1.6 — Source Qualification
 
 - Recorded v2.1.5 Account/Auth physical QA sign-off after the maintainer's manual Vercel deployment.
