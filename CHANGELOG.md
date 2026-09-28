@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased — v2.1.6 source re-entry
+
+- Recorded v2.1.5 Account/Auth physical QA sign-off after the maintainer's manual Vercel deployment.
+- Kept real cross-provider coverage QA explicitly blocked until a second reader-capable source is qualified.
+- Added v2.1.6 Live Source Re-entry & Adapter Qualification as the next milestone.
+- Rechecked Manhwa Reader live endpoints and recorded the current HTTP 500 qualification blocker.
+- Reconfirmed that GitHub source wrappers using scraping/proxy/referer/bypass mechanisms are candidates to audit, not automatic production approvals.
+- No runtime version bump and no database migration in this roadmap/status update.
+
+
 ## 2.1.5 — Coverage Gate & Account Sync
 
 - Marked v2.1.4 Provider Reliability & Coverage Classification physical QA signed off.
