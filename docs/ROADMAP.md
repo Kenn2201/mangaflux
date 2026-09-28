@@ -14,15 +14,15 @@ v2.1.3   ████████████████████  ✅ PHYSI
 v2.1.4   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
 v2.1.5   ████████████████████  ✅ IMPLEMENTED ACCOUNT/AUTH QA SIGNED OFF
                                    ↳ cross-provider coverage QA remains BLOCKED AT SOURCE GATE
-v2.1.6   ░░░░░░░░░░░░░░░░░░░░  ➡️ NEXT — LIVE SOURCE RE-ENTRY & ADAPTER QUALIFICATION
+v2.1.6   ████████████████████  🟡 IMPLEMENTED — SOURCE QUALIFICATION / QA PENDING
 v2.2.x   ░░░░░░░░░░░░░░░░░░░░  Canonical Manga Identity & Deduplication
 v2.3.x   ░░░░░░░░░░░░░░░░░░░░  Missing-title/chapter fallback + explicit source selection
 v2.4+    ░░░░░░░░░░░░░░░░░░░░  Library migration, SDK, operations, explicit-source isolation
 ~~~
 
-**Current release:** v2.1.5 is deployed by the maintainer and its implemented Account/Auth scope has passed physical QA. The cross-provider portion is not falsely signed off: MangaDex is still the only approved production reader source.
+**Current release:** v2.1.6 implements the source-qualification layer. v2.1.5's Account/Auth scope is physically QA signed off. MangaDex remains the only enabled production reader source; candidate APIs are now represented separately with explicit pass/fail/unverified checks and blockers.
 
-**Next:** v2.1.6 qualifies real candidate APIs through live endpoint health plus a complete `search → details → chapters → pages` reader-path test. A candidate can be wired as an isolated experimental adapter only after that path works without protected-access bypasses. Production fallback remains disabled until the provider passes the promotion gate.
+**v2.1.6 gate:** MangaPDF is the strongest newly documented candidate because it advertises a public developer API and complete reader path, but its advertised API hosts timed out during the live probe. Manhwa Reader returned HTTP 500 and Nyora remains maintenance/provenance-blocked. No candidate is enabled merely to advance the roadmap. Physical QA for v2.1.6 validates the qualification API and MangaDex regression behavior; real Source B reader QA remains blocked until a candidate's live reader path passes.
 
 **Fallback goal:** once a second reader source is qualified, v2.2.x maps the same work across providers and v2.3.x compares chapter coverage so MangaFlux can find missing titles/chapters from approved sources while always preserving provenance and never silently splicing unrelated editions.
 
