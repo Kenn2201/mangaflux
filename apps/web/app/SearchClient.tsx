@@ -191,7 +191,7 @@ export default function SearchClient({
           {items.map((item) => (
             <Link
               className="manga-card"
-              href={`/manga/${item.id}${mangaQuerySuffix}`}
+              href={`/manga/${item.id}?source=${encodeURIComponent(item.source)}${preservedQuery ? `&q=${encodeURIComponent(preservedQuery)}` : ""}`}
               key={`${item.source}:${item.id}`}
             >
               <div className="cover-shell">
