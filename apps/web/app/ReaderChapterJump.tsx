@@ -77,6 +77,7 @@ export default function ReaderChapterJump({
   mangaId,
   currentChapterId,
   currentChapter,
+  source,
   querySuffix,
   language = "en",
   languageLabel = "English"
@@ -84,6 +85,7 @@ export default function ReaderChapterJump({
   mangaId: string;
   currentChapterId: string;
   currentChapter?: string;
+  source: string;
   querySuffix: string;
   language?: string;
   languageLabel?: string;
@@ -104,7 +106,7 @@ export default function ReaderChapterJump({
     const response = await fetch(
       `/api/manga/${encodeURIComponent(
         mangaId
-      )}/chapters?language=${encodeURIComponent(
+      )}/chapters?source=${encodeURIComponent(source)}&language=${encodeURIComponent(
         language
       )}&limit=${PAGE_SIZE}&offset=${offset}&order=desc`,
       { cache: "no-store" }
@@ -308,7 +310,8 @@ export default function ReaderChapterJump({
     mangaId,
     currentChapterId,
     currentChapter,
-    language
+    language,
+    source
   ]);
 
   useEffect(() => {
