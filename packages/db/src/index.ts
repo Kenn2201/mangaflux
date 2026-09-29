@@ -1,3 +1,4 @@
+export * from "./canonicalMappingReview.js";
 export * from "./canonicalIdentity.js";
 export * from "./adminRepository.js";
 export * from "./authRepository.js";
