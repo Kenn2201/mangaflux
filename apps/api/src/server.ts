@@ -28,6 +28,7 @@ import {
   listSourceDescriptors,
   listSourceCandidates,
   requireSourceCapability,
+  scoreMangaMatch,
   sourceSupportsDiscoveryKind,
   sourceSupportsLanguage,
   validateSourceChapterId,
@@ -35,11 +36,12 @@ import {
   UnsupportedSourceCapabilityError
 } from "@mangaflux/sources";
 import type {
+  MangaDetails,
   MangaDiscoveryKind,
   MangaSummary
 } from "@mangaflux/sources";
 
-const APP_VERSION = "2.2.0";
+const APP_VERSION = "2.2.1";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LANGUAGE_RE = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i;
@@ -884,6 +886,213 @@ app.get<{ Querystring: { q?: string; limit?: string; source?: string } }>(
         latencyMs
       })),
       items
+    };
+  }
+);
+
+app.get<{ Querystring: { q?: string; limit?: string } }>(
+  "/api/search/matches",
+  { preHandler: searchRateLimit },
+  async (request, reply) => {
+    const query = request.query.q?.trim();
+    const perSourceLimit = parseBoundedInt(request.query.limit, 8, 1, 12);
+
+    if (!query || query.length > 120 || perSourceLimit === null) {
+      return reply.code(400).send({
+        error: "INVALID_REQUEST",
+        message: "q must contain between 1 and 120 characters and limit must be 1-12"
+      });
+    }
+
+    const eligible = listSourceDescriptors().filter(
+      (descriptor) =>
+        descriptor.enabled &&
+        descriptor.capabilities.search &&
+        descriptor.capabilities.details &&
+        descriptor.policy.contentClass === "general" &&
+        descriptor.policy.role !== "experimental"
+    );
+
+    const searchResults = await Promise.all(
+      eligible.map(async (descriptor) => {
+        const startedAt = Date.now();
+
+        try {
+          const source = requireSourceCapability(descriptor.id, "search");
+          const items = await source.search(query, { limit: perSourceLimit });
+
+          return {
+            source: descriptor.id,
+            name: descriptor.name,
+            status: "ok" as const,
+            latencyMs: Date.now() - startedAt,
+            items
+          };
+        } catch (error) {
+          request.log.warn(
+            { err: error, source: descriptor.id },
+            "Duplicate-candidate search source failed"
+          );
+
+          return {
+            source: descriptor.id,
+            name: descriptor.name,
+            status: "error" as const,
+            latencyMs: Date.now() - startedAt,
+            items: [] as MangaSummary[]
+          };
+        }
+      })
+    );
+
+    const summaries = searchResults.flatMap((result) => result.items);
+    const coarsePairs: Array<{
+      left: MangaSummary;
+      right: MangaSummary;
+      score: number;
+    }> = [];
+
+    for (let leftIndex = 0; leftIndex < summaries.length; leftIndex += 1) {
+      for (
+        let rightIndex = leftIndex + 1;
+        rightIndex < summaries.length;
+        rightIndex += 1
+      ) {
+        const left = summaries[leftIndex];
+        const right = summaries[rightIndex];
+
+        if (left.source === right.source) continue;
+
+        const scored = scoreMangaMatch(left, right);
+        if (scored.score < 45) continue;
+
+        coarsePairs.push({
+          left,
+          right,
+          score: scored.score
+        });
+      }
+    }
+
+    coarsePairs.sort((left, right) => {
+      if (left.score !== right.score) return right.score - left.score;
+
+      const leftKey =
+        `${left.left.source}:${left.left.id}:${left.right.source}:${left.right.id}`;
+      const rightKey =
+        `${right.left.source}:${right.left.id}:${right.right.source}:${right.right.id}`;
+      return leftKey.localeCompare(rightKey);
+    });
+
+    const boundedPairs = coarsePairs.slice(0, 12);
+    const candidateItems = new Map<string, MangaSummary>();
+
+    for (const pair of boundedPairs) {
+      candidateItems.set(`${pair.left.source}:${pair.left.id}`, pair.left);
+      candidateItems.set(`${pair.right.source}:${pair.right.id}`, pair.right);
+    }
+
+    const enriched = new Map<
+      string,
+      { item: MangaDetails | MangaSummary; metadata: "complete" | "partial" }
+    >();
+
+    await Promise.all(
+      [...candidateItems.entries()].map(async ([key, item]) => {
+        try {
+          const source = requireSourceCapability(item.source, "details");
+          const details = await source.details(item.id);
+          enriched.set(key, { item: details, metadata: "complete" });
+        } catch (error) {
+          request.log.warn(
+            { err: error, source: item.source, mangaId: item.id },
+            "Duplicate-candidate metadata enrichment failed"
+          );
+          enriched.set(key, { item, metadata: "partial" });
+        }
+      })
+    );
+
+    const candidates = boundedPairs
+      .map((pair) => {
+        const leftKey = `${pair.left.source}:${pair.left.id}`;
+        const rightKey = `${pair.right.source}:${pair.right.id}`;
+        const left = enriched.get(leftKey) ?? {
+          item: pair.left,
+          metadata: "partial" as const
+        };
+        const right = enriched.get(rightKey) ?? {
+          item: pair.right,
+          metadata: "partial" as const
+        };
+
+        const match = scoreMangaMatch(left.item, right.item);
+
+        return {
+          left: {
+            source: left.item.source,
+            mangaId: left.item.id,
+            title: left.item.title,
+            year: left.item.year ?? null,
+            authors: "authors" in left.item ? left.item.authors ?? [] : [],
+            artists: "artists" in left.item ? left.item.artists ?? [] : [],
+            originalLanguage:
+              "originalLanguage" in left.item
+                ? left.item.originalLanguage ?? null
+                : null,
+            metadata: left.metadata
+          },
+          right: {
+            source: right.item.source,
+            mangaId: right.item.id,
+            title: right.item.title,
+            year: right.item.year ?? null,
+            authors: "authors" in right.item ? right.item.authors ?? [] : [],
+            artists: "artists" in right.item ? right.item.artists ?? [] : [],
+            originalLanguage:
+              "originalLanguage" in right.item
+                ? right.item.originalLanguage ?? null
+                : null,
+            metadata: right.metadata
+          },
+          score: match.score,
+          confidence: match.confidence,
+          evidence: match.evidence,
+          warnings: match.warnings,
+          autoMerge: false as const,
+          nextAction: "review" as const
+        };
+      })
+      .filter((candidate) => candidate.score >= 45)
+      .sort((left, right) => {
+        if (left.score !== right.score) return right.score - left.score;
+        const leftKey =
+          `${left.left.source}:${left.left.mangaId}:${left.right.source}:${left.right.mangaId}`;
+        const rightKey =
+          `${right.left.source}:${right.left.mangaId}:${right.right.source}:${right.right.mangaId}`;
+        return leftKey.localeCompare(rightKey);
+      });
+
+    reply.header(
+      "Cache-Control",
+      "public, max-age=30, s-maxage=30, stale-while-revalidate=60"
+    );
+
+    return {
+      query,
+      sources: searchResults.map(({ source, name, status, latencyMs }) => ({
+        id: source,
+        name,
+        status,
+        latencyMs
+      })),
+      policy: {
+        minimumCandidateScore: 45,
+        highConfidenceScore: 80,
+        mediumConfidenceScore: 60,
+        autoMerge: false
+      },
+      candidates
     };
   }
 );

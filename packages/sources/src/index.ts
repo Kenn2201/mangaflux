@@ -1,3 +1,4 @@
+export * from "./matching.js";
 export * from "./types.js";
 export {
   MANGADEX_SOURCE_ID,

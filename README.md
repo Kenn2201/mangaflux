@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v2.2.0--Canonical_Manga_Identity-indigo.svg)
+![Version](https://img.shields.io/badge/version-v2.2.1--Duplicate_Candidate_Detection-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,11 +10,11 @@
 
 ## Current release
 
-**v2.2.0 — Canonical Manga Identity**
+**v2.2.1 — Duplicate Candidate Detection**
 
-MangaFlux V1 and the multi-source Source B foundation are physically QA signed off. v2.2.0 introduces persistent MangaFlux canonical manga IDs and source-edition mappings without rewriting existing MangaDex/MangaSter identifiers or user library data. Successful source detail reads seed an observed mapping, and the API can expose the canonical identity plus its mapped editions. Duplicate detection and cross-source merging remain for v2.2.1+.
+MangaFlux V1 and the multi-source Source B foundation are physically QA signed off. v2.2.0 established persistent canonical manga identity and remains pending explicit physical sign-off. v2.2.1 adds conservative cross-source duplicate candidate detection through `GET /api/search/matches`, using normalized primary/alternate titles plus creator, publication year, and original-language signals when both providers expose them. Every candidate remains review-only with `autoMerge: false`; persistent merge/correction workflows belong to v2.2.2.
 
-**Database migration:** `0014_v220_canonical_identity.sql` must be applied to production before canonical identity QA.
+**Database migration:** none for v2.2.1. It uses the v2.2.0 canonical identity schema already deployed.
 
 ### Library improvements
 

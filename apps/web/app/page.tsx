@@ -95,7 +95,7 @@ export default async function Home({
       </section>
 
       <div className="landing-version">
-        v2.2.0 · Canonical Manga Identity
+        v2.2.1 · Duplicate Candidate Detection
       </div>
     </main>
   );
