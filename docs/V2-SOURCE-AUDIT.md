@@ -162,3 +162,19 @@ MangaSter documents a public no-auth developer API with search, chapter listing,
 The production physical-QA gate must verify search → title → chapters → pages and attribution. If MangaSter is unavailable, MangaDex must continue operating and MangaSter must be reported as degraded/unavailable rather than breaking the platform.
 
 MangaPDF, Manhwa Reader, and Nyora remain disabled candidates. Their individual blockers no longer represent a global Source B gate.
+
+
+### 2026-09-30 v2.1.7 physical QA result
+Status: **FAILED / NOT SIGNED OFF**.
+
+Production QA confirmed that unified search could surface MangaSter, while MangaDex remained healthy. It also exposed integration defects rather than an upstream content gap:
+- MangaSter cover values can be relative `/api/manga?action=img...` paths and were not normalized;
+- result-card navigation did not always preserve `source=mangaster`;
+- raw MangaSter chapter IDs such as `vagabond.3120/c327` are not safe as a single Next.js route segment;
+- reader chapter-context requests, Jump Chapter, and progress persistence still contained MangaDex-default paths/values;
+- multi-source UI surfaces still contained MangaDex-only labels.
+
+Independent live verification on 2026-09-30 showed MangaSter's `vagabond.3120` response contains 327 chapters and its chapter-327 pages response contains 19 HTTPS image URLs. Therefore the v2.1.7 failure is classified as a MangaFlux adapter/UI routing defect, not evidence that MangaSter lacks the title/chapters.
+
+### v2.1.8 corrective gate
+v2.1.8 keeps MangaSter enabled as an isolated coverage source while repairing the adapter/product path. It uses opaque route-safe chapter references, absolute cover URLs, correct source propagation, dynamic attribution, and source-aware progress/navigation. Physical QA must pass the complete search → title → chapters → pages path before MangaSter Source B is signed off.
