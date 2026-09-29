@@ -71,6 +71,12 @@ export default function MangaPage() {
   const searchParams = useSearchParams();
   const id = params.id;
   const source = searchParams.get("source")?.trim() || "mangadex";
+  const sourceName =
+    source === "mangaster"
+      ? "MangaSter"
+      : source === "mangadex"
+        ? "MangaDex"
+        : source;
 
   const [manga, setManga] = useState<MangaDetails | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
@@ -177,7 +183,7 @@ export default function MangaPage() {
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [id, source]);
 
   useEffect(() => {
     let cancelled = false;
@@ -320,7 +326,7 @@ export default function MangaPage() {
     return () => {
       cancelled = true;
     };
-  }, [id, manga]);
+  }, [id, manga, source]);
 
   async function toggleBookmark() {
     if (!manga || bookmarkBusy) return;
@@ -654,7 +660,7 @@ export default function MangaPage() {
       <main>
         <Link className="back-link" href={searchHref}>← Search</Link>
         <section className="panel">
-          <p className="eyebrow">MangaDex</p>
+          <p className="eyebrow">{sourceName}</p>
           <h2>Couldn&apos;t load this manga</h2>
           <p className="message">
             {message || "The source request failed temporarily."}
@@ -690,7 +696,7 @@ export default function MangaPage() {
         </div>
 
         <div>
-          <p className="eyebrow">MangaDex</p>
+          <p className="eyebrow">{sourceName}</p>
           <h1 className="title-small">{manga.title}</h1>
 
           <div className="meta-row">
@@ -847,7 +853,7 @@ export default function MangaPage() {
                 target="_blank"
                 rel="noreferrer"
               >
-                View on MangaDex ↗
+                View on {sourceName} ↗
               </a>
             ) : null}
           </div>

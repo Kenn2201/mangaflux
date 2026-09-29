@@ -29,7 +29,7 @@ export default async function Home({
           <p className="eyebrow">Mobile-first manga discovery</p>
           <h1>Find it. Read it. Never lose your page.</h1>
           <p className="lede">
-            MangaFlux turns MangaDex discovery, a focused vertical reader,
+            MangaFlux combines source-backed discovery, a focused vertical reader,
             bookmarks, and synced reading progress into one fast mobile
             experience.
           </p>
@@ -39,7 +39,7 @@ export default async function Home({
           <div className="landing-trust-row">
             <span>Verified accounts</span>
             <span>Cross-device progress</span>
-            <span>MangaDex attribution</span>
+            <span>Source attribution</span>
           </div>
         </div>
 
@@ -88,14 +88,14 @@ export default async function Home({
           <p className="eyebrow">Open architecture</p>
           <h2>Built for source adapters.</h2>
           <p>
-            MangaDex powers V1 while MangaFlux keeps a modular path toward
-            additional permitted providers later.
+            MangaDex remains primary while MangaSter adds isolated coverage through
+            MangaFlux's source-adapter architecture.
           </p>
         </article>
       </section>
 
       <div className="landing-version">
-        v2.1.7 · MangaSter Coverage
+        v2.1.8 · MangaSter Reader Fix
       </div>
     </main>
   );

@@ -9,16 +9,19 @@ v1.x     ████████████████████  ✅ COMPL
 v2.0.x   ████████████████████  ✅ SOURCE PLATFORM FOUNDATION
 v2.1.0-5 ████████████████████  ✅ PRIOR QA / ACCOUNT-AUTH SIGNED OFF
 v2.1.6   ████████████████████  ✅ SOURCE QUALIFICATION IMPLEMENTED
-v2.1.7   ████████████████████  🟡 MANGASTER SOURCE B IMPLEMENTED / PHYSICAL QA PENDING
+v2.1.7   ████████████████████  ❌ PHYSICAL QA FAILED — SOURCE B UI/READER ROUTING
+v2.1.8   ████████████████████  🟡 MANGASTER READER FIX / PHYSICAL QA PENDING
 v2.2.x   ░░░░░░░░░░░░░░░░░░░░  Canonical Manga Identity & Deduplication
 v2.3.x   ░░░░░░░░░░░░░░░░░░░░  Missing-title/chapter coverage reconciliation + safe fallback
 ~~~
 
-**Current release:** v2.1.7 enables MangaSter as MangaFlux's first additional isolated coverage reader source. MangaDex remains primary. The previous source-gate block is removed because Source B now exists; failed candidates remain disabled rather than blocking the whole roadmap.
+**Current release:** v2.1.8 repairs the failed v2.1.7 Source B physical QA. MangaSter remains enabled as an isolated coverage source and MangaDex remains primary.
 
-**v2.1.7 physical QA gate:** verify unified search shows MangaSter when healthy, a MangaSter result opens with its source preserved, chapter lists load, a chapter opens with page images, MangaSter attribution is visible, and a MangaSter failure does not break MangaDex. The release is not physically signed off until this production QA passes.
+**Failure found in v2.1.7:** MangaSter appeared in unified search, but browse-result links could lose source identity, relative MangaSter covers rendered as broken URLs, raw chapter IDs contained `/` and could break Next.js reader routes, and several reader/navigation/progress paths still defaulted to MangaDex.
 
-**Next:** after Source B physical QA, v2.2.x establishes canonical cross-source identity. v2.3.x then reconciles chapter coverage so MangaFlux can expose missing titles/chapters from mapped editions without silently splicing unrelated feeds.
+**v2.1.8 physical QA gate:** verify MangaSter search cards show covers where the upstream provides them; opening a MangaSter result stays on MangaSter; its metadata and chapter count load; a chapter opens in the reader; page images render; Previous/Next and Jump Chapter remain on MangaSter; progress does not get saved as MangaDex; source labels/attribution are correct; MangaDex regressions still pass.
+
+**Next:** only after v2.1.8 Source B physical QA passes do we advance to v2.2.x canonical cross-source identity and then v2.3.x missing-title/chapter coverage reconciliation.
 
 ---
 
@@ -547,7 +550,7 @@ existing source-aware V1 data
 → operations/scale
 ~~~
 
-MangaDex remains the default/only enabled production source until another source is explicitly implemented and validated. Existing MangaDex IDs and user data must remain valid throughout v2.
+MangaDex remains the primary production source. MangaSter is now the first isolated coverage source under physical QA; existing MangaDex IDs and user data must remain valid throughout v2.
 
 ---
 
@@ -649,16 +652,34 @@ The goal is not merely to add another API. MangaFlux must eventually distinguish
 - Keep MangaDex as the only enabled production source
 - No database migration
 
-### ➡️ v2.1.5 — Coverage Gate & Real Multi-Source QA — PARTIALLY IMPLEMENTED / PHYSICAL QA PENDING
-- Revalidate the production source gate before claiming real multi-source coverage
-- MangaDex remains the only approved reader-capable production source; cross-provider coverage QA is BLOCKED AT SOURCE GATE
-- Preserve the QA matrix for titles absent from MangaDex, incomplete chapter feeds, manga/manhwa/manhua, provider capability differences, and degraded-provider behavior
-- Do not fabricate a second provider or weaken access/provenance policy merely to close v2.1.x
-- Add header profile menu: Account / Library / Sign out
-- Remove duplicate Account-page sign-out action
-- Synchronize sign-in/sign-out state immediately across the persistent app shell and client navigation
+### ✅ v2.1.5 — Coverage Gate & Account Sync — ACCOUNT/AUTH QA SIGNED OFF
+- Revalidated the production source gate without fabricating a second provider
+- Preserved the cross-provider QA matrix for later execution
+- Added header profile menu: Account / Library / Sign out
+- Removed duplicate Account-page sign-out action
+- Synchronized sign-in/sign-out state immediately across the persistent app shell and client navigation
 - No database migration
-- v2.1.x remains open until at least one real additional reader source is safely enabled and the coverage QA matrix can actually run
+
+### ✅ v2.1.6 — Source Qualification
+- Added typed candidate qualification separate from enabled sources
+- Exposed candidate capability/check state through `GET /api/sources/candidates`
+- Preserved failed/unverified providers as disabled candidates
+- No database migration
+
+### ❌ v2.1.7 — MangaSter Coverage — PHYSICAL QA FAILED
+- Added MangaSter as the first isolated coverage source
+- Unified search successfully surfaced MangaSter beside MangaDex
+- Physical QA exposed broken relative covers, lost source context, unsafe chapter route IDs, and remaining MangaDex-default reader paths
+- MangaDex regression behavior remained functional
+- Release is not signed off
+
+### ➡️ v2.1.8 — MangaSter Reader Fix — PHYSICAL QA PENDING
+- Normalize MangaSter cover URLs and title metadata
+- Use route-safe opaque chapter references with legacy decode compatibility
+- Preserve source identity through result cards, details, chapter lists, reader, Previous/Next, Jump Chapter, and progress
+- Make multi-source labels and attribution dynamic
+- Re-run the complete MangaSter reader QA before advancing to v2.2.x
+- No database migration
 
 ---
 

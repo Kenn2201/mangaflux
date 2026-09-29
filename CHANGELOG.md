@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.1.8 — MangaSter Reader Fix
+
+- Recorded the v2.1.7 production physical QA as failed rather than signed off.
+- Reproduced the failure against production: MangaSter search and chapter APIs worked, but UI source context and route identifiers were incorrect.
+- Normalized MangaSter relative cover paths to absolute HTTPS URLs and resolve the title cover on details pages when the chapter response omits it.
+- Added MangaSter summary, author, and genre metadata from the live chapter/details response.
+- Replaced raw upstream chapter paths such as `vagabond.3120/c327` with opaque route-safe MangaFlux chapter IDs while retaining backward decode support in the adapter.
+- Preserved the selected source through search result cards, manga details, chapter lists, reader page loading, Previous/Next, Jump Chapter, and progress writes.
+- Removed remaining MangaDex-only labels from multi-source search/detail/reader attribution surfaces.
+- Added MangaSter's public cover host to the source image-host policy.
+- Revalidated the live Vagabond path: MangaSter reports 327 chapters and chapter 327 returns 19 page-image URLs.
+- No database migration is required.
+
+
 ## 2.1.7 — MangaSter Coverage
 
 - Added MangaSter as the first enabled isolated coverage source beside primary MangaDex.

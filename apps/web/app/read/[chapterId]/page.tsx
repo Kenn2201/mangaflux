@@ -115,7 +115,7 @@ function ReaderImage({
     setFallbackSaver(false);
     setFailed(false);
     settledRef.current = false;
-  }, [chapterId, dataSaver]);
+  }, [chapterId, dataSaver, source]);
 
   function settle() {
     if (settledRef.current) return;
@@ -135,7 +135,7 @@ function ReaderImage({
           loading={eager || index <= 2 ? "eager" : "lazy"}
           onLoad={settle}
           onError={() => {
-            if (!useSaver) {
+            if (source === "mangadex" && !useSaver) {
               setFallbackSaver(true);
               return;
             }
@@ -362,7 +362,7 @@ export default function ReaderPage() {
           const response = await fetch(
             `/api/manga/${encodeURIComponent(
               mangaId
-            )}/chapters?language=${encodeURIComponent(
+            )}/chapters?source=${encodeURIComponent(source)}&language=${encodeURIComponent(
               savedPreferences.language
             )}&limit=100&offset=${offset}&order=desc`,
             { cache: "no-store" }
@@ -402,7 +402,7 @@ export default function ReaderPage() {
               const nextPageResponse = await fetch(
                 `/api/manga/${encodeURIComponent(
                   mangaId
-                )}/chapters?language=${encodeURIComponent(
+                )}/chapters?source=${encodeURIComponent(source)}&language=${encodeURIComponent(
                   savedPreferences.language
                 )}&limit=100&offset=${nextOffset}&order=desc`,
                 { cache: "no-store" }
@@ -443,7 +443,8 @@ export default function ReaderPage() {
   }, [
     chapterId,
     data?.chapter.mangaId,
-    readerPreferences.language
+    readerPreferences.language,
+    source
   ]);
 
   useEffect(() => {
@@ -638,7 +639,7 @@ export default function ReaderPage() {
           method: "PUT",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
-            source: "mangadex",
+            source,
             mangaId: data.chapter.mangaId,
             mangaTitle: mangaMeta.title,
             coverUrl: mangaMeta.coverUrl,
@@ -667,7 +668,8 @@ export default function ReaderPage() {
     data,
     mangaMeta,
     totalPages,
-    resumePending
+    resumePending,
+    source
   ]);
 
   const progress = totalPages
@@ -811,6 +813,7 @@ export default function ReaderPage() {
             mangaId={data.chapter.mangaId}
             currentChapterId={chapterId}
             currentChapter={data.chapter.chapter}
+            source={source}
             querySuffix={querySuffix}
             language={readerPreferences.language}
             languageLabel={
@@ -960,7 +963,7 @@ export default function ReaderPage() {
       <footer className="reader-footer reader-end-card">
         <span>{pageLabel}</span>
         <a href={data.attribution.sourceUrl} target="_blank" rel="noreferrer">
-          MangaDex source / chapter attribution
+          {data.attribution.sourceName} source / chapter attribution
         </a>
 
         <nav aria-label="End of chapter navigation">

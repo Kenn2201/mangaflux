@@ -153,8 +153,8 @@ export default function AppChrome({
         </div>
         <div className="footer-meta">
           <p>
-            Manga metadata and chapter attribution are provided by MangaDex and
-            credited throughout the reader.
+            Manga metadata and chapter attribution are provided by enabled
+            sources and credited throughout the reader.
           </p>
           <SystemStatusLink />
         </div>

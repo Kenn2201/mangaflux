@@ -19,11 +19,19 @@ export default function MangaTile({
   query?: string;
   className?: string;
 }) {
-  const suffix = query
-    ? `?q=${encodeURIComponent(query)}`
-    : "";
+  const params = new URLSearchParams({ source: item.source });
+  if (query) params.set("q", query);
+  const suffix = `?${params.toString()}`;
+
+  const sourceName =
+    item.source === "mangaster"
+      ? "MangaSter"
+      : item.source === "mangadex"
+        ? "MangaDex"
+        : item.source;
 
   const meta = [
+    sourceName,
     item.year ? String(item.year) : undefined,
     ...(item.tags ?? []).slice(0, 2)
   ].filter(Boolean);
@@ -31,7 +39,7 @@ export default function MangaTile({
   return (
     <Link
       className={`discovery-card ${className}`.trim()}
-      href={`/manga/${item.id}${suffix}`}
+      href={`/manga/${encodeURIComponent(item.id)}${suffix}`}
     >
       <div className="discovery-cover">
         {item.coverUrl ? (
