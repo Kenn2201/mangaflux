@@ -63,7 +63,7 @@ export default function SearchResultsClient({
         setItems(payload.items);
 
         if (!payload.items.length) {
-          setMessage("No MangaDex results found.");
+          setMessage("No results found from the enabled sources.");
         }
       } catch (error) {
         if ((error as Error).name !== "AbortError") {
@@ -111,7 +111,7 @@ export default function SearchResultsClient({
       {items.length ? (
         <div className="browse-grid">
           {items.map((item) => (
-            <MangaTile item={item} query={query} key={item.id} />
+            <MangaTile item={item} query={query} key={`${item.source}:${item.id}`} />
           ))}
         </div>
       ) : null}
