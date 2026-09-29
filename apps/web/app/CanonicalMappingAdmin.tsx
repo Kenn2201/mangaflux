@@ -66,11 +66,11 @@ export default function CanonicalMappingAdmin() {
   const [busy, setBusy] = useState(false);
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
 
-  async function loadMapping() {
+  async function loadMapping(ignoreBusy = false) {
     const cleanSource = source.trim();
     const cleanMangaId = mangaId.trim();
 
-    if (!cleanSource || !cleanMangaId || loading || busy) return;
+    if (!cleanSource || !cleanMangaId || loading || (!ignoreBusy && busy)) return;
 
     setLoading(true);
     setMessage("");
@@ -164,7 +164,7 @@ export default function CanonicalMappingAdmin() {
         setTargetCanonicalId("");
       }
 
-      await loadMapping();
+      await loadMapping(true);
     } catch (error) {
       notify({
         tone: "error",
