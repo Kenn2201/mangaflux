@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.2.2 — Mapping Review & Corrections
+
+- Recorded v2.2.0 Canonical Manga Identity and v2.2.1 Duplicate Candidate Detection physical QA as signed off.
+- Added an admin-only canonical mapping inspector inside the existing MangaFlux Admin Console.
+- Added reviewed merge/move support so one source edition can be attached to an existing canonical manga ID.
+- Added split support that assigns an edition a fresh canonical MangaFlux identity without changing its source ID.
+- Added append-only mapping audit events with actor, action, source edition, previous canonical ID, target canonical ID, optional reason, rollback linkage, and timestamp.
+- Added safe rollback with stale-state/conflict checks; already-rolled-back events cannot be replayed blindly.
+- Mapping updates preserve the previous mapping when audit persistence fails through compensating rollback logic.
+- Old canonical rows are intentionally retained so reviewed changes remain safely reversible.
+- Added authenticated admin web proxy + Admin Console controls for inspect, merge, split, audit review, and rollback.
+- Existing bookmarks, follows, history, progress, notifications, source IDs, and reader URLs are not rewritten.
+- Added migration `0015_v222_mapping_review.sql`.
+- Production database migration is required before physical QA.
+
+
 ## 2.2.1 — Duplicate Candidate Detection
 
 - Added conservative cross-source duplicate candidate scoring for canonical-identity review.
