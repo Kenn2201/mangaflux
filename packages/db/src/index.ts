@@ -1,3 +1,4 @@
+export * from "./canonicalIdentity.js";
 export * from "./adminRepository.js";
 export * from "./authRepository.js";
 export * from "./client.js";
