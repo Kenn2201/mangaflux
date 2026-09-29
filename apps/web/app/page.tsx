@@ -95,7 +95,7 @@ export default async function Home({
       </section>
 
       <div className="landing-version">
-        v2.1.9 · MangaSter Reader Reliability
+        v2.2.0 · Canonical Manga Identity
       </div>
     </main>
   );
