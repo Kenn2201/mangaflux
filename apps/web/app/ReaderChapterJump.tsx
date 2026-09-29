@@ -183,7 +183,7 @@ export default function ReaderChapterJump({
         const response = await fetch(
           `/api/manga/${encodeURIComponent(
             mangaId
-          )}/chapters?language=${encodeURIComponent(
+          )}/chapters?source=${encodeURIComponent(source)}&language=${encodeURIComponent(
             language
           )}&limit=100&offset=0&order=desc&chapter=${encodeURIComponent(
             currentChapter
