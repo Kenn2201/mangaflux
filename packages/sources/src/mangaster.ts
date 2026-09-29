@@ -246,12 +246,16 @@ export const mangaSterSource: MangaSource = {
       throw new Error("MangaSter returned no readable pages");
     }
 
+    const chapterNumber =
+      upstreamChapterId.match(/\/c([0-9]+(?:\.[0-9]+)?)$/i)?.[1];
+
     return {
       chapter: {
         id: chapterId,
         mangaId: mangaId || text(body.mangaId ?? body.sourceId),
         source: "mangaster",
-        title: text(body.title) || "Chapter"
+        title: text(body.title) || (chapterNumber ? `Chapter ${chapterNumber}` : "Chapter"),
+        chapter: chapterNumber
       },
       pages,
       dataSaver: false,
