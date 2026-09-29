@@ -19,7 +19,7 @@ export default async function SearchPage({
   return (
     <main className="search-results-page">
       <section className="browse-heading">
-        <p className="eyebrow">Search MangaDex</p>
+        <p className="eyebrow">Search MangaFlux sources</p>
         <h1>
           {query ? <>Results for “{query}”</> : "Search MangaFlux"}
         </h1>
