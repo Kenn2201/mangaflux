@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.1.9 — MangaSter Reader Reliability
+
+- Follow-up reliability patch discovered during live v2.1.8 deployment verification before physical QA.
+- Serialize MangaSter API requests with the declared 500 ms minimum interval instead of issuing the details metadata request and cover lookup back-to-back.
+- Cache normalized MangaSter covers by source ID so a title opened from search can reuse the verified cover immediately.
+- Keep the paced search fallback for direct title-detail visits where no prior search cache exists.
+- Preserve the v2.1.8 route-safe chapter IDs, source-aware reader navigation, and source attribution fixes.
+- No database migration is required.
+
+
 ## 2.1.8 — MangaSter Reader Fix
 
 - Recorded the v2.1.7 production physical QA as failed rather than signed off.
