@@ -9,6 +9,10 @@ const BASE = "https://ahm7xmakki.com/api/manga";
 const ORIGIN = "https://ahm7xmakki.com";
 const HOME = "https://ahm7xmakki.com/manga";
 const TIMEOUT_MS = 15_000;
+const MIN_INTERVAL_MS = 500;
+const coverCache = new Map<string, string>();
+let requestQueue: Promise<void> = Promise.resolve();
+let lastRequestAt = 0;
 
 type Json = Record<string, unknown>;
 
@@ -81,27 +85,49 @@ function decodeChapterRef(value: string) {
 }
 
 async function request(params: Record<string, string>): Promise<Json> {
-  const url = new URL(BASE);
-  Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, value));
-
-  const response = await fetch(url, {
-    headers: {
-      Accept: "application/json",
-      "User-Agent": "MangaFlux/2.1.8 (+https://manga.kenncode.me)"
-    },
-    signal: AbortSignal.timeout(TIMEOUT_MS)
+  let release!: () => void;
+  const previous = requestQueue;
+  requestQueue = new Promise<void>((resolve) => {
+    release = resolve;
   });
 
-  if (!response.ok) {
-    throw new Error(`MangaSter upstream returned ${response.status}`);
-  }
+  await previous;
 
-  const body = await response.json();
-  if (!body || typeof body !== "object") {
-    throw new Error("Invalid MangaSter response");
-  }
+  try {
+    const waitFor = Math.max(
+      0,
+      MIN_INTERVAL_MS - (Date.now() - lastRequestAt)
+    );
 
-  return body as Json;
+    if (waitFor > 0) {
+      await new Promise((resolve) => setTimeout(resolve, waitFor));
+    }
+
+    const url = new URL(BASE);
+    Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, value));
+    lastRequestAt = Date.now();
+
+    const response = await fetch(url, {
+      headers: {
+        Accept: "application/json",
+        "User-Agent": "MangaFlux/2.1.9 (+https://manga.kenncode.me)"
+      },
+      signal: AbortSignal.timeout(TIMEOUT_MS)
+    });
+
+    if (!response.ok) {
+      throw new Error(`MangaSter upstream returned ${response.status}`);
+    }
+
+    const body = await response.json();
+    if (!body || typeof body !== "object") {
+      throw new Error("Invalid MangaSter response");
+    }
+
+    return body as Json;
+  } finally {
+    release();
+  }
 }
 
 function searchItems(body: Json): MangaSummary[] {
@@ -115,11 +141,14 @@ function searchItems(body: Json): MangaSummary[] {
 
     if (!id || !title) return [];
 
+    const coverUrl = absoluteHttpsUrl(row.cover ?? row.coverUrl);
+    if (coverUrl) coverCache.set(id, coverUrl);
+
     return [{
       id,
       source: "mangaster",
       title,
-      coverUrl: absoluteHttpsUrl(row.cover ?? row.coverUrl)
+      coverUrl
     }];
   });
 }
@@ -157,7 +186,13 @@ async function allChapters(id: string) {
 
 async function resolveCover(id: string, title: string, body: Json) {
   const direct = absoluteHttpsUrl(body.cover ?? body.coverUrl);
-  if (direct) return direct;
+  if (direct) {
+    coverCache.set(id, direct);
+    return direct;
+  }
+
+  const cached = coverCache.get(id);
+  if (cached) return cached;
 
   try {
     const matches = searchItems(
