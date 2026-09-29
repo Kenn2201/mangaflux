@@ -10,18 +10,19 @@ v2.0.x   ████████████████████  ✅ SOURC
 v2.1.0-5 ████████████████████  ✅ PRIOR QA / ACCOUNT-AUTH SIGNED OFF
 v2.1.6   ████████████████████  ✅ SOURCE QUALIFICATION IMPLEMENTED
 v2.1.7   ████████████████████  ❌ PHYSICAL QA FAILED — SOURCE B UI/READER ROUTING
-v2.1.8   ████████████████████  🟡 MANGASTER READER FIX / PHYSICAL QA PENDING
+v2.1.8   ████████████████████  🟠 DEPLOYED / INTERNAL LIVE CHECK FOUND COVER RACE
+v2.1.9   ████████████████████  🟡 MANGASTER RELIABILITY / PHYSICAL QA PENDING
 v2.2.x   ░░░░░░░░░░░░░░░░░░░░  Canonical Manga Identity & Deduplication
 v2.3.x   ░░░░░░░░░░░░░░░░░░░░  Missing-title/chapter coverage reconciliation + safe fallback
 ~~~
 
-**Current release:** v2.1.8 repairs the failed v2.1.7 Source B physical QA. MangaSter remains enabled as an isolated coverage source and MangaDex remains primary.
+**Current release:** v2.1.9 is the final corrective Source B patch before re-running physical QA. It preserves the v2.1.8 routing fixes and adds enforced MangaSter request pacing plus cover caching after a live post-deployment check found the details cover lookup could race the upstream.
 
 **Failure found in v2.1.7:** MangaSter appeared in unified search, but browse-result links could lose source identity, relative MangaSter covers rendered as broken URLs, raw chapter IDs contained `/` and could break Next.js reader routes, and several reader/navigation/progress paths still defaulted to MangaDex.
 
-**v2.1.8 physical QA gate:** verify MangaSter search cards show covers where the upstream provides them; opening a MangaSter result stays on MangaSter; its metadata and chapter count load; a chapter opens in the reader; page images render; Previous/Next and Jump Chapter remain on MangaSter; progress does not get saved as MangaDex; source labels/attribution are correct; MangaDex regressions still pass.
+**v2.1.9 physical QA gate:** verify MangaSter search cards show covers where the upstream provides them; opening a MangaSter result stays on MangaSter; its metadata and chapter count load; a chapter opens in the reader; page images render; Previous/Next and Jump Chapter remain on MangaSter; progress does not get saved as MangaDex; source labels/attribution are correct; MangaDex regressions still pass.
 
-**Next:** only after v2.1.8 Source B physical QA passes do we advance to v2.2.x canonical cross-source identity and then v2.3.x missing-title/chapter coverage reconciliation.
+**Next:** only after v2.1.9 Source B physical QA passes do we advance to v2.2.x canonical cross-source identity and then v2.3.x missing-title/chapter coverage reconciliation.
 
 ---
 
@@ -673,12 +674,20 @@ The goal is not merely to add another API. MangaFlux must eventually distinguish
 - MangaDex regression behavior remained functional
 - Release is not signed off
 
-### ➡️ v2.1.8 — MangaSter Reader Fix — PHYSICAL QA PENDING
+### 🟠 v2.1.8 — MangaSter Reader Fix — DEPLOYED / SUPERSEDED BEFORE PHYSICAL QA
 - Normalize MangaSter cover URLs and title metadata
 - Use route-safe opaque chapter references with legacy decode compatibility
 - Preserve source identity through result cards, details, chapter lists, reader, Previous/Next, Jump Chapter, and progress
 - Make multi-source labels and attribution dynamic
-- Re-run the complete MangaSter reader QA before advancing to v2.2.x
+- Live deployment verification confirmed v2.1.8 fixed route-safe IDs and source propagation, but the title-details cover lookup could still miss because the upstream calls were too close together
+- Superseded by v2.1.9 before physical QA
+- No database migration
+
+### ➡️ v2.1.9 — MangaSter Reader Reliability — PHYSICAL QA PENDING
+- Enforce the declared 500 ms minimum interval between MangaSter upstream requests
+- Reuse normalized cover URLs from recent search results
+- Preserve the complete v2.1.8 source-aware reader/navigation fixes
+- Re-run the full Source B physical QA before v2.2.x
 - No database migration
 
 ---
