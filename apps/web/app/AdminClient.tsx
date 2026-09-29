@@ -8,6 +8,7 @@ import {
 } from "react";
 import { notify } from "../lib/toast";
 import ConfirmDialog from "./ConfirmDialog";
+import CanonicalMappingAdmin from "./CanonicalMappingAdmin";
 import PublicProfileModal from "./PublicProfileModal";
 
 type Session = {
@@ -726,6 +727,8 @@ export default function AdminClient() {
               </div>
             </div>
           </section>
+
+          <CanonicalMappingAdmin />
 
           <section className="panel admin-safety-note">
             <p className="eyebrow">Admin scope</p>
