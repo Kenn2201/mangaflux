@@ -362,7 +362,7 @@ export default function ReaderPage() {
           const response = await fetch(
             `/api/manga/${encodeURIComponent(
               mangaId
-            )}/chapters?language=${encodeURIComponent(
+            )}/chapters?source=${encodeURIComponent(source)}&language=${encodeURIComponent(
               savedPreferences.language
             )}&limit=100&offset=${offset}&order=desc`,
             { cache: "no-store" }
@@ -402,7 +402,7 @@ export default function ReaderPage() {
               const nextPageResponse = await fetch(
                 `/api/manga/${encodeURIComponent(
                   mangaId
-                )}/chapters?language=${encodeURIComponent(
+                )}/chapters?source=${encodeURIComponent(source)}&language=${encodeURIComponent(
                   savedPreferences.language
                 )}&limit=100&offset=${nextOffset}&order=desc`,
                 { cache: "no-store" }
