@@ -95,7 +95,7 @@ export default async function Home({
       </section>
 
       <div className="landing-version">
-        v2.2.1 · Duplicate Candidate Detection
+        v2.2.2 · Mapping Review & Corrections
       </div>
     </main>
   );
