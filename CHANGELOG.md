@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.2.1 — Duplicate Candidate Detection
+
+- Added conservative cross-source duplicate candidate scoring for canonical-identity review.
+- Added Unicode-normalized primary-title and alternate-title overlap signals.
+- Added creator matching that is resilient to name token ordering.
+- Added publication-year and original-language match/conflict signals where both sources expose them.
+- Added deterministic high / medium / low confidence scoring with explicit warnings for conflicts.
+- Added `GET /api/search/matches?q=...` to search enabled general sources, enrich only plausible pairs with details, and expose review candidates.
+- Candidate generation compares different sources only.
+- Every candidate returns `autoMerge: false` and `nextAction: "review"`; no canonical mappings are changed automatically.
+- Source failures and detail-enrichment failures remain isolated; partial metadata can still produce a review candidate.
+- v2.2.0 physical QA remains pending because the maintainer advanced without explicitly signing it off.
+- No database migration is required.
+
+
 ## 2.2.0 — Canonical Manga Identity
 
 - Recorded v2.1.9 MangaSter Source B physical QA as signed off.
