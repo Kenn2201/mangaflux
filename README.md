@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v2.1.7--MangaSter_Coverage-indigo.svg)
+![Version](https://img.shields.io/badge/version-v2.1.8--MangaSter_Reader_Fix-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,9 @@
 
 ## Current release
 
-**v2.1.7 — MangaSter Coverage**
+**v2.1.8 — MangaSter Reader Fix**
 
-MangaFlux V1 and the source-platform foundation remain stable. v2.1.7 enables MangaSter as the first isolated coverage reader source alongside MangaDex, adds source-aware web detail/chapter/reader routing, and keeps failed candidates independently disabled. MangaDex remains primary; MangaSter is used as additional coverage with explicit provenance.
+MangaFlux V1 and the source-platform foundation remain stable. v2.1.8 repairs the first MangaSter physical-QA failures: source-aware result navigation, absolute cover URLs, richer MangaSter detail metadata, route-safe chapter identifiers, source-preserving reader navigation/progress, and source-neutral attribution copy. MangaDex remains primary; MangaSter remains the first isolated coverage source.
 
 ### Library improvements
 
