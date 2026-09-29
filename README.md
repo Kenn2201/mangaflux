@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v2.1.9--MangaSter_Reader_Reliability-indigo.svg)
+![Version](https://img.shields.io/badge/version-v2.2.0--Canonical_Manga_Identity-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,9 +10,11 @@
 
 ## Current release
 
-**v2.1.9 — MangaSter Reader Reliability**
+**v2.2.0 — Canonical Manga Identity**
 
-MangaFlux V1 and the source-platform foundation remain stable. v2.1.9 includes the v2.1.8 Source B routing fixes and adds enforced MangaSter request pacing plus normalized-cover reuse so title details remain reliable after search. MangaDex remains primary; MangaSter remains the first isolated coverage source.
+MangaFlux V1 and the multi-source Source B foundation are physically QA signed off. v2.2.0 introduces persistent MangaFlux canonical manga IDs and source-edition mappings without rewriting existing MangaDex/MangaSter identifiers or user library data. Successful source detail reads seed an observed mapping, and the API can expose the canonical identity plus its mapped editions. Duplicate detection and cross-source merging remain for v2.2.1+.
+
+**Database migration:** `0014_v220_canonical_identity.sql` must be applied to production before canonical identity QA.
 
 ### Library improvements
 

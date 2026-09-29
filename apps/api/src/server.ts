@@ -3,9 +3,12 @@ import cors from "@fastify/cors";
 import {
   createDatabase,
   createNewChapterNotificationEvent,
+  ensureCanonicalIdentity,
+  getCanonicalIdentityBySource,
   getNotificationCheckpoint,
   getNotificationEligibleFollows,
   getNotificationDeliveryUser,
+  listCanonicalEditions,
   probeDatabase,
   upsertNotificationCheckpoint
 } from "@mangaflux/db";
@@ -36,7 +39,7 @@ import type {
   MangaSummary
 } from "@mangaflux/sources";
 
-const APP_VERSION = "2.1.9";
+const APP_VERSION = "2.2.0";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LANGUAGE_RE = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i;
@@ -1054,13 +1057,87 @@ app.get<{ Params: { source: string; id: string } }>(
     }
 
     const item = await source.details(request.params.id);
+    let identity = null;
+
+    if (database) {
+      try {
+        identity = await ensureCanonicalIdentity(database, {
+          source: source.id,
+          mangaId: item.id,
+          title: item.title,
+          mappingMethod: "observed",
+          provenance: "source-details"
+        });
+      } catch (error) {
+        request.log.warn(
+          { err: error, source: source.id, mangaId: item.id },
+          "Canonical identity seeding failed"
+        );
+      }
+    }
 
     reply.header(
       "Cache-Control",
       sourceCacheControl(source.id, "metadata")
     );
 
-    return { source: source.id, item };
+    return { source: source.id, item, identity };
+  }
+);
+
+app.get<{ Params: { source: string; id: string } }>(
+  "/api/manga/:source/:id/identity",
+  { preHandler: metadataRateLimit },
+  async (request, reply) => {
+    if (!database) {
+      return reply.code(503).send({
+        error: "PERSISTENCE_UNAVAILABLE",
+        message: "Canonical identity persistence is not configured."
+      });
+    }
+
+    const source = requestedSource(request.params.source, "details");
+    if (!validateSourceMangaId(source.id, request.params.id)) {
+      return reply.code(400).send({
+        error: "INVALID_REQUEST",
+        message: "id is invalid for the selected source"
+      });
+    }
+
+    let identity = await getCanonicalIdentityBySource(
+      database,
+      source.id,
+      request.params.id
+    );
+
+    if (!identity) {
+      const item = await source.details(request.params.id);
+      identity = await ensureCanonicalIdentity(database, {
+        source: source.id,
+        mangaId: item.id,
+        title: item.title,
+        mappingMethod: "observed",
+        provenance: "identity-endpoint"
+      });
+    }
+
+    const editions = await listCanonicalEditions(
+      database,
+      identity.canonicalId
+    );
+
+    reply.header(
+      "Cache-Control",
+      "private, max-age=0, no-store"
+    );
+
+    return {
+      source: source.id,
+      mangaId: request.params.id,
+      canonicalId: identity.canonicalId,
+      displayTitle: identity.displayTitle,
+      editions
+    };
   }
 );
 

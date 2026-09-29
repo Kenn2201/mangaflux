@@ -389,6 +389,48 @@ export const communityReactions = pgTable(
   ]
 );
 
+export const canonicalManga = pgTable(
+  "canonical_manga",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    displayTitle: text("display_title").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+  },
+  (table) => [
+    index("canonical_manga_updated_idx").on(table.updatedAt)
+  ]
+);
+
+export const mangaSourceMappings = pgTable(
+  "manga_source_mappings",
+  {
+    canonicalId: uuid("canonical_id")
+      .notNull()
+      .references(() => canonicalManga.id, { onDelete: "cascade" }),
+    source: text("source").notNull(),
+    mangaId: text("manga_id").notNull(),
+    sourceTitle: text("source_title").notNull(),
+    mappingMethod: text("mapping_method").notNull().default("observed"),
+    provenance: text("provenance").notNull().default("source-details"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+  },
+  (table) => [
+    primaryKey({ columns: [table.source, table.mangaId] }),
+    index("manga_source_mappings_canonical_idx").on(table.canonicalId),
+    index("manga_source_mappings_updated_idx").on(table.updatedAt)
+  ]
+);
+
 export const sourceCache = pgTable("source_cache", {
   key: text("key").primaryKey(),
   payload: text("payload").notNull(),

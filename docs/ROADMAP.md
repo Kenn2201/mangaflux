@@ -7,22 +7,24 @@ This is the canonical MangaFlux roadmap.
 ~~~text
 v1.x     ████████████████████  ✅ COMPLETE
 v2.0.x   ████████████████████  ✅ SOURCE PLATFORM FOUNDATION
-v2.1.0-5 ████████████████████  ✅ PRIOR QA / ACCOUNT-AUTH SIGNED OFF
-v2.1.6   ████████████████████  ✅ SOURCE QUALIFICATION IMPLEMENTED
-v2.1.7   ████████████████████  ❌ PHYSICAL QA FAILED — SOURCE B UI/READER ROUTING
-v2.1.8   ████████████████████  🟠 DEPLOYED / INTERNAL LIVE CHECK FOUND COVER RACE
-v2.1.9   ████████████████████  🟡 MANGASTER RELIABILITY / PHYSICAL QA PENDING
-v2.2.x   ░░░░░░░░░░░░░░░░░░░░  Canonical Manga Identity & Deduplication
+v2.1.0-6 ████████████████████  ✅ COMPLETE / PRIOR QA SIGNED OFF
+v2.1.7   ████████████████████  ❌ ORIGINAL SOURCE B QA FAILED
+v2.1.8   ████████████████████  ✅ CORRECTIVE SOURCE B FIX
+v2.1.9   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
+v2.2.0   ████████████████████  🟡 CANONICAL IDENTITY IMPLEMENTED / PHYSICAL QA PENDING
+v2.2.1   ░░░░░░░░░░░░░░░░░░░░  Duplicate Candidate Detection
+v2.2.2   ░░░░░░░░░░░░░░░░░░░░  Mapping Review & Corrections
+v2.2.3   ░░░░░░░░░░░░░░░░░░░░  Canonical Product Surfaces
 v2.3.x   ░░░░░░░░░░░░░░░░░░░░  Missing-title/chapter coverage reconciliation + safe fallback
 ~~~
 
-**Current release:** v2.1.9 is the final corrective Source B patch before re-running physical QA. It preserves the v2.1.8 routing fixes and adds enforced MangaSter request pacing plus cover caching after a live post-deployment check found the details cover lookup could race the upstream.
+**Current release:** v2.2.0 establishes persistent MangaFlux canonical manga identity now that MangaDex + MangaSter Source B have passed the real reader path. Each successful source-edition details read can seed a canonical manga row and a mapping from the real `source + mangaId` to that canonical ID.
 
-**Failure found in v2.1.7:** MangaSter appeared in unified search, but browse-result links could lose source identity, relative MangaSter covers rendered as broken URLs, raw chapter IDs contained `/` and could break Next.js reader routes, and several reader/navigation/progress paths still defaulted to MangaDex.
+**Safety boundary:** v2.2.0 does **not** merge similarly named works. MangaDex Vagabond and MangaSter Vagabond may initially receive separate canonical IDs. v2.2.1 creates conservative duplicate candidates; v2.2.2 is where reviewed mappings can be corrected/merged safely.
 
-**v2.1.9 physical QA gate:** verify MangaSter search cards show covers where the upstream provides them; opening a MangaSter result stays on MangaSter; its metadata and chapter count load; a chapter opens in the reader; page images render; Previous/Next and Jump Chapter remain on MangaSter; progress does not get saved as MangaDex; source labels/attribution are correct; MangaDex regressions still pass.
+**Migration:** apply `0014_v220_canonical_identity.sql` in production before physical QA. Existing bookmarks, history, progress, follows, notifications, source URLs, and source IDs remain untouched.
 
-**Next:** only after v2.1.9 Source B physical QA passes do we advance to v2.2.x canonical cross-source identity and then v2.3.x missing-title/chapter coverage reconciliation.
+**Next after v2.2.0 QA:** v2.2.1 Duplicate Candidate Detection → v2.2.2 Mapping Review & Corrections → v2.2.3 Canonical Product Surfaces → v2.3.x missing-title/chapter fallback.
 
 ---
 
@@ -696,11 +698,17 @@ The goal is not merely to add another API. MangaFlux must eventually distinguish
 
 Only introduce canonical identity after real cross-source data exists so matching rules are based on observed data rather than guesses.
 
-### v2.2.0 — Canonical Identity Schema
-- MangaFlux canonical manga ID
-- Source-edition mapping table
-- Provenance and mapping timestamps
-- Existing MangaDex IDs remain resolvable
+### 🟡 v2.2.0 — Canonical Identity Schema — IMPLEMENTED / PHYSICAL QA PENDING
+- Persistent MangaFlux canonical manga UUID
+- Source-edition mapping table keyed by source + source manga ID
+- Mapping method, provenance, source title, creation timestamp, and update timestamp
+- Successful source details reads seed observed canonical identities when persistence is available
+- Read-only identity inspection through `GET /api/manga/:source/:id/identity`
+- Existing MangaDex and MangaSter IDs/URLs remain resolvable
+- No automatic cross-source merge in this milestone
+- Existing user library/progress/follow/notification records remain source-aware and unchanged
+- Migration: `0014_v220_canonical_identity.sql`
+- Physical production QA required before v2.2.1
 
 ### v2.2.1 — Duplicate Candidate Detection
 - Normalized title and alternate-title matching
