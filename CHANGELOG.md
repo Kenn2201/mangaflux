@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.2.0 — Canonical Manga Identity
+
+- Recorded v2.1.9 MangaSter Source B physical QA as signed off.
+- Added persistent MangaFlux canonical manga IDs.
+- Added source-edition mappings keyed by real source + source manga ID.
+- Store mapping method, provenance, source title, creation time, and update time.
+- Seed an observed canonical identity after successful source detail reads without changing existing source IDs or URLs.
+- Added `GET /api/manga/:source/:id/identity` to resolve/seed an edition identity and inspect all editions currently mapped to that canonical manga.
+- Keep MangaDex and MangaSter editions separate by default; v2.2.0 does not guess that similarly named titles are the same work.
+- Existing bookmarks, follows, history, progress, notifications, and reader preferences are not destructively rewritten.
+- Added migration `0014_v220_canonical_identity.sql`.
+- Production database migration is required before canonical identity QA.
+
+
 ## 2.1.9 — MangaSter Reader Reliability
 
 - Follow-up reliability patch discovered during live v2.1.8 deployment verification before physical QA.
