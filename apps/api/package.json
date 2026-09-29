@@ -1,7 +1,7 @@
 {
   "name": "@mangaflux/api",
   "private": true,
-  "version": "2.1.7",
+  "version": "2.1.8",
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "@fastify/cors": "^10.0.0",
-    "@mangaflux/db": "2.1.7",
-    "@mangaflux/sources": "2.1.7",
+    "@mangaflux/db": "2.1.8",
+    "@mangaflux/sources": "2.1.8",
     "fastify": "^5.0.0",
     "tsx": "^4.20.0"
   },
