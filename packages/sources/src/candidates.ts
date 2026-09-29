@@ -39,10 +39,10 @@ const candidates: readonly SourceCandidate[] = [
     intendedRole: "coverage",
     mediaTypes: ["manga", "manhwa"],
     checks: {
-      documentedDeveloperApi: "pass", liveHealth: "unverified", search: "unverified",
+      documentedDeveloperApi: "pass", liveHealth: "pass", search: "pass",
       details: "pass", chapters: "pass", pages: "pass", stableIds: "pass", protectedAccessBypass: "not-applicable"
     },
-    lastCheckedAt: "2026-09-28"
+    lastCheckedAt: "2026-09-30"
   },
   {
     id: "mangapdf",
