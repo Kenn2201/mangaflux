@@ -11,20 +11,20 @@ v2.1.0-6 ████████████████████  ✅ COMPL
 v2.1.7   ████████████████████  ❌ ORIGINAL SOURCE B QA FAILED
 v2.1.8   ████████████████████  ✅ CORRECTIVE SOURCE B FIX
 v2.1.9   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
-v2.2.0   ████████████████████  🟡 IMPLEMENTED / PHYSICAL QA PENDING
-v2.2.1   ████████████████████  🟡 DUPLICATE DETECTION IMPLEMENTED / PHYSICAL QA PENDING
-v2.2.2   ░░░░░░░░░░░░░░░░░░░░  Mapping Review & Corrections
+v2.2.0   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
+v2.2.1   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
+v2.2.2   ████████████████████  🟡 MAPPING REVIEW IMPLEMENTED / PHYSICAL QA PENDING
 v2.2.3   ░░░░░░░░░░░░░░░░░░░░  Canonical Product Surfaces
 v2.3.x   ░░░░░░░░░░░░░░░░░░░░  Missing-title/chapter coverage reconciliation + safe fallback
 ~~~
 
-**Current release:** v2.2.1 detects likely duplicate editions across enabled sources without changing canonical mappings. Candidate scoring uses normalized titles/alternate titles, then creator/year/original-language signals when metadata is available.
+**Current release:** v2.2.2 turns v2.2.1 review candidates into reversible, admin-approved canonical mappings. Admins can inspect an edition, merge it into an existing canonical manga, split an incorrect mapping into a fresh canonical identity, review the complete mapping audit trail, and roll back a prior change when the mapping has not moved again.
 
-**Safety boundary:** every candidate is review-only. MangaFlux returns confidence, evidence, warnings, `autoMerge: false`, and `nextAction: "review"`. Conflicting metadata lowers confidence; ambiguous titles are never merged automatically.
+**Safety boundary:** mapping writes are restricted to verified admin sessions, never triggered automatically by candidate confidence. Source IDs and user reading/library records stay untouched. Every successful manual change is audited, and stale mappings are rejected instead of overwritten.
 
-**QA state:** v2.2.0 canonical identity is still physically QA pending because development was advanced without an explicit sign-off. v2.2.1 can be QA-tested together with the v2.2.0 identity endpoint before proceeding to v2.2.2.
+**Migration:** apply `0015_v222_mapping_review.sql` in production before physical QA.
 
-**Migration:** no new migration for v2.2.1. It uses the deployed `0014_v220_canonical_identity.sql` foundation.
+**Next after v2.2.2 QA:** v2.2.3 Canonical Product Surfaces, where reviewed multi-source editions become visible as one canonical product while preserving chapter/source provenance.
 
 ---
 
@@ -685,11 +685,11 @@ The goal is not merely to add another API. MangaFlux must eventually distinguish
 - Superseded by v2.1.9 before physical QA
 - No database migration
 
-### ➡️ v2.1.9 — MangaSter Reader Reliability — PHYSICAL QA PENDING
+### ✅ v2.1.9 — MangaSter Reader Reliability — PHYSICAL QA SIGNED OFF
 - Enforce the declared 500 ms minimum interval between MangaSter upstream requests
 - Reuse normalized cover URLs from recent search results
 - Preserve the complete v2.1.8 source-aware reader/navigation fixes
-- Re-run the full Source B physical QA before v2.2.x
+- Source B search → details → chapters → reader navigation passed physical QA
 - No database migration
 
 ---
@@ -698,7 +698,7 @@ The goal is not merely to add another API. MangaFlux must eventually distinguish
 
 Only introduce canonical identity after real cross-source data exists so matching rules are based on observed data rather than guesses.
 
-### 🟡 v2.2.0 — Canonical Identity Schema — IMPLEMENTED / PHYSICAL QA PENDING
+### ✅ v2.2.0 — Canonical Identity Schema — PHYSICAL QA SIGNED OFF
 - Persistent MangaFlux canonical manga UUID
 - Source-edition mapping table keyed by source + source manga ID
 - Mapping method, provenance, source title, creation timestamp, and update timestamp
@@ -708,9 +708,9 @@ Only introduce canonical identity after real cross-source data exists so matchin
 - No automatic cross-source merge in this milestone
 - Existing user library/progress/follow/notification records remain source-aware and unchanged
 - Migration: `0014_v220_canonical_identity.sql`
-- Physical production QA required before v2.2.1
+- Production identity endpoint and stable canonical ID behavior passed physical QA
 
-### 🟡 v2.2.1 — Duplicate Candidate Detection — IMPLEMENTED / PHYSICAL QA PENDING
+### ✅ v2.2.1 — Duplicate Candidate Detection — PHYSICAL QA SIGNED OFF
 - Unicode-normalized primary-title and alternate-title matching
 - Creator matching with normalized token order
 - Publication-year and original-language match/conflict signals where both sources expose metadata
@@ -723,11 +723,18 @@ Only introduce canonical identity after real cross-source data exists so matchin
 - Never auto-merge ambiguous titles
 - No database migration
 
-### v2.2.2 — Mapping Review & Corrections
-- Admin/manual mapping correction
-- Merge/split correction workflow
-- Audit provenance
-- Safe rollback of incorrect mappings
+### 🟡 v2.2.2 — Mapping Review & Corrections — IMPLEMENTED / PHYSICAL QA PENDING
+- Admin-only mapping inspection through the existing verified-admin console
+- Reviewed merge/move of a source edition into an existing canonical manga
+- Split an edition into a new canonical MangaFlux identity
+- Append-only audit provenance: actor, action, source edition, from/to canonical IDs, reason, rollback linkage, timestamp
+- Stale-state guards reject mapping changes when the edition moved during review
+- Safe rollback of prior mapping changes when the audited target is still current
+- Already-rolled-back events cannot be blindly replayed
+- Old canonical rows are retained to keep rollback destinations available
+- Source IDs and user library/progress/follow/notification records are not rewritten
+- Migration: `0015_v222_mapping_review.sql`
+- Physical production QA required before v2.2.3
 
 ### v2.2.3 — Canonical Product Surfaces
 - Canonical manga detail identity
