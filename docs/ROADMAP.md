@@ -11,20 +11,20 @@ v2.1.0-6 ████████████████████  ✅ COMPL
 v2.1.7   ████████████████████  ❌ ORIGINAL SOURCE B QA FAILED
 v2.1.8   ████████████████████  ✅ CORRECTIVE SOURCE B FIX
 v2.1.9   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
-v2.2.0   ████████████████████  🟡 CANONICAL IDENTITY IMPLEMENTED / PHYSICAL QA PENDING
-v2.2.1   ░░░░░░░░░░░░░░░░░░░░  Duplicate Candidate Detection
+v2.2.0   ████████████████████  🟡 IMPLEMENTED / PHYSICAL QA PENDING
+v2.2.1   ████████████████████  🟡 DUPLICATE DETECTION IMPLEMENTED / PHYSICAL QA PENDING
 v2.2.2   ░░░░░░░░░░░░░░░░░░░░  Mapping Review & Corrections
 v2.2.3   ░░░░░░░░░░░░░░░░░░░░  Canonical Product Surfaces
 v2.3.x   ░░░░░░░░░░░░░░░░░░░░  Missing-title/chapter coverage reconciliation + safe fallback
 ~~~
 
-**Current release:** v2.2.0 establishes persistent MangaFlux canonical manga identity now that MangaDex + MangaSter Source B have passed the real reader path. Each successful source-edition details read can seed a canonical manga row and a mapping from the real `source + mangaId` to that canonical ID.
+**Current release:** v2.2.1 detects likely duplicate editions across enabled sources without changing canonical mappings. Candidate scoring uses normalized titles/alternate titles, then creator/year/original-language signals when metadata is available.
 
-**Safety boundary:** v2.2.0 does **not** merge similarly named works. MangaDex Vagabond and MangaSter Vagabond may initially receive separate canonical IDs. v2.2.1 creates conservative duplicate candidates; v2.2.2 is where reviewed mappings can be corrected/merged safely.
+**Safety boundary:** every candidate is review-only. MangaFlux returns confidence, evidence, warnings, `autoMerge: false`, and `nextAction: "review"`. Conflicting metadata lowers confidence; ambiguous titles are never merged automatically.
 
-**Migration:** apply `0014_v220_canonical_identity.sql` in production before physical QA. Existing bookmarks, history, progress, follows, notifications, source URLs, and source IDs remain untouched.
+**QA state:** v2.2.0 canonical identity is still physically QA pending because development was advanced without an explicit sign-off. v2.2.1 can be QA-tested together with the v2.2.0 identity endpoint before proceeding to v2.2.2.
 
-**Next after v2.2.0 QA:** v2.2.1 Duplicate Candidate Detection → v2.2.2 Mapping Review & Corrections → v2.2.3 Canonical Product Surfaces → v2.3.x missing-title/chapter fallback.
+**Migration:** no new migration for v2.2.1. It uses the deployed `0014_v220_canonical_identity.sql` foundation.
 
 ---
 
@@ -710,11 +710,18 @@ Only introduce canonical identity after real cross-source data exists so matchin
 - Migration: `0014_v220_canonical_identity.sql`
 - Physical production QA required before v2.2.1
 
-### v2.2.1 — Duplicate Candidate Detection
-- Normalized title and alternate-title matching
-- Creator/year/language metadata signals where available
-- Confidence-based candidate generation
+### 🟡 v2.2.1 — Duplicate Candidate Detection — IMPLEMENTED / PHYSICAL QA PENDING
+- Unicode-normalized primary-title and alternate-title matching
+- Creator matching with normalized token order
+- Publication-year and original-language match/conflict signals where both sources expose metadata
+- High / medium / low confidence scoring with explicit evidence and warnings
+- Bounded detail enrichment only for plausible cross-source pairs
+- Inspectable endpoint: `GET /api/search/matches?q=...`
+- Source/detail failures remain isolated and can fall back to partial metadata
+- Candidates compare different sources only
+- Every result is review-only: `autoMerge: false`, `nextAction: "review"`
 - Never auto-merge ambiguous titles
+- No database migration
 
 ### v2.2.2 — Mapping Review & Corrections
 - Admin/manual mapping correction
