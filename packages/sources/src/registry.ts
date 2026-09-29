@@ -97,7 +97,7 @@ const registeredSources = new Map<SourceId, RegisteredSource>([
         role: "coverage",
         mediaTypes: ["manga", "manhwa"],
         failureMode: "isolated",
-        allowedImageHosts: [],
+        allowedImageHosts: ["ahm7xmakki.com", "www.ahm7xmakki.com"],
         cache: { searchSeconds: 30, metadataSeconds: 120, chaptersSeconds: 60 },
         requests: {
           publicApiOnly: true, htmlAdapterAllowed: false, bypassProtectedAccess: false,
