@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v2.2.1--Duplicate_Candidate_Detection-indigo.svg)
+![Version](https://img.shields.io/badge/version-v2.2.2--Mapping_Review_Corrections-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,11 +10,11 @@
 
 ## Current release
 
-**v2.2.1 — Duplicate Candidate Detection**
+**v2.2.2 — Mapping Review & Corrections**
 
-MangaFlux V1 and the multi-source Source B foundation are physically QA signed off. v2.2.0 established persistent canonical manga identity and remains pending explicit physical sign-off. v2.2.1 adds conservative cross-source duplicate candidate detection through `GET /api/search/matches`, using normalized primary/alternate titles plus creator, publication year, and original-language signals when both providers expose them. Every candidate remains review-only with `autoMerge: false`; persistent merge/correction workflows belong to v2.2.2.
+MangaFlux V1, Source B, canonical identity, and duplicate candidate detection have passed physical QA. v2.2.2 adds an admin-only canonical mapping review workflow: inspect a source edition, merge it into a reviewed canonical manga, split an incorrect mapping into a new canonical identity, view an append-only audit trail, and safely roll back prior mapping changes. Source IDs, chapter IDs, bookmarks, follows, history, and reading progress remain source-aware and are not rewritten by this milestone.
 
-**Database migration:** none for v2.2.1. It uses the v2.2.0 canonical identity schema already deployed.
+**Database migration:** `0015_v222_mapping_review.sql` adds the canonical mapping audit trail required for reversible review operations.
 
 ### Library improvements
 

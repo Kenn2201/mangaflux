@@ -4,10 +4,16 @@ import type {
   FastifyRequest
 } from "fastify";
 import {
+  CanonicalMappingReviewError,
   deleteCommunityCommentAsAdmin,
   deleteUserSessions,
   getAdminOverview,
-  setUserCommunityRestricted
+  getCanonicalIdentityBySource,
+  listCanonicalMappingAudit,
+  mergeCanonicalEdition,
+  rollbackCanonicalMapping,
+  setUserCommunityRestricted,
+  splitCanonicalEdition
 } from "@mangaflux/db";
 import type { MangaFluxDatabase } from "@mangaflux/db";
 import { authenticateSession } from "./auth.js";
@@ -17,6 +23,42 @@ import { getMangaDexCacheStats } from "@mangaflux/sources";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const SOURCE_RE = /^[a-z0-9-]{1,40}$/;
+
+function validSourceMangaRef(source: unknown, mangaId: unknown) {
+  return (
+    typeof source === "string" &&
+    SOURCE_RE.test(source) &&
+    typeof mangaId === "string" &&
+    mangaId.length > 0 &&
+    mangaId.length <= 500 &&
+    !/[\u0000-\u001f\u007f]/.test(mangaId)
+  );
+}
+
+function mappingReviewFailure(
+  error: unknown,
+  reply: FastifyReply
+) {
+  if (!(error instanceof CanonicalMappingReviewError)) {
+    throw error;
+  }
+
+  const status =
+    error.code === "MAPPING_NOT_FOUND" ||
+    error.code === "TARGET_NOT_FOUND" ||
+    error.code === "AUDIT_NOT_FOUND"
+      ? 404
+      : error.code === "ALREADY_MAPPED" ||
+          error.code === "ALREADY_ROLLED_BACK"
+        ? 400
+        : 409;
+
+  return reply.code(status).send({
+    error: error.code,
+    message: error.message
+  });
+}
 
 type LimitHandler = (
   request: FastifyRequest,
@@ -127,6 +169,192 @@ export function registerAdminRoutes(
         traffic: getDiagnosticsSnapshot(),
         sourceCache: getMangaDexCacheStats()
       };
+    }
+  );
+
+  app.get<{
+    Querystring: { source?: string; mangaId?: string };
+  }>(
+    "/api/admin/canonical/mapping",
+    { preHandler: limits.read },
+    async (request, reply) => {
+      const session = await requireAdmin(
+        request,
+        reply,
+        database,
+        authProxySecret
+      );
+
+      if (!session || !database) return;
+
+      const source = request.query.source?.trim();
+      const mangaId = request.query.mangaId?.trim();
+
+      if (!validSourceMangaRef(source, mangaId)) {
+        return reply.code(400).send({
+          error: "INVALID_REQUEST",
+          message: "A valid source and mangaId are required."
+        });
+      }
+
+      const identity = await getCanonicalIdentityBySource(
+        database,
+        source!,
+        mangaId!
+      );
+
+      if (!identity) {
+        return reply.code(404).send({
+          error: "MAPPING_NOT_FOUND",
+          message: "That source edition does not have a canonical mapping yet."
+        });
+      }
+
+      const audit = await listCanonicalMappingAudit(
+        database,
+        source!,
+        mangaId!,
+        20
+      );
+
+      return {
+        identity,
+        audit
+      };
+    }
+  );
+
+  app.post<{
+    Body: {
+      action?: "merge" | "split" | "rollback";
+      source?: string;
+      mangaId?: string;
+      targetCanonicalId?: string;
+      displayTitle?: string;
+      eventId?: string;
+      reason?: string;
+    };
+  }>(
+    "/api/admin/canonical/mapping",
+    { preHandler: limits.write },
+    async (request, reply) => {
+      const session = await requireAdmin(
+        request,
+        reply,
+        database,
+        authProxySecret
+      );
+
+      if (!session || !database) return;
+
+      const action = request.body?.action;
+      const reason = request.body?.reason?.trim();
+
+      if (
+        !action ||
+        (reason && reason.length > 500)
+      ) {
+        return reply.code(400).send({
+          error: "INVALID_REQUEST",
+          message: "A valid action is required and reason must be 500 characters or less."
+        });
+      }
+
+      try {
+        if (action === "rollback") {
+          const eventId = request.body?.eventId?.trim();
+
+          if (!eventId || !UUID_RE.test(eventId)) {
+            return reply.code(400).send({
+              error: "INVALID_REQUEST",
+              message: "A valid audit event id is required for rollback."
+            });
+          }
+
+          const result = await rollbackCanonicalMapping(database, {
+            eventId,
+            actorUserId: session.userId,
+            reason
+          });
+
+          return {
+            ok: true,
+            action,
+            ...result,
+            message: "Canonical mapping change rolled back."
+          };
+        }
+
+        const source = request.body?.source?.trim();
+        const mangaId = request.body?.mangaId?.trim();
+
+        if (!validSourceMangaRef(source, mangaId)) {
+          return reply.code(400).send({
+            error: "INVALID_REQUEST",
+            message: "A valid source and mangaId are required."
+          });
+        }
+
+        if (action === "merge") {
+          const targetCanonicalId =
+            request.body?.targetCanonicalId?.trim();
+
+          if (!targetCanonicalId || !UUID_RE.test(targetCanonicalId)) {
+            return reply.code(400).send({
+              error: "INVALID_REQUEST",
+              message: "A valid target canonical id is required."
+            });
+          }
+
+          const result = await mergeCanonicalEdition(database, {
+            source: source!,
+            mangaId: mangaId!,
+            targetCanonicalId,
+            actorUserId: session.userId,
+            reason
+          });
+
+          return {
+            ok: true,
+            action,
+            ...result,
+            message: "Source edition merged into the reviewed canonical manga."
+          };
+        }
+
+        if (action === "split") {
+          const displayTitle = request.body?.displayTitle?.trim();
+
+          if (displayTitle && displayTitle.length > 300) {
+            return reply.code(400).send({
+              error: "INVALID_REQUEST",
+              message: "Display title must be 300 characters or less."
+            });
+          }
+
+          const result = await splitCanonicalEdition(database, {
+            source: source!,
+            mangaId: mangaId!,
+            displayTitle,
+            actorUserId: session.userId,
+            reason
+          });
+
+          return {
+            ok: true,
+            action,
+            ...result,
+            message: "Source edition split into a new canonical manga."
+          };
+        }
+
+        return reply.code(400).send({
+          error: "INVALID_REQUEST",
+          message: "Unknown canonical mapping action."
+        });
+      } catch (error) {
+        return mappingReviewFailure(error, reply);
+      }
     }
   );
 

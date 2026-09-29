@@ -431,6 +431,37 @@ export const mangaSourceMappings = pgTable(
   ]
 );
 
+export const canonicalMappingAudit = pgTable(
+  "canonical_mapping_audit",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    source: text("source").notNull(),
+    mangaId: text("manga_id").notNull(),
+    sourceTitle: text("source_title").notNull(),
+    action: text("action").notNull(),
+    fromCanonicalId: uuid("from_canonical_id").notNull(),
+    toCanonicalId: uuid("to_canonical_id").notNull(),
+    actorUserId: uuid("actor_user_id").notNull(),
+    reason: text("reason"),
+    rollbackOf: uuid("rollback_of"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+  },
+  (table) => [
+    index("canonical_mapping_audit_edition_created_idx").on(
+      table.source,
+      table.mangaId,
+      table.createdAt
+    ),
+    index("canonical_mapping_audit_actor_created_idx").on(
+      table.actorUserId,
+      table.createdAt
+    ),
+    index("canonical_mapping_audit_rollback_idx").on(table.rollbackOf)
+  ]
+);
+
 export const sourceCache = pgTable("source_cache", {
   key: text("key").primaryKey(),
   payload: text("payload").notNull(),
