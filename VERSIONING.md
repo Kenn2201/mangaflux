@@ -4,7 +4,7 @@ MangaFlux follows Semantic Versioning.
 
 ## Current version
 
-**v2.2.2 — Mapping Review & Corrections**
+**v2.2.3 — Canonical Product Surfaces**
 
 - `PATCH` = compatible bug/security/reliability fixes and focused compatible release slices
 - `MINOR` = compatible larger feature milestones
