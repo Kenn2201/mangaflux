@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v2.2.2--Mapping_Review_Corrections-indigo.svg)
+![Version](https://img.shields.io/badge/version-v2.2.3--Canonical_Product_Surfaces-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,11 +10,11 @@
 
 ## Current release
 
-**v2.2.2 — Mapping Review & Corrections**
+**v2.2.3 — Canonical Product Surfaces**
 
 MangaFlux V1, Source B, canonical identity, and duplicate candidate detection have passed physical QA. v2.2.2 adds an admin-only canonical mapping review workflow: inspect a source edition, merge it into a reviewed canonical manga, split an incorrect mapping into a new canonical identity, view an append-only audit trail, and safely roll back prior mapping changes. Source IDs, chapter IDs, bookmarks, follows, history, and reading progress remain source-aware and are not rewritten by this milestone.
 
-**Database migration:** `0015_v222_mapping_review.sql` adds the canonical mapping audit trail required for reversible review operations.
+**v2.2.3:** Reviewed editions are displayed together on manga detail pages. Source-specific Library entries, chapters, and progress are preserved. No new migration.
 
 ### Library improvements
 
