@@ -13,6 +13,7 @@ import { MangaDetailsSkeleton } from "../../Skeletons";
 import CommunityThread from "../../CommunityThread";
 import MangaRecommendations from "../../MangaRecommendations";
 import ReaderSettingsSheet from "../../ReaderSettingsSheet";
+import CanonicalEditions from "../../CanonicalEditions";
 import {
   getReaderPreferences,
   readerLanguageOptions,
@@ -687,6 +688,8 @@ export default function MangaPage() {
           {surpriseBusy ? "Rolling…" : "Surprise me"}
         </button>
       </div>
+
+      <CanonicalEditions source={source} mangaId={id} />
 
       <section className="details">
         <div className="details-cover">
