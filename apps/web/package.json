@@ -1,7 +1,7 @@
 {
   "name": "@mangaflux/web",
   "private": true,
-  "version": "2.2.2",
+  "version": "2.2.3",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

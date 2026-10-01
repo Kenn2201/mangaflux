@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.2.3 — Canonical Product Surfaces
+
+- Recorded user-confirmed v2.2.2 manual deployment and physical QA as signed off.
+- Added source-aware identity web proxy and public manga detail panel for reviewed canonical source editions.
+- Each edition links to its original source, with source-specific chapters and reading progress preserved.
+- Do not collapse distinct Library bookmarks/progress; safe cross-source Library grouping is pending.
+- No database migration.
+
+
 ## 2.2.2 — Mapping Review & Corrections
 
 - Recorded v2.2.0 Canonical Manga Identity and v2.2.1 Duplicate Candidate Detection physical QA as signed off.
