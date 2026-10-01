@@ -13,18 +13,18 @@ v2.1.8   ████████████████████  ✅ CORRE
 v2.1.9   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
 v2.2.0   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
 v2.2.1   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
-v2.2.2   ████████████████████  🟡 MAPPING REVIEW IMPLEMENTED / PHYSICAL QA PENDING
-v2.2.3   ░░░░░░░░░░░░░░░░░░░░  Canonical Product Surfaces
+v2.2.2   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
+v2.2.3   ████████████████████  🟡 DETAILS IMPLEMENTED / LIBRARY GROUPING DEFERRED / QA PENDING
 v2.3.x   ░░░░░░░░░░░░░░░░░░░░  Missing-title/chapter coverage reconciliation + safe fallback
 ~~~
 
-**Current release:** v2.2.2 turns v2.2.1 review candidates into reversible, admin-approved canonical mappings. Admins can inspect an edition, merge it into an existing canonical manga, split an incorrect mapping into a fresh canonical identity, review the complete mapping audit trail, and roll back a prior change when the mapping has not moved again.
+**Previous release:** v2.2.2 turns v2.2.1 review candidates into reversible, admin-approved canonical mappings. Admins can inspect an edition, merge it into an existing canonical manga, split an incorrect mapping into a fresh canonical identity, review the complete mapping audit trail, and roll back a prior change when the mapping has not moved again.
 
 **Safety boundary:** mapping writes are restricted to verified admin sessions, never triggered automatically by candidate confidence. Source IDs and user reading/library records stay untouched. Every successful manual change is audited, and stale mappings are rejected instead of overwritten.
 
 **Migration:** apply `0015_v222_mapping_review.sql` in production before physical QA.
 
-**Next after v2.2.2 QA:** v2.2.3 Canonical Product Surfaces, where reviewed multi-source editions become visible as one canonical product while preserving chapter/source provenance.
+**Current release:** v2.2.3 displays reviewed source editions together on manga detail pages while preserving source-specific reading data. Safe Library grouping remains pending so no saved entries are hidden. No migration.
 
 ---
 
@@ -736,7 +736,7 @@ Only introduce canonical identity after real cross-source data exists so matchin
 - Migration: `0015_v222_mapping_review.sql`
 - Physical production QA required before v2.2.3
 
-### v2.2.3 — Canonical Product Surfaces
+### 🟡 v2.2.3 — Canonical Product Surfaces — PARTIAL IMPLEMENTATION / QA PENDING
 - Canonical manga detail identity
 - Source editions shown explicitly
 - Avoid duplicate Library titles
