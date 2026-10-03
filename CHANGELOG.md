@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.3.0 — Source Coverage Visibility
+
+- Recorded the maintainer's v2.2.3 physical QA sign-off.
+- Added `GET /api/manga/:source/:id/coverage?language=en`, a bounded, read-only source coverage snapshot for source editions mapped to the same canonical manga.
+- Shows per-source reported chapter-release totals plus bounded oldest/newest samples, sample completeness, and isolated provider error status.
+- Does not assert that a chapter is truly missing or equivalent from sampling alone; no automatic source substitution.
+- Added source-aware web proxy and on-demand coverage panel on manga details.
+- Fixed source identity in Library bookmark/follow links, Continue Reading resume, history links, and notification chapter links.
+- Deferred safe cross-source Library grouping rather than hiding source-specific saved entries.
+- No database migration.
+
+
 ## 2.2.3 — Canonical Product Surfaces
 
 - Recorded user-confirmed v2.2.2 manual deployment and physical QA as signed off.
