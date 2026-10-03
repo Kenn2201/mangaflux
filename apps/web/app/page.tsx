@@ -95,7 +95,7 @@ export default async function Home({
       </section>
 
       <div className="landing-version">
-        v2.2.3 · Canonical Product Surfaces
+        v2.3.0 · Source Coverage Visibility
       </div>
     </main>
   );

@@ -41,7 +41,7 @@ import type {
   MangaSummary
 } from "@mangaflux/sources";
 
-const APP_VERSION = "2.2.3";
+const APP_VERSION = "2.3.0";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LANGUAGE_RE = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i;
@@ -1346,6 +1346,144 @@ app.get<{ Params: { source: string; id: string } }>(
       canonicalId: identity.canonicalId,
       displayTitle: identity.displayTitle,
       editions
+    };
+  }
+);
+
+// v2.3.0: Chapter coverage is a bounded snapshot, never a proof of missing chapters.
+app.get<{
+  Params: { source: string; id: string };
+  Querystring: { language?: string };
+}>(
+  "/api/manga/:source/:id/coverage",
+  { preHandler: metadataRateLimit },
+  async (request, reply) => {
+    const source = requestedSource(request.params.source, "details");
+    if (!validateSourceMangaId(source.id, request.params.id)) {
+      return reply.code(400).send({
+        error: "INVALID_REQUEST",
+        message: "Invalid source manga identifier."
+      });
+    }
+
+    const language = request.query.language?.trim().toLowerCase() || "en";
+    if (!LANGUAGE_RE.test(language)) {
+      return reply.code(400).send({
+        error: "INVALID_REQUEST",
+        message: "Invalid chapter language."
+      });
+    }
+
+    if (!database) {
+      return reply.code(503).send({
+        error: "PERSISTENCE_UNAVAILABLE",
+        message: "Canonical identity persistence is not configured."
+      });
+    }
+
+    const identity = await getCanonicalIdentityBySource(
+      database, source.id, request.params.id
+    );
+
+    if (!identity) {
+      return reply.code(404).send({
+        error: "CANONICAL_MAPPING_NOT_FOUND",
+        message: "Open the title details to establish its source identity first."
+      });
+    }
+
+    const editions = (await listCanonicalEditions(
+      database, identity.canonicalId
+    )).slice(0, 8);
+
+    const snapshots = await Promise.all(editions.map(async (edition) => {
+      const descriptor = getSourceDescriptor(edition.source);
+      if (
+        !descriptor?.enabled ||
+        !descriptor.capabilities.chapters ||
+        !validateSourceMangaId(edition.source, edition.mangaId)
+      ) {
+        return {
+          source: edition.source,
+          mangaId: edition.mangaId,
+          sourceTitle: edition.sourceTitle,
+          status: "unavailable" as const,
+          total: null,
+          samples: [],
+          sampledOnly: true,
+          message: "This source is not available for chapter coverage."
+        };
+      }
+
+      try {
+        const provider = requireSourceCapability(edition.source, "chapters");
+        // Each edge of the feed is sampled independently. Neither sample
+        // establishes a complete chapter set, nor verifies chapter equivalence.
+        const [newest, oldest] = await Promise.all([
+          provider.chapterPage(edition.mangaId, {
+            language, limit: 25, offset: 0, order: "desc"
+          }),
+          provider.chapterPage(edition.mangaId, {
+            language, limit: 25, offset: 0, order: "asc"
+          })
+        ]);
+        const samples = [...newest.items, ...oldest.items].map((chapter) => ({
+          chapterId: chapter.id,
+          number: chapter.chapter ?? null,
+          title: chapter.title,
+          language: chapter.language ?? language,
+          source: edition.source
+        }));
+        const uniqueSamples = [
+          ...new Map(samples.map((chapter) =>
+            [chapter.source + ":" + chapter.chapterId, chapter]
+          )).values()
+        ];
+        const total = Math.max(newest.total, oldest.total);
+        return {
+          source: edition.source,
+          mangaId: edition.mangaId,
+          sourceTitle: edition.sourceTitle,
+          status: "ok" as const,
+          total,
+          samples: uniqueSamples,
+          sampledOnly: total > uniqueSamples.length,
+          message: total > uniqueSamples.length
+            ? "Only the newest and oldest chapter samples were inspected."
+            : "Chapter feed sampled; chapter equivalence is not verified."
+        };
+      } catch (error) {
+        request.log.warn(
+          { err: error, source: edition.source, mangaId: edition.mangaId },
+          "Chapter coverage source failed"
+        );
+        return {
+          source: edition.source,
+          mangaId: edition.mangaId,
+          sourceTitle: edition.sourceTitle,
+          status: "error" as const,
+          total: null,
+          samples: [],
+          sampledOnly: true,
+          message: "This provider's chapter availability could not be checked."
+        };
+      }
+    }));
+
+    reply.header("Cache-Control", "private, no-store");
+    return {
+      canonicalId: identity.canonicalId,
+      displayTitle: identity.displayTitle,
+      language,
+      sampledAt: new Date().toISOString(),
+      policy: {
+        mappedEditionsOnly: true,
+        sourceIsolated: true,
+        automaticChapterSubstitution: false,
+        verifiedChapterEquivalence: false,
+        gapsVerified: false
+      },
+      editions: snapshots
     };
   }
 );
