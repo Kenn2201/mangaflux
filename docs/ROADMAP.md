@@ -14,8 +14,8 @@ v2.1.9   ████████████████████  ✅ PHYSI
 v2.2.0   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
 v2.2.1   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
 v2.2.2   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
-v2.2.3   ████████████████████  🟡 DETAILS IMPLEMENTED / LIBRARY GROUPING DEFERRED / QA PENDING
-v2.3.x   ░░░░░░░░░░░░░░░░░░░░  Missing-title/chapter coverage reconciliation + safe fallback
+v2.2.3   ████████████████████  ✅ PHYSICAL QA SIGNED OFF (LIBRARY GROUPING DEFERRED)
+v2.3.0   ████████████████████  🟡 COVERAGE VISIBILITY IMPLEMENTED / PHYSICAL QA PENDING\nv2.3.1+  ░░░░░░░░░░░░░░░░░░░░  Missing-chapter reconciliation + explicit fallback
 ~~~
 
 **Previous release:** v2.2.2 turns v2.2.1 review candidates into reversible, admin-approved canonical mappings. Admins can inspect an edition, merge it into an existing canonical manga, split an incorrect mapping into a fresh canonical identity, review the complete mapping audit trail, and roll back a prior change when the mapping has not moved again.
@@ -24,7 +24,7 @@ v2.3.x   ░░░░░░░░░░░░░░░░░░░░  Missing-t
 
 **Migration:** apply `0015_v222_mapping_review.sql` in production before physical QA.
 
-**Current release:** v2.2.3 displays reviewed source editions together on manga detail pages while preserving source-specific reading data. Safe Library grouping remains pending so no saved entries are hidden. No migration.
+**v2.2.3:** reviewed source editions appear together on details and physical QA passed; safe Library grouping remains deferred.\n\n**Current release:** v2.3.0 reports per-edition chapter counts and bounded sample completeness for admin-reviewed canonical mappings, without declaring sampled gaps truly missing. Source failures are isolated, existing saved data stays source-specific, and source-aware Library/History/Continue Reading links are fixed. No migration. Physical QA pending.
 
 ---
 
@@ -744,7 +744,7 @@ Only introduce canonical identity after real cross-source data exists so matchin
 
 ---
 
-## v2.3.x — Source Selection, Coverage & Safe Fallback
+## v2.3.x — Source Selection, Coverage & Safe Fallback\n\n### 🟡 v2.3.0 — Source Coverage Visibility — IMPLEMENTED / PHYSICAL QA PENDING\n- Read-only canonical edition chapter availability endpoint and on-demand details panel\n- Report source-specific chapter count, newest/oldest samples and partial-feed indicator\n- Provider failures isolated; no false missing chapter claims or silent fallback\n- Correct source identity on Library, history, notifications and resume links\n- No migration\n\n### ⏳ v2.3.1 — Missing-chapter Reconciliation\n- Safely inspect complete mapped-edition chapter feeds before identifying numbered gaps\n- Separate release variants, languages and unknown chapters; never claim equivalence from title alone\n- Present explicitly attributed chapter availability and missing chapter candidates\n\n### ⏳ v2.3.2 — Explicit Chapter Source Fallback\n- Reader-selectable fallback for verified mapped editions only; preserve reader progress and source attribution\n
 
 - Show chapter coverage per mapped source/edition
 - Make missing/older chapter availability discoverable when another verified source covers it
