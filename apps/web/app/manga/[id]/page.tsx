@@ -14,6 +14,7 @@ import CommunityThread from "../../CommunityThread";
 import MangaRecommendations from "../../MangaRecommendations";
 import ReaderSettingsSheet from "../../ReaderSettingsSheet";
 import CanonicalEditions from "../../CanonicalEditions";
+import CanonicalCoverage from "../../CanonicalCoverage";
 import {
   getReaderPreferences,
   readerLanguageOptions,
@@ -690,6 +691,7 @@ export default function MangaPage() {
       </div>
 
       <CanonicalEditions source={source} mangaId={id} />
+      <CanonicalCoverage source={source} mangaId={id} language={readerPreferences.language} />
 
       <section className="details">
         <div className="details-cover">
