@@ -514,7 +514,7 @@ export default function LibraryClient() {
       {view !== "bookmarks" && view !== "following" && data?.continueReading ? (
         <Link
           className="continue-card"
-          href={`/read/${data.continueReading.chapterId}?resume=${data.continueReading.page}`}
+          href={`/read/${encodeURIComponent(data.continueReading.chapterId)}?source=${encodeURIComponent(data.continueReading.source)}&resume=${data.continueReading.page}`}
         >
           <div className="continue-cover">
             {data.continueReading.coverUrl ? (
@@ -564,7 +564,7 @@ export default function LibraryClient() {
             {filteredBookmarks.map((item) => (
               <Link
                 className="bookmark-card"
-                href={`/manga/${item.mangaId}`}
+                href={`/manga/${encodeURIComponent(item.mangaId)}?source=${encodeURIComponent(item.source)}`}
                 key={`${item.source}:${item.mangaId}`}
               >
                 <div className="bookmark-cover">
@@ -601,7 +601,7 @@ export default function LibraryClient() {
               >
                 <Link
                   className="bookmark-card following-card"
-                  href={`/manga/${item.mangaId}`}
+                  href={`/manga/${encodeURIComponent(item.mangaId)}?source=${encodeURIComponent(item.source)}`}
                 >
                   <div className="bookmark-cover">
                     {item.coverUrl ? (
@@ -668,7 +668,7 @@ export default function LibraryClient() {
                   key={item.id}
                 >
                   <Link
-                    href={`/read/${item.chapterId}`}
+                    href={`/read/${encodeURIComponent(item.chapterId)}?source=${encodeURIComponent(item.source)}`}
                     onClick={() => {
                       if (!item.readAt) void markNotificationRead(item.id);
                     }}
@@ -764,7 +764,7 @@ export default function LibraryClient() {
                 key={`${item.source}:${item.mangaId}`}
               >
                 <Link
-                  href={`/read/${item.chapterId}?resume=${item.page}`}
+                  href={`/read/${encodeURIComponent(item.chapterId)}?source=${encodeURIComponent(item.source)}&resume=${item.page}`}
                 >
                   <strong>{item.mangaTitle}</strong>
                   <span>
