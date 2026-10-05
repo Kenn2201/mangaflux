@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v2.3.0--Source_Coverage_Visibility-indigo.svg)
+![Version](https://img.shields.io/badge/version-v2.3.1--Missing_Chapter_Reconciliation-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,11 +10,11 @@
 
 ## Current release
 
-**v2.3.0 — Source Coverage Visibility**
+**v2.3.1 — Missing-Chapter Reconciliation**
 
 MangaFlux V1, Source B, canonical identity, and duplicate candidate detection have passed physical QA. v2.2.2 adds an admin-only canonical mapping review workflow: inspect a source edition, merge it into a reviewed canonical manga, split an incorrect mapping into a new canonical identity, view an append-only audit trail, and safely roll back prior mapping changes. Source IDs, chapter IDs, bookmarks, follows, history, and reading progress remain source-aware and are not rewritten by this milestone.
 
-**v2.3.0:** A read-only chapter coverage comparison shows reported counts and bounded newest/oldest samples for reviewed canonical editions, isolating provider failures. Library, history, notification and resume links now preserve actual source IDs. No migration. v2.3.1 will reconcile missing chapters only after confirming comprehensive provider coverage.
+**v2.3.1:** MangaFlux can fully enumerate reviewed mapped-edition chapter feeds up to a 1,000-release safety cap, normalize numeric chapter labels, separate duplicate and unnumbered releases, and report explicit cross-source availability differences only when at least two feeds are proven complete. Results say “not reported by” rather than claiming nonexistence, and automatic source substitution remains disabled. No migration.
 
 ### Library improvements
 
