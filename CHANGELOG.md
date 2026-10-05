@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.3.1 — Missing-Chapter Reconciliation
+
+- Recorded the maintainer's v2.3.0 physical QA sign-off.
+- Added full-feed enumeration for reviewed canonical source editions with a 1,000-release per-edition safety cap.
+- Normalize numeric chapter labels so equivalent forms such as `001`, `1.0`, and `1` compare consistently.
+- Separate duplicate numbered releases and unnumbered releases from unique chapter-number coverage.
+- Exclude incomplete, truncated, early-empty, short-page, unavailable, and failed provider feeds from gap reconciliation.
+- Added `GET /api/manga/:source/:id/reconciliation` for explicit cross-source chapter availability differences.
+- Reconciliation activates only when at least two reviewed mapped feeds for the same language are proven complete.
+- Differences are described as “reported by” / “not reported by”; chapter-number agreement is not treated as verified content equivalence.
+- Added a web proxy and on-demand reconciliation UI with explicit source-labelled chapter links.
+- Automatic source substitution remains disabled for v2.3.1; explicit reader fallback remains v2.3.2.
+- No database migration.
+
+
 ## 2.3.0 — Source Coverage Visibility
 
 - Recorded the maintainer's v2.2.3 physical QA sign-off.
