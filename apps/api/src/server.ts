@@ -23,6 +23,10 @@ import {
 import { registerStateRoutes } from "./state.js";
 import { attachDiagnostics } from "./diagnostics.js";
 import {
+  enumerateEditionChapters,
+  reconcileChapterAvailability
+} from "./chapterReconciliation.js";
+import {
   fetchMangaDexPageImage,
   getSourceDescriptor,
   listSourceDescriptors,
@@ -1484,6 +1488,131 @@ app.get<{
         gapsVerified: false
       },
       editions: snapshots
+    };
+  }
+);
+
+app.get<{
+  Params: { source: string; id: string };
+  Querystring: { language?: string; limit?: string };
+}>(
+  "/api/manga/:source/:id/reconciliation",
+  { preHandler: metadataRateLimit },
+  async (request, reply) => {
+    const source = requestedSource(request.params.source, "details");
+    if (!validateSourceMangaId(source.id, request.params.id)) {
+      return reply.code(400).send({
+        error: "INVALID_REQUEST",
+        message: "Invalid source manga identifier."
+      });
+    }
+
+    const language = request.query.language?.trim().toLowerCase() || "en";
+    const limit = parseBoundedInt(request.query.limit, 100, 1, 250);
+
+    if (!LANGUAGE_RE.test(language) || limit === null) {
+      return reply.code(400).send({
+        error: "INVALID_REQUEST",
+        message: "Invalid chapter language or reconciliation limit."
+      });
+    }
+
+    if (!database) {
+      return reply.code(503).send({
+        error: "PERSISTENCE_UNAVAILABLE",
+        message: "Canonical identity persistence is not configured."
+      });
+    }
+
+    const identity = await getCanonicalIdentityBySource(
+      database,
+      source.id,
+      request.params.id
+    );
+
+    if (!identity) {
+      return reply.code(404).send({
+        error: "CANONICAL_MAPPING_NOT_FOUND",
+        message: "Open the title details to establish its source identity first."
+      });
+    }
+
+    const mappedEditions = (await listCanonicalEditions(
+      database,
+      identity.canonicalId
+    )).slice(0, 8);
+
+    const enumerated = [];
+    const unavailable = [];
+
+    for (const edition of mappedEditions) {
+      const descriptor = getSourceDescriptor(edition.source);
+
+      if (
+        !descriptor?.enabled ||
+        !descriptor.capabilities.chapters ||
+        !validateSourceMangaId(edition.source, edition.mangaId)
+      ) {
+        unavailable.push({
+          source: edition.source,
+          mangaId: edition.mangaId,
+          sourceTitle: edition.sourceTitle,
+          status: "unavailable" as const,
+          totalReported: null,
+          fetchedReleases: 0,
+          uniqueNumberedChapters: 0,
+          duplicateNumberedReleases: 0,
+          unnumberedReleases: 0,
+          complete: false,
+          reason: "This mapped source cannot provide a chapter feed."
+        });
+        continue;
+      }
+
+      const provider = requireSourceCapability(edition.source, "chapters");
+      enumerated.push(
+        await enumerateEditionChapters(
+          {
+            source: edition.source,
+            mangaId: edition.mangaId,
+            sourceTitle: edition.sourceTitle,
+            provider
+          },
+          language
+        )
+      );
+    }
+
+    const reconciliation = reconcileChapterAvailability(enumerated);
+    const summaries = [
+      ...enumerated.map(({ chapters: _chapters, ...summary }) => summary),
+      ...unavailable
+    ];
+    const differenceTotal = reconciliation.differences.length;
+    const differences = reconciliation.differences.slice(0, limit);
+
+    reply.header("Cache-Control", "private, no-store");
+
+    return {
+      canonicalId: identity.canonicalId,
+      displayTitle: identity.displayTitle,
+      language,
+      reconciledAt: new Date().toISOString(),
+      policy: {
+        reviewedMappedEditionsOnly: true,
+        completeFeedsRequired: true,
+        numberedChaptersOnly: true,
+        chapterNumberNormalization: true,
+        automaticChapterSubstitution: false,
+        verifiedContentEquivalence: false
+      },
+      ready: reconciliation.ready,
+      comparedSources: reconciliation.comparedSources,
+      editions: summaries,
+      differenceTotal,
+      differencesReturned: differences.length,
+      differencesTruncated: differences.length < differenceTotal,
+      differences
     };
   }
 );
