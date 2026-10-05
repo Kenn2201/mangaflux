@@ -15,8 +15,9 @@ v2.2.0   ████████████████████  ✅ PHYSI
 v2.2.1   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
 v2.2.2   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
 v2.2.3   ████████████████████  ✅ PHYSICAL QA SIGNED OFF (LIBRARY GROUPING DEFERRED)
-v2.3.0   ████████████████████  🟡 COVERAGE VISIBILITY IMPLEMENTED / PHYSICAL QA PENDING
-v2.3.1+  ░░░░░░░░░░░░░░░░░░░░  Missing-chapter reconciliation + explicit fallback
+v2.3.0   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
+v2.3.1   ████████████████████  🟡 RECONCILIATION IMPLEMENTED / PHYSICAL QA PENDING
+v2.3.2+  ░░░░░░░░░░░░░░░░░░░░  Explicit chapter fallback + selection
 ~~~
 
 **Previous release:** v2.2.2 turns v2.2.1 review candidates into reversible, admin-approved canonical mappings. Admins can inspect an edition, merge it into an existing canonical manga, split an incorrect mapping into a fresh canonical identity, review the complete mapping audit trail, and roll back a prior change when the mapping has not moved again.
@@ -27,7 +28,9 @@ v2.3.1+  ░░░░░░░░░░░░░░░░░░░░  Missing-c
 
 **v2.2.3:** reviewed source editions appear together on details and physical QA passed; safe Library grouping remains deferred.
 
-**Current release:** v2.3.0 reports per-edition chapter counts and bounded sample completeness for admin-reviewed canonical mappings, without declaring sampled gaps truly missing. Source failures are isolated, existing saved data stays source-specific, and source-aware Library/History/Continue Reading links are fixed. No migration. Physical QA pending.
+**v2.3.0:** source coverage visibility passed physical QA.
+
+**Current release:** v2.3.1 fully enumerates reviewed mapped-edition chapter feeds before identifying numbered availability differences. It normalizes numeric labels, separates duplicates/unnumbered releases, excludes incomplete feeds, and never silently substitutes another provider. No migration. Physical QA pending.
 
 ---
 
@@ -756,10 +759,18 @@ Only introduce canonical identity after real cross-source data exists so matchin
 - Correct source identity on Library, history, notifications and resume links
 - No migration
 
-### ⏳ v2.3.1 — Missing-chapter Reconciliation
-- Safely inspect complete mapped-edition chapter feeds before identifying numbered gaps
-- Separate release variants, languages and unknown chapters; never claim equivalence from title alone
-- Present explicitly attributed chapter availability and missing chapter candidates
+### 🟡 v2.3.1 — Missing-Chapter Reconciliation — IMPLEMENTED / PHYSICAL QA PENDING
+- Fully enumerate each reviewed mapped-edition feed up to a 1,000-release safety cap
+- Require at least two complete feeds for the same selected language before reconciling differences
+- Normalize numeric chapter labels (for example 001 / 1.0 / 1)
+- Count duplicate numbered releases separately from unique numbered chapters
+- Keep unnumbered releases outside numeric gap claims
+- Reject incomplete/truncated/failed feeds from reconciliation instead of guessing
+- Report explicit “reported by” / “not reported by” availability differences
+- Provide source-labelled chapter links for manual inspection
+- Never treat chapter-number agreement as verified content equivalence
+- Never silently substitute providers
+- No database migration
 
 ### ⏳ v2.3.2 — Explicit Chapter Source Fallback
 - Reader-selectable fallback for verified mapped editions only; preserve reader progress and source attribution

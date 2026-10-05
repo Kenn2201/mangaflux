@@ -110,7 +110,7 @@ async function request(params: Record<string, string>): Promise<Json> {
     const response = await fetch(url, {
       headers: {
         Accept: "application/json",
-        "User-Agent": "MangaFlux/2.3.0 (+https://manga.kenncode.me)"
+        "User-Agent": "MangaFlux/2.3.1 (+https://manga.kenncode.me)"
       },
       signal: AbortSignal.timeout(TIMEOUT_MS)
     });
