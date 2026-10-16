@@ -1,7 +1,7 @@
 {
   "name": "@mangaflux/runtime",
   "private": true,
-  "version": "2.3.1",
+  "version": "2.3.2",
   "type": "module",
   "exports": "./src/index.ts"
 }

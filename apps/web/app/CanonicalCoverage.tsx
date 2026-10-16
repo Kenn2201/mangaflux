@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import ConfirmDialog from "./ConfirmDialog";
 import { useEffect, useState } from "react";
 
 type Sample = {
@@ -99,6 +101,13 @@ export default function CanonicalCoverage({
   mangaId: string;
   language: string;
 }) {
+  const router = useRouter();
+  const [selectedSource, setSelectedSource] = useState<{
+    source: string;
+    chapter: string;
+    chapterId: string;
+    chapterTitle: string;
+  } | null>(null);
   const [coverage, setCoverage] = useState<Coverage | null>(null);
   const [coverageLoading, setCoverageLoading] = useState(false);
   const [coverageRequested, setCoverageRequested] = useState(false);
@@ -113,6 +122,7 @@ export default function CanonicalCoverage({
   const [reconciliationError, setReconciliationError] = useState("");
 
   useEffect(() => {
+    setSelectedSource(null);
     setCoverage(null);
     setCoverageError("");
     setCoverageRequested(false);
@@ -279,6 +289,27 @@ export default function CanonicalCoverage({
         <p className="message" role="status">{reconciliationError}</p>
       ) : null}
 
+      <ConfirmDialog
+        open={selectedSource !== null}
+        title={selectedSource
+          ? `Open chapter ${selectedSource.chapter} on ${label(selectedSource.source)}?`
+          : "Open another source?"}
+        description={selectedSource
+          ? `This opens ${selectedSource.chapterTitle} as a ${label(selectedSource.source)} release. The chapter number matches, but the content may differ. Your existing source and reading progress are not changed. Continue?`
+          : ""}
+        confirmLabel={selectedSource
+          ? `Open ${label(selectedSource.source)}`
+          : "Open source"}
+        onCancel={() => setSelectedSource(null)}
+        onConfirm={() => {
+          if (!selectedSource) return;
+          router.push(
+            `/read/${encodeURIComponent(selectedSource.chapterId)}?source=${encodeURIComponent(selectedSource.source)}`
+          );
+          setSelectedSource(null);
+        }}
+      />
+
       {reconciliation ? (
         <div className="library-block">
           <div className="library-subheading">
@@ -340,17 +371,19 @@ export default function CanonicalCoverage({
 
                   <div className="tag-row">
                     {difference.availableIn.map((entry) => (
-                      <Link
+                      <button
                         className="secondary-button"
-                        key={
-                          entry.source +
-                          ":" +
-                          entry.chapterId
-                        }
-                        href={`/read/${encodeURIComponent(entry.chapterId)}?source=${encodeURIComponent(entry.source)}`}
+                        type="button"
+                        key={entry.source + ":" + entry.chapterId}
+                        onClick={() => setSelectedSource({
+                          source: entry.source,
+                          chapter: difference.chapter,
+                          chapterId: entry.chapterId,
+                          chapterTitle: entry.chapterTitle
+                        })}
                       >
-                        Open ch. {difference.chapter} on {label(entry.source)}
-                      </Link>
+                        Choose {label(entry.source)} for ch. {difference.chapter}
+                      </button>
                     ))}
                   </div>
                 </article>

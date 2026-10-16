@@ -13,6 +13,7 @@ import { ReaderSkeleton } from "../../Skeletons";
 import CommunityThread from "../../CommunityThread";
 import ReaderChapterJump from "../../ReaderChapterJump";
 import ReaderSettingsSheet from "../../ReaderSettingsSheet";
+import ReaderSourceFallback from "../../ReaderSourceFallback";
 import {
   getReaderPreferences,
   readerLanguageOptions,
@@ -844,6 +845,8 @@ export default function ReaderPage() {
                   : "Reading progress"}
           </span>
 
+          <a href="#reader-other-sources">Other sources</a>
+
           <a
             href={data.attribution.sourceUrl}
             target="_blank"
@@ -961,6 +964,12 @@ export default function ReaderPage() {
       />
 
       <footer className="reader-footer reader-end-card">
+        <ReaderSourceFallback
+          source={source}
+          mangaId={data.chapter.mangaId}
+          chapter={data.chapter.chapter}
+          language={readerPreferences.language}
+        />
         <span>{pageLabel}</span>
         <a href={data.attribution.sourceUrl} target="_blank" rel="noreferrer">
           {data.attribution.sourceName} source / chapter attribution

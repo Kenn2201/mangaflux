@@ -16,8 +16,9 @@ v2.2.1   ████████████████████  ✅ PHYSI
 v2.2.2   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
 v2.2.3   ████████████████████  ✅ PHYSICAL QA SIGNED OFF (LIBRARY GROUPING DEFERRED)
 v2.3.0   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
-v2.3.1   ████████████████████  🟡 RECONCILIATION IMPLEMENTED / PHYSICAL QA PENDING
-v2.3.2+  ░░░░░░░░░░░░░░░░░░░░  Explicit chapter fallback + selection
+v2.3.1   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
+v2.3.2   ████████████████████  🟡 EXPLICIT SOURCE CHOICE IMPLEMENTED / PHYSICAL QA PENDING
+v2.3.3+  ░░░░░░░░░░░░░░░░░░░░  Preferred source + quality/language policy
 ~~~
 
 **Previous release:** v2.2.2 turns v2.2.1 review candidates into reversible, admin-approved canonical mappings. Admins can inspect an edition, merge it into an existing canonical manga, split an incorrect mapping into a fresh canonical identity, review the complete mapping audit trail, and roll back a prior change when the mapping has not moved again.
@@ -30,7 +31,9 @@ v2.3.2+  ░░░░░░░░░░░░░░░░░░░░  Explicit 
 
 **v2.3.0:** source coverage visibility passed physical QA.
 
-**Current release:** v2.3.1 fully enumerates reviewed mapped-edition chapter feeds before identifying numbered availability differences. It normalizes numeric labels, separates duplicates/unnumbered releases, excludes incomplete feeds, and never silently substitutes another provider. No migration. Physical QA pending.
+**v2.3.1:** fully enumerated reviewed chapter feeds and normalized numbered availability reconciliation passed physical QA.
+
+**Current release:** v2.3.2 offers optional, confirmed source switching for numbered chapters in admin-reviewed mapped editions. The reader never silently switches or overwrites the original source's progress. The chapter-number match is a discoverability hint, not verified equivalent content. No migration. Physical QA pending.
 
 ---
 
@@ -729,7 +732,7 @@ Only introduce canonical identity after real cross-source data exists so matchin
 - Never auto-merge ambiguous titles
 - No database migration
 
-### 🟡 v2.2.2 — Mapping Review & Corrections — IMPLEMENTED / PHYSICAL QA PENDING
+### ✅ v2.2.2 — Mapping Review & Corrections — PHYSICAL QA SIGNED OFF
 - Admin-only mapping inspection through the existing verified-admin console
 - Reviewed merge/move of a source edition into an existing canonical manga
 - Split an edition into a new canonical MangaFlux identity
@@ -742,7 +745,7 @@ Only introduce canonical identity after real cross-source data exists so matchin
 - Migration: `0015_v222_mapping_review.sql`
 - Physical production QA required before v2.2.3
 
-### 🟡 v2.2.3 — Canonical Product Surfaces — PARTIAL IMPLEMENTATION / QA PENDING
+### ✅ v2.2.3 — Canonical Product Surfaces — DETAILS QA SIGNED OFF / LIBRARY GROUPING DEFERRED
 - Canonical manga detail identity
 - Source editions shown explicitly
 - Avoid duplicate Library titles
@@ -752,14 +755,14 @@ Only introduce canonical identity after real cross-source data exists so matchin
 
 ## v2.3.x — Source Selection, Coverage & Safe Fallback
 
-### 🟡 v2.3.0 — Source Coverage Visibility — IMPLEMENTED / PHYSICAL QA PENDING
+### ✅ v2.3.0 — Source Coverage Visibility — PHYSICAL QA SIGNED OFF
 - Read-only canonical edition chapter availability endpoint and on-demand details panel
 - Report source-specific chapter count, newest/oldest samples and partial-feed indicator
 - Provider failures isolated; no false missing chapter claims or silent fallback
 - Correct source identity on Library, history, notifications and resume links
 - No migration
 
-### 🟡 v2.3.1 — Missing-Chapter Reconciliation — IMPLEMENTED / PHYSICAL QA PENDING
+### ✅ v2.3.1 — Missing-Chapter Reconciliation — PHYSICAL QA SIGNED OFF
 - Fully enumerate each reviewed mapped-edition feed up to a 1,000-release safety cap
 - Require at least two complete feeds for the same selected language before reconciling differences
 - Normalize numeric chapter labels (for example 001 / 1.0 / 1)
@@ -772,8 +775,15 @@ Only introduce canonical identity after real cross-source data exists so matchin
 - Never silently substitute providers
 - No database migration
 
-### ⏳ v2.3.2 — Explicit Chapter Source Fallback
-- Reader-selectable fallback for verified mapped editions only; preserve reader progress and source attribution
+### 🟡 v2.3.2 — Explicit Chapter Source Fallback — IMPLEMENTED / PHYSICAL QA PENDING
+- On-demand chapter-number lookup in admin-reviewed mapped editions only
+- Check selected language, enabled source capability, source IDs and provider provenance
+- Optional source chooser inside the reader and on reconciled chapter differences
+- Show source title, release title and scanlation group where available
+- Require confirmation before navigation; chapter-number agreement is not verified content equivalence
+- Preserve source-specific reading progress and attribution; never auto-merge chapter feeds
+- Isolate unavailable/failed providers and leave current source untouched
+- No database migration
 
 
 - Show chapter coverage per mapped source/edition

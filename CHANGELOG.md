@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.3.2 — Explicit Chapter Source Fallback
+
+- Upgraded Next.js 16.3.6 to patched 16.4.2 after the mandatory dependency audit identified high-severity upstream advisories. The security audit remains a required CI gate.
+
+- Recorded maintainer-confirmed v2.3.1 physical QA sign-off.
+- Added `GET /api/manga/:source/:id/alternatives?chapter=...&language=...` for on-demand alternatives in admin-reviewed canonical source mappings.
+- Match normalized chapter numbers and requested language against enabled, chapter-capable alternate providers; isolate source outages.
+- Avoid a source choice if no reviewed cross-source canonical mapping exists, or if the alternate does not report that numbered release.
+- Added a source chooser inside the reader, with provider, series, chapter title, language and explicit confirmation before navigating.
+- Updated reconciliation chapter choices to require confirmation before leaving the current source.
+- Continue to show full source/chapter attribution and save each provider's reading progress independently; never rewrite bookmarks, history or progress from the original source.
+- Warn that matching chapter numbers are not a guarantee of identical content or reader page availability.
+- No implicit fallback, no database migration.
+
+
 ## 2.3.1 — Missing-Chapter Reconciliation
 
 - Recorded the maintainer's v2.3.0 physical QA sign-off.
