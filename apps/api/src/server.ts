@@ -1639,7 +1639,7 @@ app.get<{
     );
     const language = request.query.language?.trim().toLowerCase() || "en";
 
-    if (!chapter || !LANGUAGE_RE.test(language)) {
+    if (!chapter || chapter.length > 40 || !LANGUAGE_RE.test(language)) {
       return reply.code(400).send({
         error: "INVALID_REQUEST",
         message: "A numbered chapter and valid language are required."
