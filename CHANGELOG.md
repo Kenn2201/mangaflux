@@ -2,6 +2,8 @@
 
 ## 2.3.2 — Explicit Chapter Source Fallback
 
+- Upgraded Next.js 16.3.6 to patched 16.4.2 after the mandatory dependency audit identified high-severity upstream advisories. The security audit remains a required CI gate.
+
 - Recorded maintainer-confirmed v2.3.1 physical QA sign-off.
 - Added `GET /api/manga/:source/:id/alternatives?chapter=...&language=...` for on-demand alternatives in admin-reviewed canonical source mappings.
 - Match normalized chapter numbers and requested language against enabled, chapter-capable alternate providers; isolate source outages.
