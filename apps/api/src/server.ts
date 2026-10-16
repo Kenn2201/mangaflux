@@ -23,6 +23,7 @@ import {
 import { registerStateRoutes } from "./state.js";
 import { attachDiagnostics } from "./diagnostics.js";
 import {
+  normalizeChapterNumber,
   enumerateEditionChapters,
   reconcileChapterAvailability
 } from "./chapterReconciliation.js";
@@ -1613,6 +1614,172 @@ app.get<{
       differencesReturned: differences.length,
       differencesTruncated: differences.length < differenceTotal,
       differences
+    };
+  }
+);
+
+// v2.3.2: Explicit chapter alternatives. Never redirect or overwrite progress.
+app.get<{
+  Params: { source: string; id: string };
+  Querystring: { chapter?: string; language?: string };
+}>(
+  "/api/manga/:source/:id/alternatives",
+  { preHandler: metadataRateLimit },
+  async (request, reply) => {
+    const source = requestedSource(request.params.source, "details");
+    if (!validateSourceMangaId(source.id, request.params.id)) {
+      return reply.code(400).send({
+        error: "INVALID_REQUEST",
+        message: "Invalid source manga ID."
+      });
+    }
+
+    const chapter = normalizeChapterNumber(
+      request.query.chapter?.trim()
+    );
+    const language = request.query.language?.trim().toLowerCase() || "en";
+
+    if (!chapter || !LANGUAGE_RE.test(language)) {
+      return reply.code(400).send({
+        error: "INVALID_REQUEST",
+        message: "A numbered chapter and valid language are required."
+      });
+    }
+
+    if (!database) {
+      return reply.code(503).send({
+        error: "PERSISTENCE_UNAVAILABLE",
+        message: "Canonical identity is not available."
+      });
+    }
+
+    const identity = await getCanonicalIdentityBySource(
+      database,
+      source.id,
+      request.params.id
+    );
+    if (!identity) {
+      return reply.code(404).send({
+        error: "CANONICAL_MAPPING_NOT_FOUND",
+        message: "No canonical identity exists for this edition."
+      });
+    }
+
+    const mapped = await listCanonicalEditions(
+      database,
+      identity.canonicalId
+    );
+    const reviewed = mapped.some(
+      (edition) =>
+        edition.mappingMethod === "matched" &&
+        edition.provenance === "admin-review"
+    );
+    if (!reviewed || mapped.length < 2) {
+      reply.header("Cache-Control", "private, no-store");
+      return {
+        canonicalId: identity.canonicalId,
+        chapter,
+        language,
+        reviewedMapping: false,
+        alternatives: [],
+        checkedSources: [],
+        note: "Only editions linked through admin review are eligible."
+      };
+    }
+
+    const eligible = mapped
+      .filter((edition) =>
+        !(edition.source === source.id && edition.mangaId === request.params.id)
+      )
+      .slice(0, 7);
+
+    const inspected = await Promise.all(
+      eligible.map(async (edition) => {
+        const descriptor = getSourceDescriptor(edition.source);
+        if (
+          !descriptor?.enabled ||
+          !descriptor.capabilities.chapters ||
+          descriptor.policy.contentClass !== "general" ||
+          !validateSourceMangaId(edition.source, edition.mangaId) ||
+          !sourceSupportsLanguage(edition.source, language)
+        ) {
+          return {
+            source: edition.source,
+            status: "unavailable" as const,
+            releases: []
+          };
+        }
+
+        try {
+          const provider = requireSourceCapability(
+            edition.source,
+            "chapters"
+          );
+          const page = await provider.chapterPage(
+            edition.mangaId,
+            {
+              chapter,
+              language,
+              limit: 30,
+              offset: 0,
+              order: "desc"
+            }
+          );
+          const releases = page.items
+            .filter((item) =>
+              item.source === edition.source &&
+              item.mangaId === edition.mangaId &&
+              normalizeChapterNumber(item.chapter) === chapter &&
+              (!item.language ||
+                item.language.toLowerCase() === language) &&
+              validateSourceChapterId(edition.source, item.id)
+            )
+            .slice(0, 5)
+            .map((item) => ({
+              source: edition.source,
+              mangaId: edition.mangaId,
+              sourceTitle: edition.sourceTitle,
+              chapterId: item.id,
+              chapterTitle: item.title,
+              chapter,
+              language,
+              scanlationGroups: item.scanlationGroups ?? []
+            }));
+
+          return {
+            source: edition.source,
+            status: "ok" as const,
+            releases
+          };
+        } catch (error) {
+          request.log.warn(
+            { err: error, source: edition.source },
+            "Optional chapter alternative source failed"
+          );
+          return {
+            source: edition.source,
+            status: "error" as const,
+            releases: []
+          };
+        }
+      })
+    );
+
+    reply.header("Cache-Control", "private, no-store");
+    return {
+      canonicalId: identity.canonicalId,
+      chapter,
+      language,
+      reviewedMapping: true,
+      checkedSources: inspected.map(({ source, status }) => ({
+        source,
+        status
+      })),
+      alternatives: inspected.flatMap((item) => item.releases),
+      note:
+        "Chapter-number matches are not verified equivalent content. " +
+        "A reader must explicitly confirm a provider switch; " +
+        "no reading progress is transferred."
     };
   }
 );
