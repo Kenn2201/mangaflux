@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v2.3.1--Missing_Chapter_Reconciliation-indigo.svg)
+![Version](https://img.shields.io/badge/version-v2.3.2--Explicit_Chapter_Source_Fallback-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,11 +10,11 @@
 
 ## Current release
 
-**v2.3.1 — Missing-Chapter Reconciliation**
+**v2.3.2 — Explicit Chapter Source Fallback**
 
 MangaFlux V1, Source B, canonical identity, and duplicate candidate detection have passed physical QA. v2.2.2 adds an admin-only canonical mapping review workflow: inspect a source edition, merge it into a reviewed canonical manga, split an incorrect mapping into a new canonical identity, view an append-only audit trail, and safely roll back prior mapping changes. Source IDs, chapter IDs, bookmarks, follows, history, and reading progress remain source-aware and are not rewritten by this milestone.
 
-**v2.3.1:** MangaFlux can fully enumerate reviewed mapped-edition chapter feeds up to a 1,000-release safety cap, normalize numeric chapter labels, separate duplicate and unnumbered releases, and report explicit cross-source availability differences only when at least two feeds are proven complete. Results say “not reported by” rather than claiming nonexistence, and automatic source substitution remains disabled. No migration.
+**v2.3.2:** Readers can explicitly choose an alternative chapter release from another admin-reviewed canonical source edition, both inside the reader and from reconciled missing-chapter results. A new bounded API query matches numbered chapters and language only on reviewed mapped editions and isolates provider failures. A confirmation dialog names the destination provider, warns that equal chapter numbers do not prove identical content, and preserves source-specific progress and attribution. No automatic switching, no database migration.
 
 ### Library improvements
 
