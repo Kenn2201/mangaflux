@@ -44,19 +44,26 @@ export default function ReaderSourceFallback({
   language: string;
 }) {
   const router = useRouter();
+  const [requestedChapter, setRequestedChapter] = useState(chapter ?? "");
   const [result, setResult] = useState<Result | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [chosen, setChosen] = useState<Alternative | null>(null);
 
   useEffect(() => {
+    setRequestedChapter(chapter ?? "");
     setResult(null);
     setChosen(null);
     setMessage("");
   }, [source, mangaId, chapter, language]);
 
   async function checkAlternatives() {
-    if (loading || !mangaId || !chapter) return;
+    const number = requestedChapter.trim();
+    if (loading || !mangaId) return;
+    if (!/^\d+(?:\.\d+)?$/.test(number) || number.length > 40) {
+      setMessage("Enter a chapter number such as 4 or 4.5.");
+      return;
+    }
 
     setLoading(true);
     setMessage("");
@@ -65,7 +72,7 @@ export default function ReaderSourceFallback({
     try {
       const query = new URLSearchParams({
         source,
-        chapter,
+        chapter: number,
         language
       });
       const response = await fetch(
@@ -93,7 +100,7 @@ export default function ReaderSourceFallback({
     }
   }
 
-  if (!mangaId || !chapter || !/^\d+(?:\.\d+)?$/.test(chapter)) {
+  if (!mangaId) {
     return null;
   }
 
@@ -104,11 +111,28 @@ export default function ReaderSourceFallback({
       aria-label="Choose another chapter source"
     >
       <p className="eyebrow">Optional source selection</p>
-      <h2>Other sources for Chapter {chapter}</h2>
+      <h2>Find a chapter from another source</h2>
       <p className="muted">
         Check approved mapped editions for a release with this chapter number.
         Choosing another provider is optional, and its content may differ.
       </p>
+
+      <label className="muted" htmlFor="fallback-chapter-number">
+        Chapter number to find
+      </label>
+      <input
+        id="fallback-chapter-number"
+        type="text"
+        inputMode="decimal"
+        value={requestedChapter}
+        maxLength={40}
+        placeholder="For example: 4 or 4.5"
+        onChange={(event) => {
+          setRequestedChapter(event.target.value);
+          setResult(null);
+          setMessage("");
+        }}
+      />
 
       <button
         className="secondary-button"
@@ -177,7 +201,7 @@ export default function ReaderSourceFallback({
       <ConfirmDialog
         open={chosen !== null}
         title={chosen
-          ? `Open Chapter ${chapter} from ${sourceLabel(chosen.source)}?`
+          ? `Open Chapter ${chosen.chapter} from ${sourceLabel(chosen.source)}?`
           : "Change source?"}
         description={chosen
           ? `You are on ${sourceLabel(source)}. This opens ${sourceLabel(chosen.source)}'s ${chosen.chapterTitle} as a separate source release. Its contents may differ, and your existing progress stays with ${sourceLabel(source)}. Continue?`
