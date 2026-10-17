@@ -34,7 +34,9 @@ v2.3.4+  ░░░░░░░░░░░░░░░░░░░░  Source se
 
 **v2.3.1:** fully enumerated reviewed chapter feeds and normalized numbered availability reconciliation passed physical QA.
 
-**v2.3.2:** optional, confirmed source switching passed physical QA. Reader progress remains source-specific.\n\n**Current release:** v2.3.3 adds device-local per-canonical preferred source selection and preference-aware ordering of approved alternate releases. Existing reader language and scanlation group preferences are respected where source metadata supports them. These preferences never silently switch sources or assume chapter equivalence. Account sync for source preferences remains deferred. No migration. Physical QA pending.
+**v2.3.2:** optional, confirmed source switching passed physical QA. Reader progress remains source-specific.
+
+**Current release:** v2.3.3 adds device-local per-canonical preferred source selection and preference-aware ordering of approved alternate releases. Existing reader language and scanlation group preferences are respected where source metadata supports them. These preferences never silently switch sources or assume chapter equivalence. Account sync for source preferences remains deferred. No migration. Physical QA pending.
 
 ---
 
