@@ -2,7 +2,7 @@
 
 > A mobile-first manga discovery, reading, community, recommendation, and account platform powering manga.kenncode.me.
 
-![Version](https://img.shields.io/badge/version-v2.3.2--Explicit_Chapter_Source_Fallback-indigo.svg)
+![Version](https://img.shields.io/badge/version-v2.3.3--Preferred_Source_Release_Policy-indigo.svg)
 [![Versioning](https://img.shields.io/badge/policy-VERSIONING.md-blue.svg)](VERSIONING.md)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-emerald.svg)](CHANGELOG.md)
 [![Security](https://img.shields.io/badge/security-SECURITY.md-red.svg)](SECURITY.md)
@@ -10,11 +10,11 @@
 
 ## Current release
 
-**v2.3.2 — Explicit Chapter Source Fallback**
+**v2.3.3 — Preferred Source & Release Policy**
 
 MangaFlux V1, Source B, canonical identity, and duplicate candidate detection have passed physical QA. v2.2.2 adds an admin-only canonical mapping review workflow: inspect a source edition, merge it into a reviewed canonical manga, split an incorrect mapping into a new canonical identity, view an append-only audit trail, and safely roll back prior mapping changes. Source IDs, chapter IDs, bookmarks, follows, history, and reading progress remain source-aware and are not rewritten by this milestone.
 
-**v2.3.2:** Readers can explicitly choose an alternative chapter release from another admin-reviewed canonical source edition, both inside the reader and from reconciled missing-chapter results. A new bounded API query matches numbered chapters and language only on reviewed mapped editions and isolates provider failures. A confirmation dialog names the destination provider, warns that equal chapter numbers do not prove identical content, and preserves source-specific progress and attribution. No automatic switching, no database migration.
+**v2.3.3:** Readers can mark a preferred provider per canonical manga. The preference is device-local and only ranks source editions and already-approved alternative releases; it never redirects or substitutes a chapter automatically. Existing reader language and preferred scanlation group settings inform eligible alternative selection and ordering. Missing scanlation metadata is not interpreted as low-quality content. Source provenance and separate reading progress are preserved. No database migration.
 
 ### Library improvements
 
