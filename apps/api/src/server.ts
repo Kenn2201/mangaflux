@@ -46,7 +46,7 @@ import type {
   MangaSummary
 } from "@mangaflux/sources";
 
-const APP_VERSION = "2.3.2";
+const APP_VERSION = "2.3.3";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LANGUAGE_RE = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i;
@@ -1355,7 +1355,7 @@ app.get<{ Params: { source: string; id: string } }>(
   }
 );
 
-// v2.3.2: Chapter coverage is a bounded snapshot, never a proof of missing chapters.
+// v2.3.3: Chapter coverage is a bounded snapshot, never a proof of missing chapters.
 app.get<{
   Params: { source: string; id: string };
   Querystring: { language?: string };
@@ -1618,7 +1618,7 @@ app.get<{
   }
 );
 
-// v2.3.2: Explicit chapter alternatives. Never redirect or overwrite progress.
+// v2.3.3: Explicit chapter alternatives. Never redirect or overwrite progress.
 app.get<{
   Params: { source: string; id: string };
   Querystring: { chapter?: string; language?: string };
