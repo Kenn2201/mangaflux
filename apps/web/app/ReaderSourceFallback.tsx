@@ -3,6 +3,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import ConfirmDialog from "./ConfirmDialog";
+import {
+  getPreferredSource,
+  savePreferredSource,
+  SOURCE_PREFERENCE_CHANGED
+} from "../lib/sourcePreferences";
 
 type Alternative = {
   source: string;
@@ -16,6 +21,7 @@ type Alternative = {
 };
 
 type Result = {
+  canonicalId?: string;
   reviewedMapping: boolean;
   alternatives: Alternative[];
   checkedSources: Array<{
@@ -36,12 +42,14 @@ export default function ReaderSourceFallback({
   source,
   mangaId,
   chapter,
-  language
+  language,
+  preferredScanlationGroup
 }: {
   source: string;
   mangaId: string;
   chapter?: string;
   language: string;
+  preferredScanlationGroup?: string;
 }) {
   const router = useRouter();
   const [requestedChapter, setRequestedChapter] = useState(chapter ?? "");
@@ -49,13 +57,27 @@ export default function ReaderSourceFallback({
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [chosen, setChosen] = useState<Alternative | null>(null);
+  const [preferredSource, setPreferredSource] = useState<string | null>(null);
+  const [preferenceMessage, setPreferenceMessage] = useState("");
 
   useEffect(() => {
     setRequestedChapter(chapter ?? "");
     setResult(null);
     setChosen(null);
     setMessage("");
+    setPreferredSource(null);
+    setPreferenceMessage("");
   }, [source, mangaId, chapter, language]);
+
+  useEffect(() => {
+    if (!result?.canonicalId) return;
+    const canonicalId = result.canonicalId;
+    function onPreferenceChange() {
+      setPreferredSource(getPreferredSource(canonicalId));
+    }
+    window.addEventListener(SOURCE_PREFERENCE_CHANGED, onPreferenceChange);
+    return () => window.removeEventListener(SOURCE_PREFERENCE_CHANGED, onPreferenceChange);
+  }, [result?.canonicalId]);
 
   async function checkAlternatives() {
     const number = requestedChapter.trim();
@@ -89,6 +111,7 @@ export default function ReaderSourceFallback({
       }
 
       setResult(payload);
+      setPreferredSource(payload.canonicalId ? getPreferredSource(payload.canonicalId) : null);
     } catch (error) {
       setMessage(
         error instanceof Error
@@ -104,6 +127,40 @@ export default function ReaderSourceFallback({
     return null;
   }
 
+  const groupKey = preferredScanlationGroup?.trim().toLowerCase();
+  function matchesGroup(option: Alternative) {
+    return Boolean(
+      groupKey &&
+      option.scanlationGroups.some((group) =>
+        group.trim().toLowerCase() === groupKey
+      )
+    );
+  }
+
+  const orderedAlternatives = [...(result?.alternatives ?? [])].sort((a, b) => {
+    const sourceA = a.source === preferredSource ? 1 : 0;
+    const sourceB = b.source === preferredSource ? 1 : 0;
+    if (sourceA !== sourceB) return sourceB - sourceA;
+    const groupA = matchesGroup(a) ? 1 : 0;
+    const groupB = matchesGroup(b) ? 1 : 0;
+    if (groupA !== groupB) return groupB - groupA;
+    return a.source.localeCompare(b.source) || a.chapterId.localeCompare(b.chapterId);
+  });
+
+  function preferOption(option: Alternative) {
+    if (
+      !result?.canonicalId ||
+      !savePreferredSource(result.canonicalId, option.source)
+    ) {
+      setPreferenceMessage("Could not save this source preference.");
+      return;
+    }
+    setPreferredSource(option.source);
+    setPreferenceMessage(
+      `${sourceLabel(option.source)} is now preferred for this title on this device.`
+    );
+  }
+
   return (
     <section
       className="panel"
@@ -115,6 +172,7 @@ export default function ReaderSourceFallback({
       <p className="muted">
         Check approved mapped editions for a release with this chapter number.
         Choosing another provider is optional, and its content may differ.
+        Only releases matching the selected chapter language are offered.
       </p>
 
       <label className="muted" htmlFor="fallback-chapter-number">
@@ -147,6 +205,14 @@ export default function ReaderSourceFallback({
 
       {result ? (
         <>
+          <p className="device-note">
+            Language: {language.toUpperCase()}. {preferredSource
+              ? `Preferred source: ${sourceLabel(preferredSource)} (shown first).`
+              : "No preferred source set."}
+            {preferredScanlationGroup
+              ? ` Preferred scanlation group: ${preferredScanlationGroup} when listed.`
+              : ""}
+          </p>
           {!result.reviewedMapping ? (
             <p className="message" role="status">
               No admin-reviewed source match is available for this edition yet.
@@ -158,27 +224,45 @@ export default function ReaderSourceFallback({
             </p>
           ) : (
             <div className="history-list history-list-v11">
-              {result.alternatives.map((option) => (
+              {orderedAlternatives.map((option) => (
                 <article
                   className="history-row"
                   key={option.source + ":" + option.chapterId}
                 >
                   <div>
-                    <strong>{sourceLabel(option.source)}</strong>
+                    <strong>
+                      {sourceLabel(option.source)}
+                      {option.source === preferredSource ? " · Preferred source" : ""}
+                      {matchesGroup(option) ? " · Preferred group" : ""}
+                    </strong>
                     <span>
                       {option.sourceTitle} · {option.chapterTitle}
                     </span>
                     <small>
                       {option.language.toUpperCase()} · Chapter {option.chapter}
+                      {option.scanlationGroups.length
+                        ? ` · ${option.scanlationGroups.join(", ")}`
+                        : " · Group not listed"}
                     </small>
                   </div>
-                  <button
-                    className="secondary-button"
-                    type="button"
-                    onClick={() => setChosen(option)}
-                  >
-                    Select {sourceLabel(option.source)}
-                  </button>
+                  <div className="tag-row">
+                    <button
+                      className="secondary-button"
+                      type="button"
+                      onClick={() => setChosen(option)}
+                    >
+                      Select {sourceLabel(option.source)}
+                    </button>
+                    {option.source !== preferredSource ? (
+                      <button
+                        className="secondary-button"
+                        type="button"
+                        onClick={() => preferOption(option)}
+                      >
+                        Prefer {sourceLabel(option.source)}
+                      </button>
+                    ) : null}
+                  </div>
                 </article>
               ))}
             </div>
@@ -193,8 +277,12 @@ export default function ReaderSourceFallback({
         </>
       ) : null}
 
+      {preferenceMessage ? <p className="device-note" role="status">{preferenceMessage}</p> : null}
+
       <p className="device-note">
-        Switching sources never transfers or overwrites your existing reading
+        Source and scanlation group are ordering preferences, not quality scores.
+        Unknown metadata stays unknown. These choices never override explicit
+        confirmation. Switching sources never transfers or overwrites your existing reading
         progress. Matching chapter numbers do not guarantee identical pages.
       </p>
 
