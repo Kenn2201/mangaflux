@@ -17,8 +17,9 @@ v2.2.2   ████████████████████  ✅ PHYSI
 v2.2.3   ████████████████████  ✅ PHYSICAL QA SIGNED OFF (LIBRARY GROUPING DEFERRED)
 v2.3.0   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
 v2.3.1   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
-v2.3.2   ████████████████████  🟡 EXPLICIT SOURCE CHOICE IMPLEMENTED / PHYSICAL QA PENDING
-v2.3.3+  ░░░░░░░░░░░░░░░░░░░░  Preferred source + quality/language policy
+v2.3.2   ████████████████████  ✅ PHYSICAL QA SIGNED OFF
+v2.3.3   ████████████████████  🟡 SOURCE PREFERENCES IMPLEMENTED / PHYSICAL QA PENDING
+v2.3.4+  ░░░░░░░░░░░░░░░░░░░░  Source selection policy refinements
 ~~~
 
 **Previous release:** v2.2.2 turns v2.2.1 review candidates into reversible, admin-approved canonical mappings. Admins can inspect an edition, merge it into an existing canonical manga, split an incorrect mapping into a fresh canonical identity, review the complete mapping audit trail, and roll back a prior change when the mapping has not moved again.
@@ -33,7 +34,9 @@ v2.3.3+  ░░░░░░░░░░░░░░░░░░░░  Preferred
 
 **v2.3.1:** fully enumerated reviewed chapter feeds and normalized numbered availability reconciliation passed physical QA.
 
-**Current release:** v2.3.2 offers optional, confirmed source switching for numbered chapters in admin-reviewed mapped editions. The reader never silently switches or overwrites the original source's progress. The chapter-number match is a discoverability hint, not verified equivalent content. No migration. Physical QA pending.
+**v2.3.2:** optional, confirmed source switching passed physical QA. Reader progress remains source-specific.
+
+**Current release:** v2.3.3 adds device-local per-canonical preferred source selection and preference-aware ordering of approved alternate releases. Existing reader language and scanlation group preferences are respected where source metadata supports them. These preferences never silently switch sources or assume chapter equivalence. Account sync for source preferences remains deferred. No migration. Physical QA pending.
 
 ---
 
@@ -775,7 +778,7 @@ Only introduce canonical identity after real cross-source data exists so matchin
 - Never silently substitute providers
 - No database migration
 
-### 🟡 v2.3.2 — Explicit Chapter Source Fallback — IMPLEMENTED / PHYSICAL QA PENDING
+### ✅ v2.3.2 — Explicit Chapter Source Fallback — PHYSICAL QA SIGNED OFF
 - On-demand chapter-number lookup in admin-reviewed mapped editions only
 - Check selected language, enabled source capability, source IDs and provider provenance
 - Optional source chooser inside the reader and on reconciled chapter differences
@@ -785,6 +788,14 @@ Only introduce canonical identity after real cross-source data exists so matchin
 - Isolate unavailable/failed providers and leave current source untouched
 - No database migration
 
+### 🟡 v2.3.3 — Preferred Source & Release Policy — IMPLEMENTED / PHYSICAL QA PENDING
+- Device-local preferred source selection for each canonical manga; clear/change at any time
+- Preferred provider displayed first in canonical edition navigation
+- Explicit reader alternatives ordered by preferred source then preferred scanlation group where source data provides it
+- Reuse reader chapter-language preference, without displaying mismatched-language choices
+- Preserve explicit confirmation, original progress and attribution; no automatic source switching
+- No inferred quality score for missing scanlation metadata
+- Account-synced source preference deferred; no migration
 
 - Show chapter coverage per mapped source/edition
 - Make missing/older chapter availability discoverable when another verified source covers it

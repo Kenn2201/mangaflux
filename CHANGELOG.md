@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.3.3 — Preferred Source & Release Policy
+
+- Recorded user-confirmed v2.3.2 physical QA sign-off.
+- Added per-canonical-title preferred source selection (device-local, reversible, no account synchronization yet).
+- Display preferred source first on reviewed canonical manga edition panels and label its status.
+- Rank explicit chapter alternatives by preferred source and then preferred scanlation group when group metadata is available.
+- Reuse existing reader chapter-language selection; only source-provided matching-language releases are selectable.
+- Show release language and scanlation-group attribution where provided; unknown group metadata stays unknown.
+- Allow setting preferred source from the reader chooser without navigating; chapter switching still requires confirmation.
+- Preserve original source chapter references, reading progress and saved library records; never automatically substitute content.
+- No database migration.
+
+
 ## 2.3.2 — Explicit Chapter Source Fallback
 
 - Upgraded Next.js 16.3.6 to patched 16.4.2 after the mandatory dependency audit identified high-severity upstream advisories. The security audit remains a required CI gate.

@@ -969,6 +969,7 @@ export default function ReaderPage() {
           mangaId={data.chapter.mangaId}
           chapter={data.chapter.chapter}
           language={readerPreferences.language}
+          preferredScanlationGroup={readerPreferences.preferredScanlationGroup}
         />
         <span>{pageLabel}</span>
         <a href={data.attribution.sourceUrl} target="_blank" rel="noreferrer">
