@@ -95,7 +95,7 @@ export default async function Home({
       </section>
 
       <div className="landing-version">
-        v2.3.2 · Explicit Chapter Source Fallback
+        v2.3.3 · Preferred Source & Release Policy
       </div>
     </main>
   );
